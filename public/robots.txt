@@ -1,0 +1,41 @@
+# Robots.txt for Allo Services CI
+# https://alloservices.ci
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /client/
+Disallow: /provider/
+Disallow: /_next/
+Disallow: /auth/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /client/
+Disallow: /provider/
+Disallow: /_next/
+Disallow: /auth/
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /client/
+Disallow: /provider/
+Disallow: /_next/
+Disallow: /auth/
+
+# Sitemap
+Sitemap: https://alloservices.ci/sitemap.xml

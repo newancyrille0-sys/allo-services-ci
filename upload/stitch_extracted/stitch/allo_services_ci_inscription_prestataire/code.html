@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Devenir Prestataire - Allo Services CI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#ffdbca",
+                        "surface-container-low": "#f1f4f5",
+                        "on-background": "#181c1d",
+                        "tertiary": "#00460e",
+                        "tertiary-container": "#076018",
+                        "surface-dim": "#d7dadb",
+                        "surface-tint": "#1b667b",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#005312",
+                        "on-secondary-fixed": "#331200",
+                        "background": "#f7fafb",
+                        "inverse-surface": "#2d3132",
+                        "primary-fixed-dim": "#8ed0e7",
+                        "on-primary-container": "#8dcfe6",
+                        "on-primary-fixed": "#001f28",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#002204",
+                        "on-tertiary-container": "#87d982",
+                        "outline": "#70787c",
+                        "on-secondary-container": "#5b2500",
+                        "surface-container": "#ebeeef",
+                        "primary": "#004150",
+                        "inverse-on-surface": "#eef1f2",
+                        "surface-bright": "#f7fafb",
+                        "primary-container": "#005a6e",
+                        "on-surface-variant": "#3f484c",
+                        "secondary-container": "#fd7613",
+                        "surface": "#f7fafb",
+                        "tertiary-fixed-dim": "#88d982",
+                        "outline-variant": "#bfc8cc",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#004e5f",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb68f",
+                        "inverse-primary": "#8ed0e7",
+                        "surface-container-high": "#e5e9ea",
+                        "surface-variant": "#e0e3e4",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e4",
+                        "tertiary-fixed": "#a3f69c",
+                        "primary-fixed": "#b4ebff",
+                        "on-surface": "#181c1d",
+                        "secondary": "#9c4400",
+                        "on-secondary-fixed-variant": "#773200"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface antialiased">
+<!-- TopNavBar Placeholder - Focused state suppresses main navigation links to prioritize content canvas -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
+<div class="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black tracking-tight text-teal-900">Allo Services CI</div>
+<div class="hidden md:flex items-center gap-6">
+<span class="text-sm font-medium text-on-surface-variant italic">Centre d'inscription des partenaires</span>
+<a class="text-primary font-bold hover:underline" href="#">Aide</a>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-20 px-4 md:px-10 max-w-5xl mx-auto">
+<!-- Header & Stepper -->
+<section class="mb-12 text-center">
+<h1 class="font-headline text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-4">Rejoignez l'élite des services</h1>
+<p class="text-on-surface-variant max-w-2xl mx-auto mb-10">Complétez votre profil en 3 étapes simples pour commencer à recevoir des demandes clients en Côte d'Ivoire.</p>
+<!-- Stepper Component -->
+<div class="relative flex justify-between items-center max-w-3xl mx-auto">
+<!-- Progress Line -->
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-surface-container-highest -translate-y-1/2 z-0"></div>
+<div class="absolute top-1/2 left-0 w-1/3 h-0.5 bg-primary -translate-y-1/2 z-0 transition-all duration-500"></div>
+<!-- Step 1 -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold shadow-lg">1</div>
+<span class="text-xs font-semibold font-label text-primary">Informations</span>
+</div>
+<!-- Step 2 -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold">2</div>
+<span class="text-xs font-semibold font-label text-on-surface-variant">Vérification</span>
+</div>
+<!-- Step 3 -->
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center font-bold">3</div>
+<span class="text-xs font-semibold font-label text-on-surface-variant">Activation</span>
+</div>
+</div>
+</section>
+<!-- Form Container -->
+<div class="bg-surface-container-lowest rounded-[2rem] p-8 md:p-12 shadow-sm border-t border-white/20">
+<form class="space-y-10">
+<!-- STEP 1: Personal Info -->
+<div id="step-1">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-secondary text-3xl">person_pin</span>
+<h2 class="font-headline text-2xl font-bold text-primary">Informations Personnelles</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Name -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1">Nom complet</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary-fixed-dim transition-all outline-none" placeholder="Ex: Jean Kouassi" type="text"/>
+</div>
+<!-- Phone -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1">Numéro WhatsApp</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">+225</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl pl-16 pr-5 py-4 focus:ring-2 focus:ring-primary-fixed-dim transition-all outline-none" placeholder="07 00 00 00 00" type="tel"/>
+</div>
+</div>
+<!-- City -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1">Ville de résidence</label>
+<select class="w-full bg-surface-container-low border-none rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary-fixed-dim transition-all outline-none appearance-none">
+<option>Abidjan (Toutes communes)</option>
+<option>Yamoussoukro</option>
+<option>Bouaké</option>
+<option>San-Pédro</option>
+<option>Korhogo</option>
+</select>
+</div>
+<!-- Service Type -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface-variant ml-1">Votre domaine d'expertise</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border-none rounded-xl px-5 py-4 focus:ring-2 focus:ring-primary-fixed-dim transition-all outline-none appearance-none">
+<option>Plomberie &amp; Sanitaire</option>
+<option>Électricité Bâtiment</option>
+<option>Climatisation &amp; Froid</option>
+<option>Menuiserie &amp; Décoration</option>
+<option>Mécanique Automobile</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</div>
+<div class="mt-8 p-4 bg-surface-container rounded-xl flex items-start gap-4">
+<span class="material-symbols-outlined text-primary mt-0.5">info</span>
+<p class="text-sm text-on-surface-variant">Vos informations nous permettent de vous proposer des missions à proximité de votre zone géographique.</p>
+</div>
+</div>
+<!-- STEP 2: Verification (Visualized for structure) -->
+<div class="opacity-40 grayscale pointer-events-none border-t border-surface-container pt-10" id="step-2">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-secondary text-3xl">verified_user</span>
+<h2 class="font-headline text-2xl font-bold text-primary">Vérification d'Identité</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- ID Upload -->
+<div class="group relative bg-surface-container-low border-2 border-dashed border-outline-variant rounded-2xl p-8 flex flex-col items-center justify-center text-center hover:bg-surface-container transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant mb-3">upload_file</span>
+<span class="font-bold text-on-surface">Pièce d'identité (CNI/Passport)</span>
+<span class="text-xs text-on-surface-variant mt-1">Recto et Verso acceptés (JPG, PNG)</span>
+</div>
+<!-- Video Selfie -->
+<div class="group relative bg-surface-container-low border-2 border-dashed border-outline-variant rounded-2xl p-8 flex flex-col items-center justify-center text-center hover:bg-surface-container transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant mb-3">videocam</span>
+<span class="font-bold text-on-surface">Vidéo Selfie Express</span>
+<span class="text-xs text-on-surface-variant mt-1">Dites "Allo Services" face caméra (5s)</span>
+</div>
+</div>
+</div>
+<!-- STEP 3: Payment (Visualized for structure) -->
+<div class="opacity-40 grayscale pointer-events-none border-t border-surface-container pt-10" id="step-3">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-secondary text-3xl">payments</span>
+<h2 class="font-headline text-2xl font-bold text-primary">Abonnement &amp; Activation</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<!-- Plan Basic -->
+<div class="relative p-6 rounded-2xl border-2 border-outline-variant bg-surface-container-low flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-black text-xl text-primary">Pack Starter</span>
+<span class="bg-white px-3 py-1 rounded-full text-xs font-bold text-on-surface-variant">Mensuel</span>
+</div>
+<div class="text-3xl font-black text-primary">5,000 <span class="text-sm font-normal">FCFA</span></div>
+<ul class="text-xs space-y-2 mt-2 text-on-surface-variant">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-xs text-tertiary">check_circle</span> Visibilité basique</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-xs text-tertiary">check_circle</span> 10 Leads / mois</li>
+</ul>
+</div>
+<!-- Plan Premium -->
+<div class="relative p-6 rounded-2xl border-2 border-primary bg-primary-fixed text-primary flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="font-black text-xl">Pack Pro</span>
+<span class="bg-primary text-white px-3 py-1 rounded-full text-xs font-bold">Populaire</span>
+</div>
+<div class="text-3xl font-black">10,000 <span class="text-sm font-normal">FCFA</span></div>
+<ul class="text-xs space-y-2 mt-2">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-xs">check_circle</span> Badge "Vérifié"</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-xs">check_circle</span> Leads Illimités</li>
+</ul>
+</div>
+</div>
+<div class="space-y-4">
+<label class="block text-sm font-semibold text-on-surface-variant">Preuve de paiement (Wave / Orange Money)</label>
+<div class="flex items-center gap-6 p-6 bg-surface-container-low rounded-2xl">
+<img class="w-16 h-16 rounded-xl object-cover shadow-md" data-alt="close up shot of a high quality smartphone screen displaying a mobile payment transaction confirmation with vibrant interface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-hVxSNuvYVPYdsawdt5BvTd9IJBSuETXFIOQbgab7Pm00S6mOm3f1YzscTdFqDTOMoL0gFPPJKEGuztOVz_lFSY1wUZhjSfD-ePKtAF7K3V3-CNKTmmwgI46iqA38Ps_QSgUZIEmYz-jPh4hUiWfFUap_Io0ZE44JESEDmj9QAgTB2eluNWfzLZLVJec7iUwoHm1hK0ippJA-172tDG6VaL02D3AXW2rd_qCg1mteqfxF2uMK32rd3VePO4rxvWsKcHzlpMDUzM5r"/>
+<div class="flex-1">
+<p class="text-sm font-medium">Téléchargez la capture d'écran du transfert</p>
+<p class="text-xs text-on-surface-variant">Le numéro de transaction doit être visible.</p>
+</div>
+<button class="bg-white text-primary px-4 py-2 rounded-lg font-bold text-sm shadow-sm border border-outline-variant" type="button">Choisir</button>
+</div>
+</div>
+</div>
+<!-- Form Navigation -->
+<div class="flex justify-between items-center pt-10 mt-10 border-t border-surface-container">
+<button class="px-8 py-4 rounded-xl font-bold text-on-surface-variant hover:bg-surface-container transition-all" type="button">Retour</button>
+<button class="bg-gradient-to-r from-primary to-primary-container text-white px-10 py-4 rounded-xl font-bold shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2" type="button">
+                        Continuer vers la vérification
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- Trust Section -->
+<section class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="flex flex-col items-center text-center p-6">
+<div class="w-16 h-16 rounded-2xl bg-tertiary-fixed-dim flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-tertiary text-3xl">verified</span>
+</div>
+<h3 class="font-bold text-primary mb-2">Certification Gratuite</h3>
+<p class="text-sm text-on-surface-variant">Nous vérifions chaque profil pour garantir la meilleure qualité à nos clients.</p>
+</div>
+<div class="flex flex-col items-center text-center p-6">
+<div class="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-secondary text-3xl">trending_up</span>
+</div>
+<h3 class="font-bold text-primary mb-2">Boost de Revenus</h3>
+<p class="text-sm text-on-surface-variant">Nos prestataires augmentent leur chiffre d'affaires de 40% en moyenne après 3 mois.</p>
+</div>
+<div class="flex flex-col items-center text-center p-6">
+<div class="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-3xl">support_agent</span>
+</div>
+<h3 class="font-bold text-primary mb-2">Support Dédié</h3>
+<p class="text-sm text-on-surface-variant">Une équipe locale basée à Abidjan pour vous accompagner dans votre succès.</p>
+</div>
+</section>
+</main>
+<!-- Footer - Light version for registration -->
+<footer class="bg-surface-container-low py-10">
+<div class="max-w-screen-2xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="text-primary font-black text-xl">Allo Services CI</div>
+<div class="flex gap-8 text-sm text-on-surface-variant font-medium">
+<a href="#">Conditions d'utilisation</a>
+<a href="#">Confidentialité</a>
+<a href="#">Contact</a>
+</div>
+<div class="text-xs text-on-surface-variant opacity-60">
+                © 2024 Allo Services CI. Tous droits réservés.
+            </div>
+</div>
+</footer>
+</body></html>

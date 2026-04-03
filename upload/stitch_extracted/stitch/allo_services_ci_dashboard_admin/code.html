@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Allo Services CI | Console d'Administration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error-container": "#93000a",
+              "secondary-fixed": "#ffdbca",
+              "surface-container-low": "#f1f4f5",
+              "on-background": "#181c1d",
+              "tertiary": "#00460e",
+              "tertiary-container": "#076018",
+              "surface-dim": "#d7dadb",
+              "surface-tint": "#1b667b",
+              "on-secondary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "on-secondary-fixed": "#331200",
+              "background": "#f7fafb",
+              "inverse-surface": "#2d3132",
+              "primary-fixed-dim": "#8ed0e7",
+              "on-primary-container": "#8dcfe6",
+              "on-primary-fixed": "#001f28",
+              "surface-container-lowest": "#ffffff",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#002204",
+              "on-tertiary-container": "#87d982",
+              "outline": "#70787c",
+              "on-secondary-container": "#5b2500",
+              "surface-container": "#ebeeef",
+              "primary": "#004150",
+              "inverse-on-surface": "#eef1f2",
+              "surface-bright": "#f7fafb",
+              "primary-container": "#005a6e",
+              "on-surface-variant": "#3f484c",
+              "secondary-container": "#fd7613",
+              "surface": "#f7fafb",
+              "tertiary-fixed-dim": "#88d982",
+              "outline-variant": "#bfc8cc",
+              "error-container": "#ffdad6",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#004e5f",
+              "on-primary": "#ffffff",
+              "secondary-fixed-dim": "#ffb68f",
+              "inverse-primary": "#8ed0e7",
+              "surface-container-high": "#e5e9ea",
+              "surface-variant": "#e0e3e4",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e0e3e4",
+              "tertiary-fixed": "#a3f69c",
+              "primary-fixed": "#b4ebff",
+              "on-surface": "#181c1d",
+              "secondary": "#9c4400",
+              "on-secondary-fixed-variant": "#773200"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-screen p-4 bg-slate-50 dark:bg-slate-950 h-full w-64 border-r-0 fixed left-0 top-0 overflow-y-auto">
+<div class="mb-10 px-2">
+<h1 class="font-black text-teal-900 dark:text-white text-2xl font-headline tracking-tight">Admin Panel</h1>
+<p class="text-xs text-on-surface-variant font-medium">Management Console</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Navigation Tabs based on JSON -->
+<a class="flex items-center gap-3 px-4 py-3 bg-teal-50 dark:bg-teal-900/20 text-teal-800 dark:text-teal-200 font-semibold border-r-4 border-teal-600 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+<span class="font-label">Validation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label">Payments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label">Logs</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/15">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                    New Report
+                </button>
+<div class="mt-6 flex items-center gap-3 px-2">
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a professional administrator in a bright office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-5zK8aHzss65FFOuQkOirZPVBTcVVcf62nLoz8PNm5yuSPjggK2wtf8aZFtDPEfKMdT_rkfQN6u0TeNyA5lJG_rptLnH4bzYYRSBcn1JKB3HT_WCYy-ixEF-a8XU2wIU5qyi_DvwUwYg-TPwS_EShVrZ2HcFLPIKuMHlfp7mSPLy3INweF43W-x8NpTK-PYUVNQqplJAi_71dSgMulbIMBerqUlvnqDPXX6-Y1oghemQfigB1Q2ehFVoBu6OauYbHeAJkoaAdJqu-"/>
+</div>
+<div>
+<p class="text-sm font-bold">Admin Central</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Access: Cy-73-03</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-64 p-8 max-w-screen-2xl mx-auto">
+<!-- Header Section -->
+<header class="flex justify-between items-center mb-10">
+<div>
+<h2 class="text-3xl font-extrabold font-headline text-primary tracking-tight">Tableau de Bord</h2>
+<p class="text-on-surface-variant mt-1">Surveillance en temps réel d'Allo Services CI</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-surface-container-low px-4 py-2 rounded-full flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="lock_clock">lock_clock</span>
+                        Code session: <span class="font-mono font-bold text-primary">Cy-73-03</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Pending Validations -->
+<div class="bg-surface-container-lowest p-6 rounded-[2rem] flex flex-col justify-between group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<div class="p-3 rounded-2xl bg-primary-fixed-dim/30 text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="pending_actions">pending_actions</span>
+</div>
+<span class="text-tertiary font-bold text-sm bg-tertiary-fixed/30 px-3 py-1 rounded-full">+12%</span>
+</div>
+<div class="mt-8">
+<p class="text-on-surface-variant font-medium">Validations en attente</p>
+<h3 class="text-4xl font-black font-headline text-primary">48</h3>
+</div>
+</div>
+<!-- Active Subscriptions -->
+<div class="bg-primary text-on-primary p-6 rounded-[2rem] flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<div class="p-3 rounded-2xl bg-white/10 text-on-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="verified_user">verified_user</span>
+</div>
+<span class="text-on-primary/70 font-medium text-sm">Mensuel</span>
+</div>
+<div class="mt-8">
+<p class="text-on-primary/70 font-medium">Abonnements actifs</p>
+<h3 class="text-4xl font-black font-headline">1,204</h3>
+</div>
+</div>
+<!-- Fraud Alerts -->
+<div class="bg-surface-container-lowest p-6 rounded-[2rem] flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<div class="p-3 rounded-2xl bg-error-container text-error">
+<span class="material-symbols-outlined text-3xl" data-icon="gpp_maybe">gpp_maybe</span>
+</div>
+<span class="text-error font-bold text-sm">Action requise</span>
+</div>
+<div class="mt-8">
+<p class="text-on-surface-variant font-medium">Alertes de fraude</p>
+<h3 class="text-4xl font-black font-headline text-on-surface">03</h3>
+</div>
+</div>
+</section>
+<!-- Main Application List Section -->
+<section class="bg-surface-container-low rounded-[2.5rem] p-8 overflow-hidden">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h3 class="text-2xl font-extrabold font-headline">Demandes de Prestataires</h3>
+<p class="text-on-surface-variant">Vérification d'identité et preuve de paiement</p>
+</div>
+<div class="flex gap-2">
+<button class="px-5 py-2 rounded-full bg-surface-container-lowest text-sm font-bold text-primary hover:bg-white transition-colors">Tout voir</button>
+<button class="px-5 py-2 rounded-full bg-primary text-on-primary text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="filter_list">filter_list</span>
+                            Filtrer
+                        </button>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Application Item 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl flex items-center justify-between group hover:bg-surface-container-lowest transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-5">
+<div class="relative">
+<img class="w-16 h-16 rounded-2xl object-cover" data-alt="professional african woman portrait, soft lighting, business attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv5GfPBKI49oEHzT_--t0YTrFFBoRTVdwoAdEAtB1Ka0RNnyLb00RCMyXH8rMJV4R_y14_WMEdnJ-4zRuttU40CLg8XPbQK2fbP6z6np_tO14i5Kj1HralzNq6rKQTKtJiFXpDN-uAb06ojzNkv44ar0AIDCrM7rI438fVKunzi1WaPybd6SWod3iFq1Ihna6UvoaBx-w5E0YxUNOGULtUojnS7zVA1zGnYHEs71hAGfq_gIh92JzawjiggA0fGvdddJhKJw-9sgko"/>
+<div class="absolute -bottom-1 -right-1 bg-tertiary text-white p-1 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-lg">Maimouna Diallo</h4>
+<p class="text-on-surface-variant text-sm">Services Ménagers • Abidjan, Cocody</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex flex-col items-center">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2">Pièce ID</p>
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="badge">badge</span>
+<span class="text-xs font-bold text-primary">VOIR</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2">Paiement</p>
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-surface-container transition-colors border border-tertiary/20">
+<span class="material-symbols-outlined text-tertiary text-xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-xs font-bold text-tertiary">VALIDE</span>
+</div>
+</div>
+<div class="flex gap-2 ml-4">
+<button class="w-12 h-12 rounded-2xl bg-error-container text-on-error-container flex items-center justify-center hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<button class="w-12 h-12 rounded-2xl bg-tertiary text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Application Item 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl flex items-center justify-between group hover:bg-surface-container-lowest transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-5">
+<div class="relative">
+<img class="w-16 h-16 rounded-2xl object-cover" data-alt="professional african man portrait, warm natural light, casual work clothes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKO4QHRofT5-qjDJW6UGDxw7jOzxY1B_TjwZI5ECZSvRk7e5zjiuNL2KNivPiuZfU9XZbDb2bA0gQ_STJQcMFD7m6fi_oEiTiiKeP5JJtUxVWtQ0HsrdLgMnj_XGagGg60PWcriW6tURVlQsHo2xDq2Qi2lo0-rU2f5NtoDSwuwG3M6wGepRtsSOh-THRUi2Vkl5Up921pSDKa2tf3czJbPkuw5xgZLf8EWLpdLhsEo8iuMdhqyyGt7O2hrv0qyWN8MQ98wic6EZYH"/>
+<div class="absolute -bottom-1 -right-1 bg-secondary text-white p-1 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-[10px]" data-icon="timer">timer</span>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-lg">Koffi Kouamé</h4>
+<p class="text-on-surface-variant text-sm">Plomberie &amp; Réparations • Yamoussoukro</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex flex-col items-center">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2">Pièce ID</p>
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="badge">badge</span>
+<span class="text-xs font-bold text-primary">VOIR</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2">Paiement</p>
+<div class="bg-error-container/40 px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error text-xl" data-icon="error">error</span>
+<span class="text-xs font-bold text-error">MANQUANT</span>
+</div>
+</div>
+<div class="flex gap-2 ml-4">
+<button class="w-12 h-12 rounded-2xl bg-error-container text-on-error-container flex items-center justify-center hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<button class="w-12 h-12 rounded-2xl bg-surface-container text-on-surface-variant flex items-center justify-center cursor-not-allowed">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Application Item 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-3xl flex items-center justify-between group hover:bg-surface-container-lowest transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-5">
+<div class="relative">
+<img class="w-16 h-16 rounded-2xl object-cover" data-alt="close up portrait of african woman, minimalist background, professional look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA35CWCIJhDJztrriUMQbGtdUQwyZEAZ2hxNnxa_3Or_NWGA3-Akb071yrDm1PAfIvTgCcSHUtEGywd-YCxZi5-u-znWB_bRyKiHRdvHr8FxUQJxDfQH5pSwgr5BYIIT37LDQTqkS0sUTSg8adYGoazLUHSnHkC_NjSsHa24uVqCr0qUsXNhXpgwOd1ivcSmrnTLxiv3hruKJCz2Hkn5kXtzVtE6nr--vZkbGP9bPgqRlQb4cNN8Xz5FnvlKYSXad7NNeojt2mdwpRe"/>
+</div>
+<div>
+<h4 class="font-bold text-lg">Fatou Sylla</h4>
+<p class="text-on-surface-variant text-sm">Esthétique &amp; Coiffure • Plateau, Abidjan</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex flex-col items-center">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2">Pièce ID</p>
+<div class="bg-error-container/40 px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-error-container transition-colors">
+<span class="material-symbols-outlined text-error text-xl" data-icon="warning">warning</span>
+<span class="text-xs font-bold text-error">FLOU</span>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-widest mb-2">Paiement</p>
+<div class="bg-surface-container-low px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-tertiary text-xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-xs font-bold text-tertiary">VOIR</span>
+</div>
+</div>
+<div class="flex gap-2 ml-4">
+<button class="w-12 h-12 rounded-2xl bg-error-container text-on-error-container flex items-center justify-center hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<button class="w-12 h-12 rounded-2xl bg-tertiary text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Logs Section (Simplified) -->
+<section class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="bg-surface-container-lowest p-8 rounded-[2rem]">
+<h4 class="text-xl font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="history">history</span>
+                        Logs d'activité récents
+                    </h4>
+<div class="space-y-4">
+<div class="flex gap-4 pb-4 border-b border-outline-variant/10">
+<span class="text-xs font-mono text-on-surface-variant whitespace-nowrap">14:22:10</span>
+<p class="text-sm">Admin <span class="font-bold">Jean P.</span> a validé le prestataire ID #8842</p>
+</div>
+<div class="flex gap-4 pb-4 border-b border-outline-variant/10">
+<span class="text-xs font-mono text-on-surface-variant whitespace-nowrap">13:45:02</span>
+<p class="text-sm">Alerte fraude : <span class="text-error font-bold">Tentative de double paiement</span> sur carte ending 4402</p>
+</div>
+<div class="flex gap-4">
+<span class="text-xs font-mono text-on-surface-variant whitespace-nowrap">12:10:55</span>
+<p class="text-sm">Système : Nouvelle inscription prestataire <span class="font-bold">Bakary T.</span> (San-Pédro)</p>
+</div>
+</div>
+</div>
+<!-- Financial Quick View -->
+<div class="bg-gradient-to-br from-primary-container to-primary text-on-primary p-8 rounded-[2rem] relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="text-xl font-bold mb-2">Revenus du jour</h4>
+<p class="text-on-primary/60 text-sm mb-6">Mises à jour il y a 5 min</p>
+<h3 class="text-4xl font-black font-headline">845,200 FCFA</h3>
+<div class="mt-8 flex gap-3">
+<div class="bg-white/10 px-4 py-2 rounded-xl text-xs backdrop-blur-md">Orange Money: 60%</div>
+<div class="bg-white/10 px-4 py-2 rounded-xl text-xs backdrop-blur-md">Wave: 35%</div>
+<div class="bg-white/10 px-4 py-2 rounded-xl text-xs backdrop-blur-md">MTN: 5%</div>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="absolute -bottom-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+</div>
+</section>
+</main>
+</div>
+<!-- Floating Secure Session Banner (Bottom) -->
+<div class="fixed bottom-6 right-6 z-50">
+<div class="bg-on-background text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 animate-pulse">
+<span class="material-symbols-outlined text-secondary" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+<div class="text-xs">
+<p class="font-bold">Session Sécurisée Active</p>
+<p class="opacity-60">ID: Cy-73-03-ADMIN</p>
+</div>
+</div>
+</div>
+</body></html>

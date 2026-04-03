@@ -1,0 +1,47 @@
+{
+    local_certs
+    email admin@alloservices.ci
+}
+
+# HTTPS server
+:443 {
+    tls internal
+    
+    # Security headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Handle transform port query for dynamic proxy
+    @transform_port_query {
+        query XTransformPort=*
+    }
+
+    handle @transform_port_query {
+        reverse_proxy localhost:{query.XTransformPort} {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+
+    # Main proxy to Next.js
+    handle {
+        reverse_proxy localhost:3000 {
+            header_up Host {host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Real-IP {remote_host}
+        }
+    }
+}
+
+# HTTP to HTTPS redirect
+:80 {
+    redir https://{host}{uri} permanent
+}

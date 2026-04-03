@@ -1,0 +1,346 @@
+// This is your Prisma schema file for Allo Services CI
+// Marketplace de mise en relation clients/prestataires en Côte d'Ivoire
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  CLIENT
+  PROVIDER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum SubscriptionPlan {
+  FREE
+  MONTHLY
+  PREMIUM
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+// ==================== USER MODEL ====================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  phone     String?  @unique
+  passwordHash String?
+  role      UserRole  @default(CLIENT)
+  status    UserStatus @default(PENDING_VERIFICATION)
+  fullName  String?
+  avatarUrl String?
+  city      String?
+  country   String   @default("Côte d'Ivoire")
+  otpVerified Boolean @default(false)
+  trustScore Int     @default(0)
+  emailVerified DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  provider    Provider?
+  reservationsAsClient Reservation[] @relation("ClientReservations")
+  reviews      Review[] @relation("ClientReviews")
+  messagesSent Message[] @relation("SentMessages")
+  messagesReceived Message[] @relation("ReceivedMessages")
+  payments     Payment[]
+  notifications Notification[]
+  fraudLogs    FraudLog[]
+  accounts     Account[]
+  sessions     Session[]
+  otpCodes     OTPCode[]
+}
+
+// ==================== PROVIDER MODEL ====================
+
+model Provider {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName String?
+  description String?
+  categories String // JSON array of category IDs
+  hourlyRate Float?
+  isVerified Boolean @default(false)
+  kycStatus  KycStatus @default(PENDING)
+  kycDocuments String? // JSON array of document URLs
+  badgeVerified Boolean @default(false)
+  totalReservations Int @default(0)
+  totalReviews Int @default(0)
+  averageRating Float @default(0)
+  subscriptionStatus SubscriptionPlan @default(FREE)
+  subscriptionExpiresAt DateTime?
+  isActive  Boolean @default(false)
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  reservations Reservation[] @relation("ProviderReservations")
+  reviews      Review[] @relation("ProviderReviews")
+  subscriptions Subscription[]
+  publications ProviderPublication[]
+  lives        ProviderLive[]
+}
+
+// ==================== SERVICE MODEL ====================
+
+model Service {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  description String?
+  iconUrl   String?
+  parentId  String?
+  parent    Service? @relation("SubServices", fields: [parentId], references: [id])
+  subServices Service[] @relation("SubServices")
+  isActive  Boolean  @default(true)
+  displayOrder Int   @default(0)
+  createdAt DateTime @default(now())
+
+  // Relations
+  reservations Reservation[]
+}
+
+// ==================== RESERVATION MODEL ====================
+
+model Reservation {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    User     @relation("ClientReservations", fields: [clientId], references: [id])
+  providerId String
+  provider  Provider @relation("ProviderReservations", fields: [providerId], references: [id])
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id])
+  status    ReservationStatus @default(PENDING)
+  scheduledDate DateTime
+  address   String
+  city      String
+  phoneContact String?
+  notes     String?
+  priceTotal Float
+  paymentStatus String @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  review    Review?
+  messages  Message[]
+  payments  Payment[] @relation("ReservationPayments")
+}
+
+// ==================== REVIEW MODEL ====================
+
+model Review {
+  id        String   @id @default(cuid())
+  reservationId String @unique
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  clientId  String
+  client    User     @relation("ClientReviews", fields: [clientId], references: [id])
+  providerId String
+  provider  Provider @relation("ProviderReviews", fields: [providerId], references: [id])
+  rating    Int // 1-5
+  comment   String?
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+// ==================== MESSAGE MODEL ====================
+
+model Message {
+  id        String   @id @default(cuid())
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String
+  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  reservationId String?
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== SUBSCRIPTION MODEL ====================
+
+model Subscription {
+  id        String   @id @default(cuid())
+  providerId String
+  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  planName  SubscriptionPlan
+  amount    Float
+  currency  String   @default("XOF")
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("active")
+  paymentId String?
+  autoRenew Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== PAYMENT MODEL ====================
+
+model Payment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  reservationId String?
+  reservation Reservation? @relation("ReservationPayments", fields: [reservationId], references: [id])
+  amount    Float
+  currency  String   @default("XOF")
+  paymentMethod String // orange_money, mtn_money, wave, moov, card
+  providerName String?
+  transactionId String @unique
+  status    String   @default("pending")
+  metadata  String? // JSON
+  createdAt DateTime @default(now())
+}
+
+// ==================== NOTIFICATION MODEL ====================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // reservation, payment, system, promo
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+}
+
+// ==================== FRAUD LOG MODEL ====================
+
+model FraudLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  eventType String
+  severity  String   @default("low") // low, medium, high, critical
+  ipAddress String?
+  description String?
+  metadata  String? // JSON
+  isResolved Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== NEXTAUTH MODELS ====================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ==================== OTP CODE MODEL ====================
+
+model OTPCode {
+  id        String   @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([phone, code])
+}
+
+// ==================== PROVIDER PUBLICATION MODEL ====================
+
+model ProviderPublication {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  type        String   // photo, video
+  mediaUrl    String
+  caption     String?
+  expiresAt   DateTime? // Pour les stories (24h)
+  viewCount   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([type])
+  @@index([isActive])
+}
+
+// ==================== PROVIDER LIVE MODEL ====================
+
+model ProviderLive {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  thumbnailUrl String?
+  streamUrl   String?
+  status      String   @default("scheduled") // scheduled, live, ended
+  viewerCount Int      @default(0)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([status])
+}

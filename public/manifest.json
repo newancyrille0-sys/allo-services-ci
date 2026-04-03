@@ -1,0 +1,36 @@
+{
+  "name": "Allo Services CI",
+  "short_name": "AlloServices",
+  "description": "Marketplace de services locaux en Côte d'Ivoire. Trouvez les meilleurs prestataires près de chez vous.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066FF",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "fr",
+  "categories": ["business", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1344x768",
+      "type": "image/png",
+      "label": "Allo Services CI - Page d'accueil"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

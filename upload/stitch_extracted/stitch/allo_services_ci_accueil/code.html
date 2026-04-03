@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Allo Services CI | Excellence &amp; Confiance</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error-container": "#93000a",
+              "secondary-fixed": "#ffdbca",
+              "surface-container-low": "#f1f4f5",
+              "on-background": "#181c1d",
+              "tertiary": "#00460e",
+              "tertiary-container": "#076018",
+              "surface-dim": "#d7dadb",
+              "surface-tint": "#1b667b",
+              "on-secondary": "#ffffff",
+              "on-tertiary-fixed-variant": "#005312",
+              "on-secondary-fixed": "#331200",
+              "background": "#f7fafb",
+              "inverse-surface": "#2d3132",
+              "primary-fixed-dim": "#8ed0e7",
+              "on-primary-container": "#8dcfe6",
+              "on-primary-fixed": "#001f28",
+              "surface-container-lowest": "#ffffff",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#002204",
+              "on-tertiary-container": "#87d982",
+              "outline": "#70787c",
+              "on-secondary-container": "#5b2500",
+              "surface-container": "#ebeeef",
+              "primary": "#004150",
+              "inverse-on-surface": "#eef1f2",
+              "surface-bright": "#f7fafb",
+              "primary-container": "#005a6e",
+              "on-surface-variant": "#3f484c",
+              "secondary-container": "#fd7613",
+              "surface": "#f7fafb",
+              "tertiary-fixed-dim": "#88d982",
+              "outline-variant": "#bfc8cc",
+              "error-container": "#ffdad6",
+              "error": "#ba1a1a",
+              "on-primary-fixed-variant": "#004e5f",
+              "on-primary": "#ffffff",
+              "secondary-fixed-dim": "#ffb68f",
+              "inverse-primary": "#8ed0e7",
+              "surface-container-high": "#e5e9ea",
+              "surface-variant": "#e0e3e4",
+              "on-tertiary": "#ffffff",
+              "surface-container-highest": "#e0e3e4",
+              "tertiary-fixed": "#a3f69c",
+              "primary-fixed": "#b4ebff",
+              "on-surface": "#181c1d",
+              "secondary": "#9c4400",
+              "on-secondary-fixed-variant": "#773200"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #004150 0%, #005a6e 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .text-editorial {
+            letter-spacing: -0.02em;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed-dim selection:text-primary">
+<!-- Top Navigation Shell -->
+<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
+<div class="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black tracking-tight text-teal-900">Allo Services CI</div>
+<!-- Desktop Links -->
+<div class="hidden md:flex items-center gap-8">
+<a class="text-teal-700 font-bold border-b-2 border-teal-700 transition-colors" href="#">Services</a>
+<a class="text-slate-600 hover:text-teal-800 transition-colors" href="#">Prestataires</a>
+<a class="text-slate-600 hover:text-teal-800 transition-colors" href="#">Connexion</a>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-semibold hover:scale-95 duration-200 ease-in-out">
+                    S'inscrire
+                </button>
+</div>
+<!-- Mobile Toggle -->
+<div class="md:hidden">
+<span class="material-symbols-outlined text-on-surface text-2xl">menu</span>
+</div>
+</div>
+</nav>
+<main class="pt-20 pb-32">
+<!-- Hero Section -->
+<section class="relative min-h-[870px] flex items-center justify-center overflow-hidden px-4 md:px-10">
+<!-- Background Image with Overlay -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="Modern bright corporate office interior in Abidjan with large windows and soft daylight reflecting on glass surfaces" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY2kqsFdBOQugNb6-LlCFxVqSAUwiL8IG77-z6lbWtyIGgxWT00I5fbbOGffNHifpIrni1LeyR7fzpNvWCGoDTNf-I84_lCEAy7H__O4wSsO4B5IYcirgaUsEmeKVv7PeUlWdJ4byTFrUcy_ldAjvO77hAmAegBFvhrI-KPbLwqBn7wGsYThUdvsV4jb65qa1GPq9_M4NwtfzcDKASbqeUGS3zAzgvBRXR8c_GGfMn7ahuFWLuDYED6ShQ3pVBstWHKY-kTjKURUGZ"/>
+<div class="absolute inset-0 hero-gradient opacity-85"></div>
+</div>
+<!-- Content -->
+<div class="relative z-10 w-full max-w-4xl text-center space-y-10">
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold text-white text-editorial leading-[1.1]">
+                    L'excellence à votre <br/><span class="text-primary-fixed-dim">porte en un clic.</span>
+</h1>
+<p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto font-light">
+                    Le premier réseau de professionnels vérifiés en Côte d'Ivoire pour tous vos besoins du quotidien.
+                </p>
+<!-- Search Bento -->
+<div class="glass-card p-2 rounded-[2rem] shadow-2xl flex flex-col md:flex-row items-stretch gap-2">
+<div class="flex-1 flex items-center gap-3 px-6 py-4 bg-surface-container-lowest rounded-2xl md:rounded-l-[1.8rem]">
+<span class="material-symbols-outlined text-primary">search</span>
+<input class="w-full border-none focus:ring-0 bg-transparent text-on-surface placeholder:text-outline" placeholder="Quel service recherchez-vous ?" type="text"/>
+</div>
+<div class="flex-1 flex items-center gap-3 px-6 py-4 bg-surface-container-lowest md:border-l border-outline-variant/20 rounded-2xl md:rounded-none">
+<span class="material-symbols-outlined text-primary">location_on</span>
+<input class="w-full border-none focus:ring-0 bg-transparent text-on-surface placeholder:text-outline" placeholder="Ville ou quartier (Abidjan...)" type="text"/>
+</div>
+<button class="bg-secondary-container text-white px-10 py-4 rounded-2xl md:rounded-r-[1.8rem] font-bold text-lg hover:scale-95 transition-transform flex items-center justify-center gap-2">
+                        Trouver <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Categories Bento -->
+<section class="max-w-screen-2xl mx-auto px-6 mt-[-4rem] relative z-20">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+<!-- Plumbing -->
+<div class="group surface-container-lowest p-6 rounded-3xl flex flex-col items-center justify-center gap-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer bg-white">
+<div class="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-800 group-hover:bg-teal-700 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">plumbing</span>
+</div>
+<span class="font-bold text-on-surface">Plomberie</span>
+</div>
+<!-- Electricity -->
+<div class="group surface-container-lowest p-6 rounded-3xl flex flex-col items-center justify-center gap-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer bg-white">
+<div class="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-800 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</div>
+<span class="font-bold text-on-surface">Électricité</span>
+</div>
+<!-- Hairdressing -->
+<div class="group surface-container-lowest p-6 rounded-3xl flex flex-col items-center justify-center gap-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer bg-white">
+<div class="w-16 h-16 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-800 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">content_cut</span>
+</div>
+<span class="font-bold text-on-surface">Coiffure</span>
+</div>
+<!-- Delivery -->
+<div class="group surface-container-lowest p-6 rounded-3xl flex flex-col items-center justify-center gap-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer bg-white">
+<div class="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-800 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">local_shipping</span>
+</div>
+<span class="font-bold text-on-surface">Livraison</span>
+</div>
+<!-- Repair -->
+<div class="group surface-container-lowest p-6 rounded-3xl flex flex-col items-center justify-center gap-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer bg-white md:col-span-1 col-span-2">
+<div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-800 group-hover:bg-slate-800 group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl">build</span>
+</div>
+<span class="font-bold text-on-surface">Réparation</span>
+</div>
+</div>
+</section>
+<!-- Featured Providers -->
+<section class="max-w-screen-2xl mx-auto px-6 mt-24">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div class="space-y-2">
+<span class="text-primary font-bold tracking-widest text-sm uppercase">Nos Élites</span>
+<h2 class="font-headline text-4xl font-extrabold text-editorial">Prestataires Vedettes</h2>
+</div>
+<button class="text-primary font-bold flex items-center gap-2 hover:translate-x-2 transition-transform">
+                    Voir tout l'annuaire <span class="material-symbols-outlined">trending_flat</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Provider Card 1 -->
+<div class="group relative bg-surface-container-lowest rounded-[2.5rem] p-4 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<div class="relative h-64 overflow-hidden rounded-[2rem] mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Professional African plumber in uniform smiling while holding high-quality brass plumbing fixtures with a confident look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK5awawVCr0hnAiknP9pftoJAjjVx9nJjgW96TPOXWxMf4hBgNK2zNYp-KAtP4k2RHbF7LaHHOj_PBm8spK5wdboSrME9MiBvUbhGOVdg8hbfFsnZoKcoBHLI0MmbrhTrLaHD6OGx5j63v6a713h1YP9kabOYIA5QftgOXfRP4HRAa1JIweazc-q18loh52A1WCHyxeB6xQrNFvshQGSDwV9RM7b_xacXtYlG_7MreIcXLXDRrQSnP0ssE2KQjvS481_HseU4OB9H8"/>
+<div class="absolute top-4 left-4 bg-tertiary text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">verified</span>
+                            VÉRIFIÉ
+                        </div>
+</div>
+<div class="px-4 pb-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-xl font-bold">Koffi Kouadio</h3>
+<div class="flex items-center gap-1 text-secondary font-bold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                                4.9
+                            </div>
+</div>
+<p class="text-on-surface-variant text-sm mb-6">Plomberie &amp; Installations Sanitaires • Cocody</p>
+<div class="flex items-center justify-between">
+<span class="font-bold text-lg text-primary">À partir de 15.000 FCFA</span>
+<button class="bg-surface-container-highest p-3 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">calendar_today</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Provider Card 2 -->
+<div class="group relative bg-surface-container-lowest rounded-[2.5rem] p-4 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<div class="relative h-64 overflow-hidden rounded-[2rem] mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Skilled hair stylist with braiding tools in an elegant salon environment, warm lighting, professional studio setup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8HarNeh5rnFUjNUfViohL0jcixrWYbtnVNQQWdLoiecbISFbf8wgZkI53_BCLqZEqVK4Tki7HPtphLX3_Dn-12SM2uoRdyumyJfEhhHlcLqVbhKwRFMlQmOvXzAh5RjzskLe5Z7OEdidR4O142S7_pGn-qwkTzzVjc2o4PerN5qc-fgHO9oXPg_iYTJ7JH0Z1jEtn10e56lW7INfO9SInYrLNJS-_LGvpDSMom41aJtJF84m-PySxG86p751moxCxyg902iQVCLWZ"/>
+<div class="absolute top-4 left-4 bg-tertiary text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">verified</span>
+                            VÉRIFIÉ
+                        </div>
+</div>
+<div class="px-4 pb-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-xl font-bold">Awa Bakayoko</h3>
+<div class="flex items-center gap-1 text-secondary font-bold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                                5.0
+                            </div>
+</div>
+<p class="text-on-surface-variant text-sm mb-6">Coiffure à Domicile &amp; Esthétique • Riviera</p>
+<div class="flex items-center justify-between">
+<span class="font-bold text-lg text-primary">À partir de 10.000 FCFA</span>
+<button class="bg-surface-container-highest p-3 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">calendar_today</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Provider Card 3 -->
+<div class="group relative bg-surface-container-lowest rounded-[2.5rem] p-4 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden">
+<div class="relative h-64 overflow-hidden rounded-[2rem] mb-6">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Expert electrician testing a modern circuit board with precision tools, bright workplace with blue tech accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2wt4VIFjdh4A0TpD4rSKCVXX8HhX41W7LQd3R-l0Xmu1nmTWo-Fg4T5EDaeFrJMIS4wagp2dJVBG7QBhi8Dredmk63U4KZ0fwBmpu3KUdLtq1CQNu64bvNmEOrj5UYdx9ZXX9iUbRy-lW_K8IPASImsucdwpQF6FpGrT4fgl4-UvAJNgoi_nnN5EQ0BxTIvEOA2jsohkTP2TgnTa4esK_86ImqhlSsbEU7a9U3B1qMY1rDOGJoYTSe2EcK0EdFLAxz-1p-crTwpze"/>
+<div class="absolute top-4 left-4 bg-secondary text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                            URGENT
+                        </div>
+</div>
+<div class="px-4 pb-4">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline text-xl font-bold">Jean-Marc Yao</h3>
+<div class="flex items-center gap-1 text-secondary font-bold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+                                4.8
+                            </div>
+</div>
+<p class="text-on-surface-variant text-sm mb-6">Électricité &amp; Domotique • Marcory</p>
+<div class="flex items-center justify-between">
+<span class="font-bold text-lg text-primary">À partir de 20.000 FCFA</span>
+<button class="bg-surface-container-highest p-3 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">calendar_today</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Trust Section -->
+<section class="max-w-screen-2xl mx-auto px-6 mt-32">
+<div class="bg-primary-container rounded-[3rem] p-10 md:p-20 overflow-hidden relative">
+<!-- Abstract BG -->
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-10">
+<span class="material-symbols-outlined text-[30rem] rotate-12">security</span>
+</div>
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<div class="space-y-8">
+<h2 class="font-headline text-4xl md:text-5xl font-extrabold text-white leading-tight">Votre sécurité est notre priorité absolue.</h2>
+<div class="space-y-6">
+<div class="flex gap-4">
+<div class="bg-white/10 p-3 rounded-2xl shrink-0">
+<span class="material-symbols-outlined text-primary-fixed-dim">verified_user</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg">Profils 100% Vérifiés</h4>
+<p class="text-white/60 text-sm">Chaque prestataire passe un entretien rigoureux et une vérification d'identité systématique.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="bg-white/10 p-3 rounded-2xl shrink-0">
+<span class="material-symbols-outlined text-primary-fixed-dim">payments</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg">Paiements Sécurisés</h4>
+<p class="text-white/60 text-sm">Vos transactions sont protégées. Le prestataire n'est payé qu'une fois le travail validé par vos soins.</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="bg-white/10 p-3 rounded-2xl shrink-0">
+<span class="material-symbols-outlined text-primary-fixed-dim">support_agent</span>
+</div>
+<div>
+<h4 class="text-white font-bold text-lg">Assistance 24/7</h4>
+<p class="text-white/60 text-sm">Une équipe locale dédiée pour vous accompagner avant, pendant et après chaque prestation.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="relative">
+<div class="glass-card p-8 rounded-[2.5rem] relative z-20">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">AS</div>
+<div>
+<div class="text-primary font-bold">Allo Services Support</div>
+<div class="text-on-surface-variant text-xs">En ligne actuellement</div>
+</div>
+</div>
+<div class="space-y-4">
+<div class="bg-surface-container-low p-4 rounded-2xl rounded-tl-none mr-12 text-sm">
+                                    Bonjour ! Comment puis-je vous aider à trouver le meilleur expert aujourd'hui ?
+                                </div>
+<div class="bg-primary text-white p-4 rounded-2xl rounded-tr-none ml-12 text-sm">
+                                    Je cherche un électricien certifié sur Cocody pour demain 10h.
+                                </div>
+<div class="bg-surface-container-low p-4 rounded-2xl rounded-tl-none mr-12 text-sm">
+                                    Parfait. Nous avons 3 experts disponibles qui correspondent à vos critères.
+                                </div>
+</div>
+</div>
+<!-- Floating Accents -->
+<div class="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary-container rounded-full blur-[80px] opacity-20"></div>
+<div class="absolute -top-20 -right-20 w-60 h-60 bg-primary-fixed-dim rounded-full blur-[100px] opacity-10"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-white/60 backdrop-blur-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-50 rounded-t-3xl">
+<a class="flex flex-col items-center justify-center bg-teal-100/50 text-teal-900 rounded-2xl px-5 py-2 scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[11px] font-semibold font-label">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:bg-slate-100/50 transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[11px] font-semibold font-label">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:bg-slate-100/50 transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-[11px] font-semibold font-label">Reservations</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2 hover:bg-slate-100/50 transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[11px] font-semibold font-label">Profile</span>
+</a>
+</nav>
+<!-- FAB for quick booking -->
+<button class="fixed right-6 bottom-24 md:bottom-10 bg-primary text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</body></html>

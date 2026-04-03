@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#ffdbca",
+                        "surface-container-low": "#f1f4f5",
+                        "on-background": "#181c1d",
+                        "tertiary": "#00460e",
+                        "tertiary-container": "#076018",
+                        "surface-dim": "#d7dadb",
+                        "surface-tint": "#1b667b",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#005312",
+                        "on-secondary-fixed": "#331200",
+                        "background": "#f7fafb",
+                        "inverse-surface": "#2d3132",
+                        "primary-fixed-dim": "#8ed0e7",
+                        "on-primary-container": "#8dcfe6",
+                        "on-primary-fixed": "#001f28",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#002204",
+                        "on-tertiary-container": "#87d982",
+                        "outline": "#70787c",
+                        "on-secondary-container": "#5b2500",
+                        "surface-container": "#ebeeef",
+                        "primary": "#004150",
+                        "inverse-on-surface": "#eef1f2",
+                        "surface-bright": "#f7fafb",
+                        "primary-container": "#005a6e",
+                        "on-surface-variant": "#3f484c",
+                        "secondary-container": "#fd7613",
+                        "surface": "#f7fafb",
+                        "tertiary-fixed-dim": "#88d982",
+                        "outline-variant": "#bfc8cc",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#004e5f",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb68f",
+                        "inverse-primary": "#8ed0e7",
+                        "surface-container-high": "#e5e9ea",
+                        "surface-variant": "#e0e3e4",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e4",
+                        "tertiary-fixed": "#a3f69c",
+                        "primary-fixed": "#b4ebff",
+                        "on-surface": "#181c1d",
+                        "secondary": "#9c4400",
+                        "on-secondary-fixed-variant": "#773200"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/20">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
+<nav class="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-black tracking-tight text-teal-900">Allo Services CI</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-slate-600 hover:text-teal-800 transition-colors" href="#">Services</a>
+<a class="text-teal-700 font-bold border-b-2 border-teal-700" href="#">Prestataires</a>
+<a class="text-slate-600 hover:text-teal-800 transition-colors" href="#">Connexion</a>
+<button class="bg-primary text-white px-6 py-2.5 rounded-full font-semibold transition-all hover:scale-95 duration-200">
+                    S'inscrire
+                </button>
+</div>
+<button class="md:hidden text-teal-900">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</nav>
+</header>
+<main class="pt-24 pb-32 px-4 md:px-10 max-w-screen-xl mx-auto">
+<!-- Hero Section / Header Profile -->
+<div class="relative overflow-hidden rounded-[2.5rem] mb-12 bg-primary-container h-64 md:h-80">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary to-primary-container opacity-90"></div>
+<img class="w-full h-full object-cover mix-blend-overlay" data-alt="abstract architectural background with geometric shapes and soft teal lighting representing professional services" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABnpDKjpNAPRuTgsmU6jk9_mjIdM2GTm9iwTCYb1WAbTx01wFKoNtFXf6XomsxPJpVihbMk9X-xArexDtyD9QnT2dpurUAtJO7iqQK4MUPLI4xcDJXy3ciHJO3evBxQKe-o8XMHO06zLuYZM8miaJN4LR4hYCfacDol7vTNmWqdj4STQ_0banybmftFJwhPQY7P3F2m48JRCkNXxUr1hF2ngksxVWW4aNIhjQWu79g1nscR_389YbFI7U2-eIFtBAGQido3FRYV3ng"/>
+<!-- Floating Profile Info -->
+<div class="absolute -bottom-1 left-8 right-8 translate-y-1/2">
+<div class="bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] shadow-xl flex flex-col md:flex-row items-center gap-6">
+<div class="relative">
+<img class="w-32 h-32 md:w-40 md:h-40 rounded-3xl object-cover shadow-lg ring-4 ring-white" data-alt="portrait of a professional male technician in a clean uniform smiling warmly with a neutral studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhXSay2iW-wuFs5NDVZl6i4qaJEgCgLiZNcz1GyptTUa4PzPFFm7ubJtY7xXMinm_j3vSmy3lfCGHYJG-w-YqST_66LcaBvAfi1y7WYZcn-eHi59Sb86UbZh2cEO6laNdO55LeqlFEVNHWuZRyVASjLFks8NJFhi_rIBTwW5koOn0YVzuc1l4X2pX9Fw6E9UoiVI83wg2iGfCnyXJoWQZFxsbmqArcJ8OO1vg8izdiJJV4ZwJHxMPGNZiiPW9fuK7k1Vpt4wE2uJTN"/>
+<div class="absolute -bottom-2 -right-2 bg-tertiary text-white p-2 rounded-full shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="text-center md:text-left flex-1">
+<div class="flex flex-col md:flex-row md:items-center gap-2 mb-2">
+<h1 class="text-3xl md:text-4xl font-headline font-extrabold tracking-tight text-primary">Jean-Marc Koffi</h1>
+<span class="hidden md:inline px-3 py-1 bg-surface-container text-on-surface-variant text-xs font-bold rounded-full">EXPERT ÉLECTRICIEN</span>
+</div>
+<p class="text-on-surface-variant flex items-center justify-center md:justify-start gap-1">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                            Abidjan, Cocody Riviera 3
+                        </p>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 gap-4 w-full md:w-auto">
+<div class="bg-surface-container-low p-4 rounded-2xl text-center">
+<div class="text-2xl font-black text-primary">98%</div>
+<div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Score de Confiance</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl text-center">
+<div class="text-2xl font-black text-primary">450+</div>
+<div class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Interventions</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-28 grid grid-cols-1 lg:grid-cols-3 gap-10">
+<!-- Left Column: Details -->
+<div class="lg:col-span-2 space-y-12">
+<!-- About Section -->
+<section>
+<h2 class="text-2xl font-headline font-bold text-primary mb-4 flex items-center gap-3">
+<span class="w-8 h-1 bg-secondary-container rounded-full"></span>
+                        À propos de moi
+                    </h2>
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] leading-relaxed text-on-surface-variant">
+<p class="mb-4">
+                            Avec plus de 12 ans d'expérience dans le domaine de l'électricité générale et industrielle, je m'engage à fournir des solutions sûres, durables et conformes aux normes internationales. Diplômé de l'INP-HB, j'ai bâti ma réputation sur la ponctualité et la rigueur.
+                        </p>
+<p>
+                            Maîtrise complète des systèmes domotiques modernes et de la rénovation électrique pour particuliers et entreprises à travers tout Abidjan.
+                        </p>
+</div>
+</section>
+<!-- Service Details -->
+<section>
+<h2 class="text-2xl font-headline font-bold text-primary mb-4 flex items-center gap-3">
+<span class="w-8 h-1 bg-secondary-container rounded-full"></span>
+                        Détails des Services
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-primary/10 p-3 rounded-2xl text-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Tarification</h3>
+<p class="text-sm text-on-surface-variant">À partir de 15,000 CFA</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-3xl border border-outline-variant/15">
+<div class="flex items-center gap-4 mb-4">
+<div class="bg-primary/10 p-3 rounded-2xl text-primary">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Disponibilité</h3>
+<p class="text-sm text-on-surface-variant">Lun - Sam, 08h00 - 19h00</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Reviews -->
+<section>
+<div class="flex justify-between items-end mb-6">
+<h2 class="text-2xl font-headline font-bold text-primary flex items-center gap-3">
+<span class="w-8 h-1 bg-secondary-container rounded-full"></span>
+                            Avis Clients
+                        </h2>
+<div class="flex items-center gap-1 text-secondary font-bold">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.9 (124 avis)</span>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Review Card 1 -->
+<div class="bg-surface-container-low p-6 rounded-3xl">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a young woman with a friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjJ5kQA_MILlnVWFf2NOOACAFd_B-bQeGkNfGD7RyKl2IWbP85Ycclh3rZYVk7AJcUuO066GjqNHl7alM9gIPNU5lmunWY9xhovXfn3F00OWVwOeB7KRJkudjm02nK3SK7cZa5X1zDla8Wl8JF9UvqSj_zBAnIDfyPeJi8bwnG9SiQsUivcDpKm4wVUf3cbZR0CRX0B6AfwhujVmTg0O5pDvyo0dcWyS-dZqg5ZO0XR14q4cTJeVXADCohZCQkFy4_eb-KIULa7Sah"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">Marie-Evelyne T.</div>
+<div class="text-xs text-on-surface-variant">Il y a 2 jours</div>
+</div>
+</div>
+<div class="flex text-secondary text-sm">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm italic">"Excellent travail pour la rénovation de mon tableau électrique. Très professionnel et propre."</p>
+</div>
+<!-- Review Card 2 -->
+<div class="bg-surface-container-low p-6 rounded-3xl">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-300 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="portrait of a man in casual attire looking thoughtful" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIfwmh29AlmU8WfDUASS0RCO372NLLyDsUcoU3_ncmTXcmcNqy_UsRuDxUJzjnLxqz4Dqvskw94nvf2AvuF14Qa8KuOaaNDk7VLqal8B2QnEP-wTvDLPsmlbdmw90U3_3zgWg3kL6tG70hmRamJQP197IEHZchUYxLNa4qywQnw7DeZJywuH3r6OCTXjxK74WndUi_18v6M_IpBeA_R4-uvy5fkGMwFlaD8l00UYIEYH8GHx7wsYDEwi63hKMWCAJ1Vtb8ZP1r3QHA"/>
+</div>
+<div>
+<div class="font-bold text-on-surface">Didier G.</div>
+<div class="text-xs text-on-surface-variant">Il y a 1 semaine</div>
+</div>
+</div>
+<div class="flex text-secondary text-sm">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+</div>
+<p class="text-on-surface-variant text-sm italic">"Intervention rapide un samedi soir. Je recommande Jean-Marc sans hésiter pour son efficacité."</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Booking Widget -->
+<div class="lg:col-span-1">
+<div class="sticky top-28 bg-surface-container-lowest p-8 rounded-[2.5rem] shadow-2xl shadow-primary/5 border border-outline-variant/10">
+<h3 class="text-2xl font-headline font-extrabold text-primary mb-6">Réserver un service</h3>
+<form class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Type de Service</label>
+<select class="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20">
+<option>Diagnostic Électrique</option>
+<option>Installation Domotique</option>
+<option>Dépannage Urgent</option>
+<option>Maintenance Préventive</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Date</label>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20" type="date"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Heure</label>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20" type="time"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Votre Message</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-2xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20" placeholder="Décrivez brièvement votre besoin..." rows="3"></textarea>
+</div>
+<div class="pt-4">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform" type="submit">
+                                Confirmer la Demande
+                            </button>
+<p class="text-[10px] text-center mt-4 text-on-surface-variant/60">Paiement sécurisé après intervention</p>
+</div>
+</form>
+<div class="mt-8 pt-8 border-t border-outline-variant/30 flex items-center justify-between">
+<span class="text-sm font-semibold text-on-surface">Besoin d'aide ?</span>
+<button class="text-primary text-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">chat</span>
+                            Contacter
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-white/60 backdrop-blur-2xl z-50 rounded-t-3xl shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[11px] font-semibold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-teal-100/50 text-teal-900 rounded-2xl px-5 py-2 scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[11px] font-semibold">Profile</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-[11px] font-semibold">Reservations</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 px-5 py-2" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[11px] font-semibold">Search</span>
+</a>
+</nav>
+</body></html>
