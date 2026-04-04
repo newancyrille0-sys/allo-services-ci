@@ -59,12 +59,12 @@ export default function VerifyOTPPage() {
 
     if (result.success) {
       setIsVerified(true);
-      // Redirect after success animation
+      // Redirect to profile after verification success
       setTimeout(() => {
         if (result.role === "CLIENT") {
-          router.push("/dashboard/client");
+          router.push("/client/profile");
         } else if (result.role === "PROVIDER") {
-          router.push("/dashboard/provider");
+          router.push("/provider/profile");
         } else {
           router.push("/");
         }

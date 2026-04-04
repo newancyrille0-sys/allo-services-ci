@@ -65,9 +65,9 @@ export function useAuth(): UseAuthReturn {
 
     switch (user.role) {
       case "CLIENT":
-        return "/dashboard/client";
+        return "/client/profile";
       case "PROVIDER":
-        return "/dashboard/provider";
+        return "/provider/profile";
       case "ADMIN":
         return "/admin/dashboard";
       default:
