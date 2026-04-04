@@ -21,9 +21,12 @@ import {
   ChevronRight,
   X,
   CheckCircle2,
-  Camera,
+  Video,
   RefreshCw,
   AlertCircle,
+  Play,
+  Square,
+  Clock,
 } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -95,9 +98,11 @@ type ProviderFormValues = z.infer<typeof providerSchema>;
 const STEPS = [
   { id: 1, title: "Informations personnelles", description: "Vos coordonnées" },
   { id: 2, title: "Informations professionnelles", description: "Votre activité" },
-  { id: 3, title: "Documents & Selfie", description: "Vérification d'identité" },
+  { id: 3, title: "Documents & Vidéo de vérification", description: "Vérification d'identité" },
   { id: 4, title: "Choix de l'abonnement", description: "Sélectionnez votre offre" },
 ];
+
+const VIDEO_DURATION = 5; // 5 seconds
 
 export default function ProviderRegisterPage() {
   const router = useRouter();
@@ -109,15 +114,22 @@ export default function ProviderRegisterPage() {
     registreCommerce?: File;
   }>({});
   
-  // Selfie state
-  const [selfieImage, setSelfieImage] = useState<string | null>(null);
-  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  // Video recording state
+  const [videoBlob, setVideoBlob] = useState<Blob | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [cameraPermissionRequested, setCameraPermissionRequested] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   const cniInputRef = useRef<HTMLInputElement>(null);
   const registreInputRef = useRef<HTMLInputElement>(null);
@@ -146,21 +158,38 @@ export default function ProviderRegisterPage() {
   const startCamera = useCallback(async () => {
     try {
       setCameraError(null);
+      setCameraPermissionRequested(true);
+      
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: 640, height: 480 },
+        video: { 
+          facingMode: "user", 
+          width: { ideal: 640 }, 
+          height: { ideal: 480 } 
+        },
+        audio: true,
       });
       
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play();
       }
       setIsCameraActive(true);
     } catch (err) {
       console.error("Camera error:", err);
-      setCameraError(
-        "Impossible d'accéder à la caméra. Vérifiez les permissions ou utilisez un autre navigateur."
-      );
+      let errorMessage = "Impossible d'accéder à la caméra. ";
+      
+      if (err instanceof Error) {
+        if (err.name === 'NotAllowedError') {
+          errorMessage = "Accès à la caméra refusé. Veuillez autoriser l'accès dans les paramètres de votre navigateur.";
+        } else if (err.name === 'NotFoundError') {
+          errorMessage = "Aucune caméra détectée. Veuillez connecter une caméra.";
+        } else if (err.name === 'NotReadableError') {
+          errorMessage = "La caméra est utilisée par une autre application.";
+        }
+      }
+      
+      setCameraError(errorMessage);
       setIsCameraActive(false);
     }
   }, []);
@@ -174,64 +203,112 @@ export default function ProviderRegisterPage() {
       videoRef.current.srcObject = null;
     }
     setIsCameraActive(false);
+    setIsRecording(false);
+    
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   }, []);
 
-  const captureSelfie = useCallback(() => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
+  // Start recording with countdown
+  const startRecording = useCallback(() => {
+    if (!streamRef.current || !videoRef.current) return;
+    
+    chunksRef.current = [];
+    
+    // Determine supported MIME type
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+      ? 'video/webm;codecs=vp9,opus'
+      : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
+      ? 'video/webm;codecs=vp8,opus'
+      : MediaRecorder.isTypeSupported('video/webm')
+      ? 'video/webm'
+      : 'video/mp4';
+    
+    try {
+      const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
+      mediaRecorderRef.current = mediaRecorder;
       
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
       
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        // Flip horizontally for mirror effect
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(video, 0, 0);
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-        
-        // Convert to blob
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const file = new File([blob], `selfie-${Date.now()}.jpg`, {
-                type: "image/jpeg",
-              });
-              setSelfieFile(file);
-              setSelfieImage(URL.createObjectURL(blob));
-              stopCamera();
-            }
-          },
-          "image/jpeg",
-          0.9
-        );
-      }
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        setVideoBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setVideoUrl(url);
+        stopCamera();
+      };
+      
+      // Start recording
+      mediaRecorder.start(100); // Collect data every 100ms
+      setIsRecording(true);
+      setRecordingTime(0);
+      
+      // Timer for recording duration
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => {
+          if (prev >= VIDEO_DURATION) {
+            stopRecording();
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 1000);
+      
+    } catch (err) {
+      console.error("Recording error:", err);
+      setCameraError("Erreur lors du démarrage de l'enregistrement. Veuillez réessayer.");
     }
   }, [stopCamera]);
 
-  const retakeSelfie = useCallback(() => {
-    setSelfieImage(null);
-    setSelfieFile(null);
-    startCamera();
-  }, [startCamera]);
+  // Stop recording
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    setIsRecording(false);
+  }, []);
 
-  // Cleanup camera on unmount
+  // Retake video
+  const retakeVideo = useCallback(() => {
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl);
+    }
+    setVideoBlob(null);
+    setVideoUrl(null);
+    setRecordingTime(0);
+    startCamera();
+  }, [videoUrl, startCamera]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       stopCamera();
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+      }
     };
-  }, [stopCamera]);
+  }, [stopCamera, videoUrl]);
 
   // Start camera when entering step 3
   useEffect(() => {
-    if (currentStep === 3 && !selfieImage) {
+    if (currentStep === 3 && !videoUrl && !cameraPermissionRequested) {
       startCamera();
     } else if (currentStep !== 3) {
       stopCamera();
     }
-  }, [currentStep, selfieImage, startCamera, stopCamera]);
+  }, [currentStep, videoUrl, cameraPermissionRequested, startCamera, stopCamera]);
 
   const validateStep = async (step: number): Promise<boolean> => {
     let fieldsToValidate: (keyof ProviderFormValues)[] = [];
@@ -244,9 +321,9 @@ export default function ProviderRegisterPage() {
         fieldsToValidate = ["businessName", "description", "categories", "hourlyRate", "city", "address"];
         break;
       case 3:
-        // Selfie is required for KYC
-        if (!selfieFile) {
-          setCameraError("Veuillez prendre un selfie pour vérifier votre identité");
+        // Video is required for KYC
+        if (!videoBlob) {
+          setCameraError("Veuillez enregistrer une vidéo de vérification de 5 secondes");
           return false;
         }
         return true;
@@ -289,6 +366,13 @@ export default function ProviderRegisterPage() {
   const onSubmit = async (data: ProviderFormValues) => {
     clearError();
     
+    // Create File from video blob
+    const videoFile = videoBlob 
+      ? new File([videoBlob], `verification-video-${Date.now()}.webm`, { 
+          type: videoBlob.type || 'video/webm' 
+        })
+      : null;
+    
     const result = await registerProvider({
       fullName: data.fullName,
       phone: data.phone,
@@ -302,7 +386,7 @@ export default function ProviderRegisterPage() {
       address: data.address,
       cniFile: uploadedFiles.cni,
       registreCommerceFile: uploadedFiles.registreCommerce,
-      profilePhotoFile: selfieFile, // Selfie as profile photo for verification
+      profilePhotoFile: videoFile, // Video file for verification
       subscriptionPlan: data.subscriptionPlan as SubscriptionPlanKey,
     });
 
@@ -325,15 +409,18 @@ export default function ProviderRegisterPage() {
             onRemoveFile={removeFile}
             cniInputRef={cniInputRef}
             registreInputRef={registreInputRef}
-            // Selfie props
+            // Video props
             videoRef={videoRef}
-            canvasRef={canvasRef}
-            selfieImage={selfieImage}
+            previewVideoRef={previewVideoRef}
+            videoUrl={videoUrl}
             isCameraActive={isCameraActive}
+            isRecording={isRecording}
+            recordingTime={recordingTime}
             cameraError={cameraError}
-            onCaptureSelfie={captureSelfie}
-            onRetakeSelfie={retakeSelfie}
             onStartCamera={startCamera}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+            onRetakeVideo={retakeVideo}
           />
         );
       case 4:
@@ -742,63 +829,72 @@ function ProfessionalInfoStep({ form }: { form: ReturnType<typeof useForm<Provid
   );
 }
 
-// Step 3: KYC Documents with Selfie
+// Step 3: KYC Documents with Video Recording
 function KYCStep({
   uploadedFiles,
   onFileUpload,
   onRemoveFile,
   cniInputRef,
   registreInputRef,
-  // Selfie props
+  // Video props
   videoRef,
-  canvasRef,
-  selfieImage,
+  previewVideoRef,
+  videoUrl,
   isCameraActive,
+  isRecording,
+  recordingTime,
   cameraError,
-  onCaptureSelfie,
-  onRetakeSelfie,
   onStartCamera,
+  onStartRecording,
+  onStopRecording,
+  onRetakeVideo,
 }: {
   uploadedFiles: { cni?: File; registreCommerce?: File };
   onFileUpload: (type: "cni" | "registreCommerce", file: File) => void;
   onRemoveFile: (type: "cni" | "registreCommerce") => void;
   cniInputRef: React.RefObject<HTMLInputElement>;
   registreInputRef: React.RefObject<HTMLInputElement>;
-  // Selfie props
+  // Video props
   videoRef: React.RefObject<HTMLVideoElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  selfieImage: string | null;
+  previewVideoRef: React.RefObject<HTMLVideoElement>;
+  videoUrl: string | null;
   isCameraActive: boolean;
+  isRecording: boolean;
+  recordingTime: number;
   cameraError: string | null;
-  onCaptureSelfie: () => void;
-  onRetakeSelfie: () => void;
   onStartCamera: () => void;
+  onStartRecording: () => void;
+  onStopRecording: () => void;
+  onRetakeVideo: () => void;
 }) {
+  const remainingTime = VIDEO_DURATION - recordingTime;
+  const progress = (recordingTime / VIDEO_DURATION) * 100;
+
   return (
     <div className="space-y-4">
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700">
         <p className="font-medium mb-1">Vérification d'identité requise</p>
         <p className="text-xs">
-          Les prestataires vérifiés obtiennent plus de réservations et gagnent la confiance des clients.
+          Enregistrez une vidéo de 5 secondes pour vérifier votre identité. Assurez-vous d'être bien éclairé et face caméra.
         </p>
       </div>
 
-      {/* Selfie Section - REQUIRED */}
+      {/* Video Recording Section - REQUIRED */}
       <div className="border border-gray-200 rounded-lg p-4 bg-white">
         <div className="flex items-start justify-between mb-3">
           <div>
             <p className="font-medium text-sm text-gray-900 flex items-center gap-2">
-              <Camera className="h-4 w-4" />
-              Selfie de vérification *
+              <Video className="h-4 w-4" />
+              Vidéo de vérification *
             </p>
             <p className="text-xs text-gray-500 mt-0.5">
-              Prenez une photo de vous pour vérifier votre identité
+              Enregistrez une vidéo de 5 secondes face caméra
             </p>
           </div>
-          {selfieImage && (
+          {videoUrl && (
             <Badge className="bg-green-50 text-green-700 border-green-200">
               <Check className="h-3 w-3 mr-1" />
-              Capturé
+              Enregistré
             </Badge>
           )}
         </div>
@@ -811,16 +907,13 @@ function KYCStep({
         )}
 
         <div className="relative aspect-[4/3] bg-gray-900 rounded-lg overflow-hidden">
-          {/* Hidden canvas for capture */}
-          <canvas ref={canvasRef} className="hidden" />
-
-          {selfieImage ? (
-            // Show captured selfie
+          {videoUrl ? (
+            // Show recorded video preview
             <div className="relative w-full h-full">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={selfieImage}
-                alt="Selfie capturé"
+              <video
+                ref={previewVideoRef}
+                src={videoUrl}
+                controls
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
@@ -828,15 +921,15 @@ function KYCStep({
                   type="button"
                   variant="secondary"
                   size="sm"
-                  onClick={onRetakeSelfie}
+                  onClick={onRetakeVideo}
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Reprendre
+                  Réenregistrer
                 </Button>
               </div>
             </div>
           ) : (
-            // Show camera feed
+            // Show camera feed or start camera button
             <>
               <video
                 ref={videoRef}
@@ -846,34 +939,80 @@ function KYCStep({
                 className="w-full h-full object-cover transform scale-x-[-1]"
               />
               
-              {/* Overlay guide */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-48 border-2 border-white/50 rounded-full" />
-              </div>
-
-              {/* Capture button */}
-              {isCameraActive && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-                  <Button
-                    type="button"
-                    className="bg-white text-gray-900 hover:bg-gray-100"
-                    onClick={onCaptureSelfie}
-                  >
-                    <Camera className="h-5 w-5 mr-2" />
-                    Prendre le selfie
-                  </Button>
+              {/* Recording overlay */}
+              {isRecording && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Recording indicator */}
+                  <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-full text-sm font-medium">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    REC {remainingTime}s
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-800">
+                    <div 
+                      className="h-full bg-red-600 transition-all duration-1000"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  
+                  {/* Face guide */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-48 h-48 border-2 border-white/30 rounded-full" />
+                  </div>
                 </div>
               )}
 
+              {/* Camera active but not recording */}
+              {isCameraActive && !isRecording && (
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Face guide */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-48 h-48 border-2 border-white/50 rounded-full" />
+                  </div>
+                  
+                  {/* Instructions */}
+                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+                    Placez votre visage dans le cercle
+                  </div>
+                </div>
+              )}
+
+              {/* Control buttons */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                {isCameraActive && !isRecording && (
+                  <Button
+                    type="button"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    onClick={onStartRecording}
+                  >
+                    <Video className="h-5 w-5 mr-2" />
+                    Démarrer l'enregistrement
+                  </Button>
+                )}
+                
+                {isRecording && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={onStopRecording}
+                  >
+                    <Square className="h-5 w-5 mr-2" />
+                    Arrêter
+                  </Button>
+                )}
+              </div>
+
               {/* Start camera button */}
               {!isCameraActive && !cameraError && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 gap-3">
+                  <Video className="h-12 w-12 text-gray-400" />
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={onStartCamera}
                   >
-                    <Camera className="h-4 w-4 mr-2" />
+                    <Video className="h-4 w-4 mr-2" />
                     Activer la caméra
                   </Button>
                 </div>
@@ -882,9 +1021,16 @@ function KYCStep({
           )}
         </div>
 
-        <p className="text-xs text-gray-500 mt-2 text-center">
-          Placez votre visage dans le cercle et assurez-vous d'être bien éclairé
-        </p>
+        <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Durée: 5 secondes
+          </div>
+          <div className="flex items-center gap-1">
+            <Video className="h-3 w-3" />
+            Face caméra
+          </div>
+        </div>
       </div>
 
       {/* CNI Upload - Optional */}
