@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -21,6 +21,9 @@ import {
   ChevronRight,
   X,
   CheckCircle2,
+  Camera,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -31,6 +34,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -78,19 +82,12 @@ const professionalInfoSchema = z.object({
   address: z.string().min(5, "Adresse trop courte"),
 });
 
-const kycSchema = z.object({
-  cniFile: z.any().optional(),
-  registreCommerceFile: z.any().optional(),
-  profilePhotoFile: z.any().optional(),
-});
-
 const subscriptionSchema = z.object({
   subscriptionPlan: z.enum(["FREE", "MONTHLY", "PREMIUM"]),
 });
 
 const providerSchema = personalInfoSchema
   .merge(professionalInfoSchema)
-  .merge(kycSchema)
   .merge(subscriptionSchema);
 
 type ProviderFormValues = z.infer<typeof providerSchema>;
@@ -98,7 +95,7 @@ type ProviderFormValues = z.infer<typeof providerSchema>;
 const STEPS = [
   { id: 1, title: "Informations personnelles", description: "Vos coordonnées" },
   { id: 2, title: "Informations professionnelles", description: "Votre activité" },
-  { id: 3, title: "Documents KYC", description: "Vérification d'identité" },
+  { id: 3, title: "Documents & Selfie", description: "Vérification d'identité" },
   { id: 4, title: "Choix de l'abonnement", description: "Sélectionnez votre offre" },
 ];
 
@@ -110,12 +107,20 @@ export default function ProviderRegisterPage() {
   const [uploadedFiles, setUploadedFiles] = useState<{
     cni?: File;
     registreCommerce?: File;
-    profilePhoto?: File;
   }>({});
-
+  
+  // Selfie state
+  const [selfieImage, setSelfieImage] = useState<string | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  
   const cniInputRef = useRef<HTMLInputElement>(null);
   const registreInputRef = useRef<HTMLInputElement>(null);
-  const profilePhotoRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProviderFormValues>({
     resolver: zodResolver(providerSchema),
@@ -137,6 +142,97 @@ export default function ProviderRegisterPage() {
 
   const progress = (currentStep / STEPS.length) * 100;
 
+  // Camera functions
+  const startCamera = useCallback(async () => {
+    try {
+      setCameraError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: 640, height: 480 },
+      });
+      
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setIsCameraActive(true);
+    } catch (err) {
+      console.error("Camera error:", err);
+      setCameraError(
+        "Impossible d'accéder à la caméra. Vérifiez les permissions ou utilisez un autre navigateur."
+      );
+      setIsCameraActive(false);
+    }
+  }, []);
+
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraActive(false);
+  }, []);
+
+  const captureSelfie = useCallback(() => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        // Flip horizontally for mirror effect
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0);
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+        
+        // Convert to blob
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const file = new File([blob], `selfie-${Date.now()}.jpg`, {
+                type: "image/jpeg",
+              });
+              setSelfieFile(file);
+              setSelfieImage(URL.createObjectURL(blob));
+              stopCamera();
+            }
+          },
+          "image/jpeg",
+          0.9
+        );
+      }
+    }
+  }, [stopCamera]);
+
+  const retakeSelfie = useCallback(() => {
+    setSelfieImage(null);
+    setSelfieFile(null);
+    startCamera();
+  }, [startCamera]);
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, [stopCamera]);
+
+  // Start camera when entering step 3
+  useEffect(() => {
+    if (currentStep === 3 && !selfieImage) {
+      startCamera();
+    } else if (currentStep !== 3) {
+      stopCamera();
+    }
+  }, [currentStep, selfieImage, startCamera, stopCamera]);
+
   const validateStep = async (step: number): Promise<boolean> => {
     let fieldsToValidate: (keyof ProviderFormValues)[] = [];
 
@@ -148,7 +244,11 @@ export default function ProviderRegisterPage() {
         fieldsToValidate = ["businessName", "description", "categories", "hourlyRate", "city", "address"];
         break;
       case 3:
-        // KYC is optional for now
+        // Selfie is required for KYC
+        if (!selfieFile) {
+          setCameraError("Veuillez prendre un selfie pour vérifier votre identité");
+          return false;
+        }
         return true;
       case 4:
         fieldsToValidate = ["subscriptionPlan"];
@@ -168,21 +268,17 @@ export default function ProviderRegisterPage() {
   };
 
   const handlePrevious = () => {
+    if (currentStep === 3) {
+      stopCamera();
+    }
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleFileUpload = (type: "cni" | "registreCommerce" | "profilePhoto", file: File) => {
+  const handleFileUpload = (type: "cni" | "registreCommerce", file: File) => {
     setUploadedFiles((prev) => ({ ...prev, [type]: file }));
-    if (type === "cni") {
-      form.setValue("cniFile", file);
-    } else if (type === "registreCommerce") {
-      form.setValue("registreCommerceFile", file);
-    } else {
-      form.setValue("profilePhotoFile", file);
-    }
   };
 
-  const removeFile = (type: "cni" | "registreCommerce" | "profilePhoto") => {
+  const removeFile = (type: "cni" | "registreCommerce") => {
     setUploadedFiles((prev) => {
       const updated = { ...prev };
       delete updated[type];
@@ -192,6 +288,7 @@ export default function ProviderRegisterPage() {
 
   const onSubmit = async (data: ProviderFormValues) => {
     clearError();
+    
     const result = await registerProvider({
       fullName: data.fullName,
       phone: data.phone,
@@ -205,7 +302,7 @@ export default function ProviderRegisterPage() {
       address: data.address,
       cniFile: uploadedFiles.cni,
       registreCommerceFile: uploadedFiles.registreCommerce,
-      profilePhotoFile: uploadedFiles.profilePhoto,
+      profilePhotoFile: selfieFile, // Selfie as profile photo for verification
       subscriptionPlan: data.subscriptionPlan as SubscriptionPlanKey,
     });
 
@@ -228,7 +325,15 @@ export default function ProviderRegisterPage() {
             onRemoveFile={removeFile}
             cniInputRef={cniInputRef}
             registreInputRef={registreInputRef}
-            profilePhotoRef={profilePhotoRef}
+            // Selfie props
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+            selfieImage={selfieImage}
+            isCameraActive={isCameraActive}
+            cameraError={cameraError}
+            onCaptureSelfie={captureSelfie}
+            onRetakeSelfie={retakeSelfie}
+            onStartCamera={startCamera}
           />
         );
       case 4:
@@ -637,134 +742,252 @@ function ProfessionalInfoStep({ form }: { form: ReturnType<typeof useForm<Provid
   );
 }
 
-// Step 3: KYC Documents
-// File Upload Card Component (moved outside to fix lint error)
-function FileUploadCard({
-  title,
-  description,
-  type,
-  file,
-  inputRef,
-  onFileUpload,
-  onRemoveFile,
-  accept = "image/*,.pdf",
-}: {
-  title: string;
-  description: string;
-  type: "cni" | "registreCommerce" | "profilePhoto";
-  file?: File;
-  inputRef: React.RefObject<HTMLInputElement>;
-  onFileUpload: (type: "cni" | "registreCommerce" | "profilePhoto", file: File) => void;
-  onRemoveFile: (type: "cni" | "registreCommerce" | "profilePhoto") => void;
-  accept?: string;
-}) {
-  return (
-    <div className="border border-gray-200 rounded-lg p-4 bg-white">
-      <div className="flex items-start justify-between mb-2">
-        <div>
-          <p className="font-medium text-sm text-gray-900">{title}</p>
-          <p className="text-xs text-gray-500">{description}</p>
-        </div>
-        {file && (
-          <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
-            Ajouté
-          </Badge>
-        )}
-      </div>
-      {file ? (
-        <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
-          <FileText className="h-4 w-4 text-gray-400" />
-          <span className="text-sm truncate flex-1 text-gray-700">{file.name}</span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onRemoveFile(type)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full h-20 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50"
-          onClick={() => inputRef.current?.click()}
-        >
-          <div className="text-center">
-            <Upload className="h-6 w-6 mx-auto mb-1 text-gray-400" />
-            <span className="text-xs text-gray-500">Cliquez pour télécharger</span>
-          </div>
-        </Button>
-      )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const uploadedFile = e.target.files?.[0];
-          if (uploadedFile) onFileUpload(type, uploadedFile);
-        }}
-      />
-    </div>
-  );
-}
-
+// Step 3: KYC Documents with Selfie
 function KYCStep({
   uploadedFiles,
   onFileUpload,
   onRemoveFile,
   cniInputRef,
   registreInputRef,
-  profilePhotoRef,
+  // Selfie props
+  videoRef,
+  canvasRef,
+  selfieImage,
+  isCameraActive,
+  cameraError,
+  onCaptureSelfie,
+  onRetakeSelfie,
+  onStartCamera,
 }: {
-  uploadedFiles: { cni?: File; registreCommerce?: File; profilePhoto?: File };
-  onFileUpload: (type: "cni" | "registreCommerce" | "profilePhoto", file: File) => void;
-  onRemoveFile: (type: "cni" | "registreCommerce" | "profilePhoto") => void;
+  uploadedFiles: { cni?: File; registreCommerce?: File };
+  onFileUpload: (type: "cni" | "registreCommerce", file: File) => void;
+  onRemoveFile: (type: "cni" | "registreCommerce") => void;
   cniInputRef: React.RefObject<HTMLInputElement>;
   registreInputRef: React.RefObject<HTMLInputElement>;
-  profilePhotoRef: React.RefObject<HTMLInputElement>;
+  // Selfie props
+  videoRef: React.RefObject<HTMLVideoElement>;
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  selfieImage: string | null;
+  isCameraActive: boolean;
+  cameraError: string | null;
+  onCaptureSelfie: () => void;
+  onRetakeSelfie: () => void;
+  onStartCamera: () => void;
 }) {
   return (
     <div className="space-y-4">
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700">
-        <p className="font-medium mb-1">Pourquoi vérifier votre identité ?</p>
+        <p className="font-medium mb-1">Vérification d'identité requise</p>
         <p className="text-xs">
           Les prestataires vérifiés obtiennent plus de réservations et gagnent la confiance des clients.
         </p>
       </div>
 
-      <FileUploadCard
-        title="Carte Nationale d'Identité (CNI) *"
-        description="Recto-verso de votre CNI"
-        type="cni"
-        file={uploadedFiles.cni}
-        inputRef={cniInputRef}
-        onFileUpload={onFileUpload}
-        onRemoveFile={onRemoveFile}
-      />
+      {/* Selfie Section - REQUIRED */}
+      <div className="border border-gray-200 rounded-lg p-4 bg-white">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <p className="font-medium text-sm text-gray-900 flex items-center gap-2">
+              <Camera className="h-4 w-4" />
+              Selfie de vérification *
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Prenez une photo de vous pour vérifier votre identité
+            </p>
+          </div>
+          {selfieImage && (
+            <Badge className="bg-green-50 text-green-700 border-green-200">
+              <Check className="h-3 w-3 mr-1" />
+              Capturé
+            </Badge>
+          )}
+        </div>
 
-      <FileUploadCard
-        title="Registre de Commerce (optionnel)"
-        description="Pour les entreprises formelles"
-        type="registreCommerce"
-        file={uploadedFiles.registreCommerce}
-        inputRef={registreInputRef}
-        onFileUpload={onFileUpload}
-        onRemoveFile={onRemoveFile}
-      />
+        {cameraError && (
+          <Alert variant="destructive" className="mb-3">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{cameraError}</AlertDescription>
+          </Alert>
+        )}
 
-      <FileUploadCard
-        title="Photo de profil"
-        description="Photo professionnelle"
-        type="profilePhoto"
-        file={uploadedFiles.profilePhoto}
-        inputRef={profilePhotoRef}
-        accept="image/*"
-        onFileUpload={onFileUpload}
-        onRemoveFile={onRemoveFile}
-      />
+        <div className="relative aspect-[4/3] bg-gray-900 rounded-lg overflow-hidden">
+          {/* Hidden canvas for capture */}
+          <canvas ref={canvasRef} className="hidden" />
+
+          {selfieImage ? (
+            // Show captured selfie
+            <div className="relative w-full h-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selfieImage}
+                alt="Selfie capturé"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={onRetakeSelfie}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reprendre
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Show camera feed
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-full object-cover transform scale-x-[-1]"
+              />
+              
+              {/* Overlay guide */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 border-2 border-white/50 rounded-full" />
+              </div>
+
+              {/* Capture button */}
+              {isCameraActive && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                  <Button
+                    type="button"
+                    className="bg-white text-gray-900 hover:bg-gray-100"
+                    onClick={onCaptureSelfie}
+                  >
+                    <Camera className="h-5 w-5 mr-2" />
+                    Prendre le selfie
+                  </Button>
+                </div>
+              )}
+
+              {/* Start camera button */}
+              {!isCameraActive && !cameraError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={onStartCamera}
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Activer la caméra
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          Placez votre visage dans le cercle et assurez-vous d'être bien éclairé
+        </p>
+      </div>
+
+      {/* CNI Upload - Optional */}
+      <div className="border border-gray-200 rounded-lg p-4 bg-white">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <p className="font-medium text-sm text-gray-900">Carte Nationale d'Identité (CNI)</p>
+            <p className="text-xs text-gray-500">Recto-verso de votre CNI (optionnel)</p>
+          </div>
+          {uploadedFiles.cni && (
+            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+              Ajouté
+            </Badge>
+          )}
+        </div>
+        {uploadedFiles.cni ? (
+          <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
+            <FileText className="h-4 w-4 text-gray-400" />
+            <span className="text-sm truncate flex-1 text-gray-700">{uploadedFiles.cni.name}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemoveFile("cni")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-16 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+            onClick={() => cniInputRef.current?.click()}
+          >
+            <div className="text-center">
+              <Upload className="h-5 w-5 mx-auto mb-1 text-gray-400" />
+              <span className="text-xs text-gray-500">Cliquez pour télécharger</span>
+            </div>
+          </Button>
+        )}
+        <input
+          ref={cniInputRef}
+          type="file"
+          accept="image/*,.pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onFileUpload("cni", file);
+          }}
+        />
+      </div>
+
+      {/* Registre de Commerce - Optional */}
+      <div className="border border-gray-200 rounded-lg p-4 bg-white">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <p className="font-medium text-sm text-gray-900">Registre de Commerce</p>
+            <p className="text-xs text-gray-500">Pour les entreprises formelles (optionnel)</p>
+          </div>
+          {uploadedFiles.registreCommerce && (
+            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+              Ajouté
+            </Badge>
+          )}
+        </div>
+        {uploadedFiles.registreCommerce ? (
+          <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
+            <FileText className="h-4 w-4 text-gray-400" />
+            <span className="text-sm truncate flex-1 text-gray-700">{uploadedFiles.registreCommerce.name}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemoveFile("registreCommerce")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-16 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+            onClick={() => registreInputRef.current?.click()}
+          >
+            <div className="text-center">
+              <Upload className="h-5 w-5 mx-auto mb-1 text-gray-400" />
+              <span className="text-xs text-gray-500">Cliquez pour télécharger</span>
+            </div>
+          </Button>
+        )}
+        <input
+          ref={registreInputRef}
+          type="file"
+          accept="image/*,.pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onFileUpload("registreCommerce", file);
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -1,43 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/client/profile - Get client profile
+// GET /api/client/profile - Get current client profile
 export async function GET() {
   try {
-    const mockUserId = "client-1";
+    // In a real app, get user ID from session/token
+    // For now, we'll use a mock user ID
+    const userId = "demo-client-user";
 
     const user = await db.user.findUnique({
-      where: { id: mockUserId },
+      where: { id: userId },
       select: {
         id: true,
+        fullName: true,
         email: true,
         phone: true,
-        fullName: true,
         avatarUrl: true,
         city: true,
         country: true,
-        role: true,
+        otpVerified: true,
         status: true,
+        trustScore: true,
         createdAt: true,
-        _count: {
-          select: {
-            reservationsAsClient: true,
-            reviews: true,
-          },
-        },
       },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Utilisateur non trouvé" },
-        { status: 404 }
-      );
+      // Create a demo user if not exists
+      const newUser = await db.user.create({
+        data: {
+          id: userId,
+          fullName: "Client Demo",
+          phone: "+2250700000000",
+          email: "client@demo.com",
+          passwordHash: "demo",
+          role: "CLIENT",
+          status: "ACTIVE",
+          otpVerified: true,
+          city: "Abidjan",
+        },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          avatarUrl: true,
+          city: true,
+          country: true,
+          otpVerified: true,
+          status: true,
+          trustScore: true,
+          createdAt: true,
+        },
+      });
+      
+      return NextResponse.json(newUser);
     }
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    console.error("Error fetching client profile:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération du profil" },
       { status: 500 }
@@ -49,59 +71,40 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fullName, email, phone, city, avatarUrl } = body;
-    const mockUserId = "client-1";
+    const { fullName, email, phone, city, address, bio, avatarUrl } = body;
 
-    const updateData: Record<string, unknown> = {};
+    // In a real app, get user ID from session/token
+    const userId = "demo-client-user";
 
-    if (fullName) updateData.fullName = fullName;
-    if (email !== undefined) updateData.email = email;
-    if (phone) updateData.phone = phone;
-    if (city) updateData.city = city;
-    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
-
-    const user = await db.user.update({
-      where: { id: mockUserId },
-      data: updateData,
+    const updatedUser = await db.user.update({
+      where: { id: userId },
+      data: {
+        fullName,
+        email,
+        phone,
+        city,
+        avatarUrl,
+      },
       select: {
         id: true,
+        fullName: true,
         email: true,
         phone: true,
-        fullName: true,
         avatarUrl: true,
         city: true,
         country: true,
+        otpVerified: true,
+        status: true,
+        trustScore: true,
+        createdAt: true,
       },
     });
 
-    return NextResponse.json(user);
+    return NextResponse.json(updatedUser);
   } catch (error) {
-    console.error("Error updating profile:", error);
+    console.error("Error updating client profile:", error);
     return NextResponse.json(
       { error: "Erreur lors de la mise à jour du profil" },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE /api/client/profile - Delete client account
-export async function DELETE() {
-  try {
-    const mockUserId = "client-1";
-
-    // Delete user and all related data (cascading deletes in schema)
-    await db.user.delete({
-      where: { id: mockUserId },
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: "Compte supprimé avec succès",
-    });
-  } catch (error) {
-    console.error("Error deleting account:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la suppression du compte" },
       { status: 500 }
     );
   }

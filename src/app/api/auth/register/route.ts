@@ -1,35 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { UserRole, SubscriptionPlan } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { writeFile, mkdir } from "fs/promises";
+import { existsSync } from "fs";
+import path from "path";
+import { sendSMS } from "@/lib/sms";
 
-// Generate a simple OTP code
+// Generate a secure OTP code
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Simple password hashing (in production, use bcrypt)
-function hashPassword(password: string): string {
-  // For demo purposes, we'll store the password as-is
-  // In production, use bcrypt.hash
-  return password;
+// Upload file to disk
+async function uploadFile(file: File, type: "images" | "documents"): Promise<string> {
+  const uploadDir = path.join(process.cwd(), "public", "uploads", type);
+  
+  if (!existsSync(uploadDir)) {
+    await mkdir(uploadDir, { recursive: true });
+  }
+
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8);
+  const extension = file.name.split(".").pop() || "jpg";
+  const fileName = `${timestamp}-${randomString}.${extension}`;
+  const filePath = path.join(uploadDir, fileName);
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  await writeFile(filePath, buffer);
+
+  return `/uploads/${type}/${fileName}`;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if the request is multipart/form-data or JSON
     const contentType = request.headers.get("content-type") || "";
-    let data: Record<string, unknown>;
+    let data: Record<string, string>;
     let files: { cniFile?: File; registreCommerceFile?: File; profilePhotoFile?: File } = {};
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       data = {};
       
-      // Extract text fields
       for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
+        if (value instanceof File && value.size > 0) {
           files[key as keyof typeof files] = value;
-        } else {
+        } else if (typeof value === "string") {
           data[key] = value;
         }
       }
@@ -43,7 +60,6 @@ export async function POST(request: NextRequest) {
       email,
       password,
       role = "CLIENT",
-      // Provider fields
       businessName,
       description,
       categories,
@@ -61,6 +77,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate password strength
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Le mot de passe doit contenir au moins 8 caractères" },
+        { status: 400 }
+      );
+    }
+
     if (role === "PROVIDER") {
       if (!businessName || !description || !categories || !hourlyRate || !city || !address) {
         return NextResponse.json(
@@ -72,6 +96,14 @@ export async function POST(request: NextRequest) {
 
     // Normalize phone number
     const normalizedPhone = phone.replace(/\s/g, "");
+    
+    // Validate phone format
+    if (!/^(\+225|0)?[0-9]{8,10}$/.test(normalizedPhone)) {
+      return NextResponse.json(
+        { error: "Format de numéro de téléphone inval" },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await db.user.findFirst({
@@ -90,14 +122,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
-    const passwordHash = hashPassword(password);
+    // Hash password with bcrypt
+    const saltRounds = 12;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Generate OTP for verification
+    // Generate OTP
     const otp = generateOTP();
-    console.log(`[DEV] OTP for ${normalizedPhone}: ${otp}`);
+    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    // Create user
+    // Upload files if present
+    const uploadedUrls: { cni?: string; registreCommerce?: string; profilePhoto?: string } = {};
+    
+    if (files.profilePhotoFile) {
+      uploadedUrls.profilePhoto = await uploadFile(files.profilePhotoFile, "images");
+    }
+    if (files.cniFile) {
+      uploadedUrls.cni = await uploadFile(files.cniFile, "documents");
+    }
+    if (files.registreCommerceFile) {
+      uploadedUrls.registreCommerce = await uploadFile(files.registreCommerceFile, "documents");
+    }
+
+    // Create user with OTP
     const user = await db.user.create({
       data: {
         fullName,
@@ -108,22 +154,25 @@ export async function POST(request: NextRequest) {
         status: "PENDING_VERIFICATION",
         otpVerified: false,
         city: city || null,
+        avatarUrl: uploadedUrls.profilePhoto || null,
+      },
+    });
+
+    // Store OTP in database
+    await db.oTPCode.create({
+      data: {
+        phone: normalizedPhone,
+        code: otp,
+        expiresAt: otpExpiresAt,
+        userId: user.id,
       },
     });
 
     // If provider, create provider profile
     if (role === "PROVIDER") {
-      // Handle file uploads (in production, upload to cloud storage)
       const kycDocuments: string[] = [];
-      if (files.cniFile) {
-        kycDocuments.push(`cni_${user.id}`);
-      }
-      if (files.registreCommerceFile) {
-        kycDocuments.push(`registre_${user.id}`);
-      }
-      if (files.profilePhotoFile) {
-        kycDocuments.push(`profile_${user.id}`);
-      }
+      if (uploadedUrls.cni) kycDocuments.push(uploadedUrls.cni);
+      if (uploadedUrls.registreCommerce) kycDocuments.push(uploadedUrls.registreCommerce);
 
       await db.provider.create({
         data: {
@@ -139,21 +188,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // In production, send OTP via SMS
-    // For now, we just log it
-    console.log(`[SMS] Sending OTP ${otp} to ${normalizedPhone}`);
+    // Send OTP via SMS
+    const smsResult = await sendSMS(
+      normalizedPhone,
+      `Allo Services CI - Votre code de vérification est: ${otp}. Valable 5 minutes.`
+    );
+
+    console.log(`[SMS] OTP sent to ${normalizedPhone}:`, smsResult);
 
     return NextResponse.json({
       success: true,
       message: "Inscription réussie. Vérifiez votre téléphone pour le code OTP.",
       userId: user.id,
-      // In development, return the OTP
+      phone: normalizedPhone,
+      // In development, return the OTP for testing
       ...(process.env.NODE_ENV === "development" && { devOTP: otp }),
     });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Erreur lors de l'inscription" },
+      { error: "Erreur lors de l'inscription. Veuillez réessayer." },
       { status: 500 }
     );
   }
