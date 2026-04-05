@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { Play, Eye } from "lucide-react";
+import { Play, Eye, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -15,6 +15,7 @@ interface PublicationCardProps {
   expiresAt?: Date | string;
   viewCount?: number;
   className?: string;
+  onClick?: () => void;
 }
 
 export function PublicationCard({
@@ -26,30 +27,43 @@ export function PublicationCard({
   expiresAt,
   viewCount = 0,
   className,
+  onClick,
 }: PublicationCardProps) {
   const [isHovered, setIsHovered] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
+  const [timeLeft, setTimeLeft] = React.useState("");
 
-  // Calculer le temps restant pour les stories
-  const getTimeRemaining = () => {
-    if (!expiresAt) return null;
-    const expiry = typeof expiresAt === "string" ? new Date(expiresAt) : expiresAt;
-    const now = new Date();
-    const diff = expiry.getTime() - now.getTime();
-    
-    if (diff <= 0) return "Expiré";
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 0) return `${hours}h restante${hours > 1 ? 's' : ''}`;
-    return `${minutes}min restante${minutes > 1 ? 's' : ''}`;
-  };
+  // Calculate time remaining with live countdown
+  React.useEffect(() => {
+    if (!expiresAt) {
+      setTimeLeft("");
+      return;
+    }
 
-  const timeRemaining = getTimeRemaining();
+    const updateTimeLeft = () => {
+      const expiry = typeof expiresAt === "string" ? new Date(expiresAt) : expiresAt;
+      const diff = expiry.getTime() - Date.now();
+
+      if (diff <= 0) {
+        setTimeLeft("Expiré");
+        return;
+      }
+
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+
+      setTimeLeft(`${hours}h ${minutes}m`);
+    };
+
+    updateTimeLeft();
+    const interval = setInterval(updateTimeLeft, 60000);
+
+    return () => clearInterval(interval);
+  }, [expiresAt]);
 
   return (
     <div
+      onClick={onClick}
       className={cn(
         "group relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted cursor-pointer transition-all duration-300 hover:shadow-lg",
         className
@@ -109,9 +123,10 @@ export function PublicationCard({
       {/* Top Badges */}
       <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
         {/* Time Remaining Badge (for stories) */}
-        {timeRemaining && (
-          <span className="text-[10px] font-medium text-white bg-black/50 backdrop-blur-sm rounded-full px-2 py-0.5">
-            {timeRemaining}
+        {timeLeft && (
+          <span className="flex items-center gap-1 text-[10px] font-medium text-white bg-black/50 backdrop-blur-sm rounded-full px-2 py-0.5">
+            <Clock className="h-3 w-3" />
+            {timeLeft}
           </span>
         )}
 
