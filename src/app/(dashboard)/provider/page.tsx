@@ -2,500 +2,577 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
-  CalendarDays,
-  Clock,
-  CheckCircle,
+  Calendar,
+  TrendingUp,
   Wallet,
   Star,
   Eye,
-  MessageSquare,
-  TrendingUp,
-  ChevronRight,
+  MessageCircle,
+  Clock,
+  CheckCircle,
   AlertTriangle,
+  ChevronRight,
+  Settings,
+  Bell,
+  Video,
+  Image,
   Crown,
-  Wrench,
+  Zap,
   MapPin,
   Phone,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart3,
+  Users,
+  Award,
+  Target,
 } from "lucide-react";
-import { StatsCard } from "@/components/dashboard/StatsCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import {
-  formatPrice,
-  formatDate,
-  formatTime,
-  getRelativeTime,
-} from "@/lib/utils/formatters";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
 
-// Mock data for provider dashboard
-const MOCK_PROVIDER = {
-  id: "provider-1",
-  businessName: "Plomberie Express",
-  subscription: {
-    plan: "MONTHLY" as const,
-    expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), // 10 days from now
-  },
-};
-
-const MOCK_STATS = {
-  totalReservations: 156,
-  monthlyReservations: 23,
+// Mock data
+const STATS = {
+  todayReservations: 3,
+  weeklyRevenue: 125000,
   monthlyRevenue: 425000,
+  totalClients: 156,
   averageRating: 4.8,
-  newReviews: 5,
+  totalReviews: 89,
   profileViews: 312,
+  responseRate: 95,
 };
 
-const MOCK_RESERVATIONS = [
+const TODAY_RESERVATIONS = [
   {
-    id: "res-1",
-    status: "PENDING",
+    id: "1",
     clientName: "Amadou Koné",
     clientPhone: "+225 07 08 09 10 11",
-    serviceName: "Plomberie",
-    scheduledDate: new Date(Date.now() + 1000 * 60 * 60 * 24),
-    scheduledTime: "09:00",
+    clientAvatar: "https://i.pravatar.cc/100?img=1",
+    service: "Plomberie urgente",
+    time: "09:00",
+    duration: "2h",
     address: "Cocody, Rue des Jardins",
-    city: "Abidjan",
-    priceTotal: 25000,
-    notes: "Fuite d'eau dans la cuisine",
+    price: 25000,
+    status: "IN_PROGRESS",
+    statusLabel: "En cours",
   },
   {
-    id: "res-2",
-    status: "CONFIRMED",
+    id: "2",
     clientName: "Fatou Diallo",
     clientPhone: "+225 05 06 07 08 09",
-    serviceName: "Installation sanitaire",
-    scheduledDate: new Date(Date.now() + 1000 * 60 * 60 * 48),
-    scheduledTime: "14:00",
+    clientAvatar: "https://i.pravatar.cc/100?img=5",
+    service: "Installation sanitaire",
+    time: "14:00",
+    duration: "3h",
     address: "Marcory, Boulevard de la République",
-    city: "Abidjan",
-    priceTotal: 75000,
-    notes: "Installation d'un nouveau WC",
+    price: 45000,
+    status: "CONFIRMED",
+    statusLabel: "Confirmée",
   },
   {
-    id: "res-3",
-    status: "IN_PROGRESS",
+    id: "3",
     clientName: "Jean Kouassi",
     clientPhone: "+225 01 02 03 04 05",
-    serviceName: "Dépannage urgence",
-    scheduledDate: new Date(Date.now() - 1000 * 60 * 30),
-    scheduledTime: "10:00",
+    clientAvatar: "https://i.pravatar.cc/100?img=3",
+    service: "Dépannage",
+    time: "17:30",
+    duration: "1h30",
     address: "Plateau, Avenue Chardy",
-    city: "Abidjan",
-    priceTotal: 45000,
-    notes: "Canalisation bouchée - urgence",
-  },
-  {
-    id: "res-4",
-    status: "COMPLETED",
-    clientName: "Awa Sanogo",
-    clientPhone: "+225 03 04 05 06 07",
-    serviceName: "Plomberie",
-    scheduledDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-    scheduledTime: "16:00",
-    address: "Yopougon, Quartier résidentiel",
-    city: "Abidjan",
-    priceTotal: 35000,
-    notes: "Remplacement robinetterie",
-  },
-  {
-    id: "res-5",
-    status: "COMPLETED",
-    clientName: "Moussa Traoré",
-    clientPhone: "+225 09 10 11 12 13",
-    serviceName: "Installation",
-    scheduledDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-    scheduledTime: "11:00",
-    address: "Treichville, Rue du Commerce",
-    city: "Abidjan",
-    priceTotal: 120000,
-    notes: "Installation complète salle de bain",
+    price: 20000,
+    status: "PENDING",
+    statusLabel: "En attente",
   },
 ];
 
-const MOCK_REVIEWS = [
+const PENDING_REQUESTS = [
   {
-    id: "review-1",
+    id: "1",
     clientName: "Awa Sanogo",
+    service: "Fuite d'eau",
+    date: "Demain, 10:00",
+    address: "Yopougon",
+    price: 35000,
+  },
+  {
+    id: "2",
+    clientName: "Moussa Traoré",
+    service: "Installation robinet",
+    date: "Mercredi, 14:00",
+    address: "Treichville",
+    price: 15000,
+  },
+];
+
+const RECENT_REVIEWS = [
+  {
+    id: "1",
+    clientName: "Awa Sanogo",
+    clientAvatar: "https://i.pravatar.cc/100?img=9",
     rating: 5,
-    comment: "Excellent travail ! Très professionnel et ponctuel. Je recommande vivement.",
-    serviceName: "Plomberie",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
+    comment: "Excellent travail ! Très professionnel et ponctuel.",
+    date: "Il y a 2h",
     responded: false,
   },
   {
-    id: "review-2",
+    id: "2",
     clientName: "Moussa Traoré",
+    clientAvatar: "https://i.pravatar.cc/100?img=8",
     rating: 5,
-    comment: "Travail impeccable, prix honnête. Le plombier a pris le temps d'expliquer ce qu'il faisait.",
-    serviceName: "Installation",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    responded: true,
-  },
-  {
-    id: "review-3",
-    clientName: "Koffi Yao",
-    rating: 4,
-    comment: "Bon service dans l'ensemble. Un peu de retard mais travail soigné.",
-    serviceName: "Dépannage",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72),
+    comment: "Travail impeccable, prix honnête. Je recommande.",
+    date: "Hier",
     responded: true,
   },
 ];
 
-const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
-  PENDING: { color: "bg-amber-500", label: "En attente" },
-  CONFIRMED: { color: "bg-primary", label: "Confirmée" },
-  IN_PROGRESS: { color: "bg-emerald-500", label: "En cours" },
-  COMPLETED: { color: "bg-gray-500", label: "Terminée" },
-  CANCELLED: { color: "bg-red-500", label: "Annulée" },
-};
+const REVENUE_DATA = [
+  { day: "Lun", value: 45000 },
+  { day: "Mar", value: 32000 },
+  { day: "Mer", value: 68000 },
+  { day: "Jeu", value: 25000 },
+  { day: "Ven", value: 55000 },
+  { day: "Sam", value: 72000 },
+  { day: "Dim", value: 48000 },
+];
 
-// Calculate days until subscription expires
-function getDaysUntilExpiration(expiresAt: Date): number {
-  const now = new Date();
-  const diff = expiresAt.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
+export default function ProviderHomePage() {
+  const { user } = useAuth();
+  const [greeting, setGreeting] = useState("Bonjour");
+  
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Bonjour");
+    else if (hour < 18) setGreeting("Bon après-midi");
+    else setGreeting("Bonsoir");
+  }, []);
 
-export default function ProviderDashboardPage() {
-  const businessName = MOCK_PROVIDER.businessName;
-  const daysUntilExpiration = getDaysUntilExpiration(MOCK_PROVIDER.subscription.expiresAt);
-  const isExpiringSoon = daysUntilExpiration <= 5;
+  const businessName = user?.businessName || user?.fullName?.split(" ")[0] || "Prestataire";
+  const maxRevenue = Math.max(...REVENUE_DATA.map(d => d.value));
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Bonjour, {businessName} 👋</h1>
-          <p className="text-muted-foreground">
-            Bienvenue sur votre tableau de bord prestataire
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      {/* Header Section */}
+      <div className="relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#fd7613]/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#004150]/30 rounded-full blur-3xl" />
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/provider/services">
-              <Wrench className="h-4 w-4 mr-2" />
-              Mes services
-            </Link>
-          </Button>
-          <Button className="bg-primary hover:bg-primary/90" asChild>
-            <Link href="/provider/reservations">
-              <CalendarDays className="h-4 w-4 mr-2" />
-              Gérer les réservations
-            </Link>
-          </Button>
-        </div>
-      </div>
 
-      {/* Subscription Warning Banner */}
-      {isExpiringSoon && (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-medium text-amber-800">
-                  Votre abonnement expire dans {daysUntilExpiration} jour{daysUntilExpiration > 1 ? "s" : ""}
-                </p>
-                <p className="text-sm text-amber-700 mt-1">
-                  Renouvelez votre abonnement pour continuer à recevoir des réservations et bénéficier de tous les avantages.
-                </p>
-              </div>
-              <Button size="sm" className="bg-amber-600 hover:bg-amber-700" asChild>
-                <Link href="/provider/subscription">
-                  Renouveler
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatsCard
-          icon={<CalendarDays className="h-5 w-5" />}
-          label="Total réservations"
-          value={MOCK_STATS.totalReservations}
-          variant="default"
-        />
-        <StatsCard
-          icon={<Clock className="h-5 w-5" />}
-          label="Ce mois"
-          value={MOCK_STATS.monthlyReservations}
-          variant="primary"
-        />
-        <StatsCard
-          icon={<Wallet className="h-5 w-5" />}
-          label="Revenus du mois"
-          value={formatPrice(MOCK_STATS.monthlyRevenue)}
-          variant="success"
-          trend={{ value: 12, isPositive: true }}
-        />
-        <StatsCard
-          icon={<Star className="h-5 w-5" />}
-          label="Note moyenne"
-          value={MOCK_STATS.averageRating.toFixed(1)}
-          variant="warning"
-        />
-        <StatsCard
-          icon={<MessageSquare className="h-5 w-5" />}
-          label="Nouveaux avis"
-          value={MOCK_STATS.newReviews}
-          variant="primary"
-        />
-        <StatsCard
-          icon={<Eye className="h-5 w-5" />}
-          label="Vues du profil"
-          value={MOCK_STATS.profileViews}
-          variant="default"
-          trend={{ value: 8, isPositive: true }}
-        />
-      </div>
-
-      {/* Quick Actions */}
-      <Card className="border-gray-200/50">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Actions rapides</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <Button
-              variant="outline"
-              className="h-auto py-4 justify-start"
-              asChild
-            >
-              <Link href="/provider/services">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                    <Wrench className="h-5 w-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium">Mes services</p>
-                    <p className="text-xs text-muted-foreground">
-                      Gérer vos services
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto py-4 justify-start"
-              asChild
-            >
-              <Link href="/provider/reservations">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                    <CalendarDays className="h-5 w-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium">Réservations</p>
-                    <p className="text-xs text-muted-foreground">
-                      Gérer les demandes
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto py-4 justify-start"
-              asChild
-            >
-              <Link href="/provider/reviews">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                    <Star className="h-5 w-5" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium">Avis clients</p>
-                    <p className="text-xs text-muted-foreground">
-                      Répondre aux avis
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </Button>
-            {MOCK_PROVIDER.subscription.plan !== "PREMIUM" && (
-              <Button
-                variant="outline"
-                className="h-auto py-4 justify-start"
-                asChild
-              >
-                <Link href="/provider/subscription">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-400 text-white">
-                      <Crown className="h-5 w-5" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium">Upgrade</p>
-                      <p className="text-xs text-muted-foreground">
-                        Passer à Premium
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Reservations */}
-        <Card className="border-gray-200/50">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Réservations récentes</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/provider/reservations">
-                  Voir tout
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {MOCK_RESERVATIONS.slice(0, 5).map((reservation) => (
-                <Link
-                  key={reservation.id}
-                  href={`/provider/reservations/${reservation.id}`}
-                  className="flex items-start gap-3 p-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className={`w-2 h-2 rounded-full mt-2 ${STATUS_CONFIG[reservation.status].color}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-medium text-sm truncate">
-                        {reservation.clientName}
-                      </p>
-                      <Badge variant="secondary" className="text-xs shrink-0">
-                        {reservation.serviceName}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{formatDate(reservation.scheduledDate)}</span>
-                      <span>•</span>
-                      <span>{reservation.scheduledTime}</span>
-                      <span>•</span>
-                      <span>{formatPrice(reservation.priceTotal)}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <MapPin className="h-3 w-3" />
-                      <span className="truncate">{reservation.address}</span>
-                    </div>
-                  </div>
-                  <Badge
-                    variant={reservation.status === "PENDING" ? "default" : "secondary"}
-                    className="shrink-0"
-                  >
-                    {STATUS_CONFIG[reservation.status].label}
+        <div className="relative max-w-7xl mx-auto px-4 py-6">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-14 w-14 border-2 border-[#fd7613]">
+                <AvatarImage src={user?.avatar} />
+                <AvatarFallback className="bg-gradient-to-br from-[#fd7613] to-[#f59542] text-white text-lg font-bold">
+                  {businessName.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-white">
+                  {greeting}, {businessName} !
+                </h1>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-[#fd7613] text-white text-xs">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Premium
                   </Badge>
+                  <div className="flex items-center gap-1 text-white/60 text-sm">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span>{STATS.averageRating}</span>
+                    <span>({STATS.totalReviews} avis)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/10">
+                <Bell className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#fd7613] rounded-full text-[10px] flex items-center justify-center">
+                  5
+                </span>
+              </Button>
+              <Link href="/provider/settings">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="bg-white/5 border-white/10 backdrop-blur">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/60 text-sm">Aujourd'hui</p>
+                    <p className="text-2xl font-bold text-white">{STATS.todayReservations}</p>
+                    <p className="text-xs text-green-400">réservations</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/5 border-white/10 backdrop-blur">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/60 text-sm">Cette semaine</p>
+                    <p className="text-2xl font-bold text-white">{(STATS.weeklyRevenue / 1000).toFixed(0)}k</p>
+                    <p className="text-xs text-white/60">FCFA gagnés</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                    <Wallet className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/5 border-white/10 backdrop-blur">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/60 text-sm">Vues profil</p>
+                    <p className="text-2xl font-bold text-white">{STATS.profileViews}</p>
+                    <p className="text-xs text-green-400 flex items-center gap-1">
+                      <ArrowUpRight className="h-3 w-3" /> +12%
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+                    <Eye className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/5 border-white/10 backdrop-blur">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white/60 text-sm">Taux réponse</p>
+                    <p className="text-2xl font-bold text-white">{STATS.responseRate}%</p>
+                    <p className="text-xs text-green-400">Excellent</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#fd7613] to-[#f59542] flex items-center justify-center">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        
+        {/* Alert Banner */}
+        {PENDING_REQUESTS.length > 0 && (
+          <Card className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-amber-500/30">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/30 flex items-center justify-center">
+                  <AlertTriangle className="h-6 w-6 text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-white">
+                    {PENDING_REQUESTS.length} nouvelle(s) demande(s) en attente
+                  </p>
+                  <p className="text-sm text-white/60">
+                    Répondez rapidement pour améliorer votre taux de réponse
+                  </p>
+                </div>
+                <Link href="/provider/reservations?status=PENDING">
+                  <Button className="bg-amber-500 hover:bg-amber-600 text-white">
+                    Voir les demandes
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link href="/provider/reservations" className="group">
+            <Card className="h-full bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+              <CardContent className="p-5 text-center">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-[#004150] to-[#005a6e] flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Calendar className="h-7 w-7 text-white" />
+                </div>
+                <p className="font-semibold text-white">Réservations</p>
+                <p className="text-xs text-white/60 mt-1">Gérer mes RDV</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/provider/services" className="group">
+            <Card className="h-full bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+              <CardContent className="p-5 text-center">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-[#fd7613] to-[#f59542] flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Settings className="h-7 w-7 text-white" />
+                </div>
+                <p className="font-semibold text-white">Mes services</p>
+                <p className="text-xs text-white/60 mt-1">Tarifs & détails</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/provider/publications" className="group">
+            <Card className="h-full bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+              <CardContent className="p-5 text-center">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Image className="h-7 w-7 text-white" />
+                </div>
+                <p className="font-semibold text-white">Publications</p>
+                <p className="text-xs text-white/60 mt-1">Photos & vidéos</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/provider/analytics" className="group">
+            <Card className="h-full bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+              <CardContent className="p-5 text-center">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <BarChart3 className="h-7 w-7 text-white" />
+                </div>
+                <p className="font-semibold text-white">Statistiques</p>
+                <p className="text-xs text-white/60 mt-1">Performance</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Today's Schedule */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-white">Planning du jour</h2>
+                <p className="text-sm text-white/60">{STATS.todayReservations} prestation(s) programmée(s)</p>
+              </div>
+              <Link href="/provider/reservations" className="text-[#fd7613] text-sm flex items-center">
+                Voir tout <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {TODAY_RESERVATIONS.map((reservation) => (
+                <Card key={reservation.id} className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        reservation.status === "IN_PROGRESS" 
+                          ? "bg-green-500/20 text-green-400"
+                          : reservation.status === "CONFIRMED"
+                          ? "bg-blue-500/20 text-blue-400"
+                          : "bg-amber-500/20 text-amber-400"
+                      }`}>
+                        <Clock className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={reservation.clientAvatar} />
+                              <AvatarFallback className="bg-white/10 text-white text-xs">
+                                {reservation.clientName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-semibold text-white">{reservation.clientName}</p>
+                              <p className="text-xs text-white/60">{reservation.service}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <Badge className={`text-xs ${
+                              reservation.status === "IN_PROGRESS" 
+                                ? "bg-green-500"
+                                : reservation.status === "CONFIRMED"
+                                ? "bg-blue-500"
+                                : "bg-amber-500"
+                            }`}>
+                              {reservation.statusLabel}
+                            </Badge>
+                            <p className="text-sm font-semibold text-white mt-1">
+                              {(reservation.price / 1000).toFixed(0)}k FCFA
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-white/60">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{reservation.time} ({reservation.duration})</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{reservation.address}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            <span>{reservation.clientPhone}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Recent Reviews */}
-        <Card className="border-gray-200/50">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Avis récents</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/provider/reviews">
-                  Voir tout
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y">
-              {MOCK_REVIEWS.map((review) => (
-                <div key={review.id} className="p-4">
-                  <div className="flex items-start gap-3">
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Revenue Chart */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-white">Revenus de la semaine</CardTitle>
+                  <Badge className="bg-green-500/20 text-green-400">
+                    <TrendingUp className="h-3 w-3 mr-1" /> +18%
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-end gap-2 h-24">
+                  {REVENUE_DATA.map((data, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div 
+                        className="w-full rounded-t-sm bg-gradient-to-t from-[#fd7613] to-[#f59542]"
+                        style={{ height: `${(data.value / maxRevenue) * 100}%` }}
+                      />
+                      <span className="text-[10px] text-white/40">{data.day}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-white/60">Total cette semaine</span>
+                    <span className="text-lg font-bold text-white">
+                      {(REVENUE_DATA.reduce((a, b) => a + b.value, 0) / 1000).toFixed(0)}k FCFA
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Reviews */}
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-white">Derniers avis</CardTitle>
+                  <Link href="/provider/reviews" className="text-[#fd7613] text-xs">
+                    Tout voir
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {RECENT_REVIEWS.map((review) => (
+                  <div key={review.id} className="flex items-start gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                      <AvatarImage src={review.clientAvatar} />
+                      <AvatarFallback className="bg-white/10 text-white text-xs">
                         {review.clientName.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-sm">{review.clientName}</p>
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 ${
-                                i < review.rating
-                                  ? "fill-amber-400 text-amber-400"
-                                  : "fill-gray-200 text-gray-200"
-                              }`}
-                            />
-                          ))}
-                        </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-white text-sm">{review.clientName}</p>
+                        <span className="text-xs text-white/40">{review.date}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {review.comment}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          {review.serviceName}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {getRelativeTime(review.createdAt)}
-                        </span>
-                        {!review.responded && (
-                          <Badge className="text-xs bg-amber-500">
-                            À répondre
-                          </Badge>
-                        )}
+                      <div className="flex items-center gap-1 my-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${
+                              i < review.rating
+                                ? "fill-amber-400 text-amber-400"
+                                : "fill-white/20 text-white/20"
+                            }`}
+                          />
+                        ))}
                       </div>
+                      <p className="text-xs text-white/60 line-clamp-2">{review.comment}</p>
+                      {!review.responded && (
+                        <Button size="sm" variant="link" className="h-auto p-0 mt-2 text-[#fd7613]">
+                          Répondre
+                        </Button>
+                      )}
                     </div>
                   </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Performance Score */}
+            <Card className="bg-gradient-to-br from-[#fd7613]/20 to-[#f59542]/20 border-[#fd7613]/30">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#fd7613] flex items-center justify-center">
+                    <Award className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Score de performance</p>
+                    <p className="text-xs text-white/60">Basé sur vos statistiques</p>
+                  </div>
                 </div>
-              ))}
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-white/60">Taux de réponse</span>
+                      <span className="text-white font-medium">95%</span>
+                    </div>
+                    <Progress value={95} className="h-2 bg-white/10" />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-white/60">Ponctualité</span>
+                      <span className="text-white font-medium">98%</span>
+                    </div>
+                    <Progress value={98} className="h-2 bg-white/10" />
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-white/60">Satisfaction client</span>
+                      <span className="text-white font-medium">92%</span>
+                    </div>
+                    <Progress value={92} className="h-2 bg-white/10" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Go Live CTA */}
+        <Card className="bg-gradient-to-r from-red-500/20 to-pink-500/20 border-red-500/30">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                <Video className="h-8 w-8 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-white mb-1">
+                  Lancez un live pour attirer plus de clients !
+                </h3>
+                <p className="text-sm text-white/60">
+                  Montrez votre travail en temps réel et gagnez en visibilité. Les prestataires qui font des lives reçoivent 3x plus de demandes.
+                </p>
+              </div>
+              <Link href="/provider/lives">
+                <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white">
+                  <Video className="h-4 w-4 mr-2" />
+                  Démarrer un live
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Pending Reservations Alert */}
-      {MOCK_RESERVATIONS.filter((r) => r.status === "PENDING").length > 0 && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">
-                    {MOCK_RESERVATIONS.filter((r) => r.status === "PENDING").length} réservation(s) en attente
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Répondez rapidement aux demandes de vos clients
-                  </p>
-                </div>
-              </div>
-              <Button asChild>
-                <Link href="/provider/reservations?status=PENDING">
-                  Voir les demandes
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
