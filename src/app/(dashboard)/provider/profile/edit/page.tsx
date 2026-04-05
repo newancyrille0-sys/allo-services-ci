@@ -43,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { POPULAR_CITIES, CITIES_CI } from "@/lib/constants/cities";
 import { SERVICE_CATEGORIES } from "@/lib/constants/services";
 import { formatXOF } from "@/lib/constants/subscription";
+import { GPSLocationPicker } from "@/components/provider/GPSLocationPicker";
 
 const providerProfileSchema = z.object({
   fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -55,6 +56,8 @@ const providerProfileSchema = z.object({
   city: z.string().min(1, "Sélectionnez une ville"),
   address: z.string().min(5, "Adresse trop courte"),
   isActive: z.boolean(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 type ProviderProfileFormValues = z.infer<typeof providerProfileSchema>;
@@ -65,6 +68,10 @@ export default function EditProviderProfilePage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [avatarUrl, setAvatarUrl] = React.useState<string | null>(null);
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+  const [gpsLocation, setGpsLocation] = React.useState<{ latitude: number | null; longitude: number | null; city?: string }>({
+    latitude: null,
+    longitude: null,
+  });
 
   const form = useForm<ProviderProfileFormValues>({
     resolver: zodResolver(providerProfileSchema),
@@ -79,6 +86,8 @@ export default function EditProviderProfilePage() {
       city: "",
       address: "",
       isActive: true,
+      latitude: null,
+      longitude: null,
     },
   });
 
@@ -100,8 +109,19 @@ export default function EditProviderProfilePage() {
             city: data.user?.city || "",
             address: data.user?.address || "",
             isActive: data.isActive ?? true,
+            latitude: data.latitude || null,
+            longitude: data.longitude || null,
           });
           setAvatarUrl(data.user?.avatarUrl);
+          
+          // Set GPS location if available
+          if (data.latitude && data.longitude) {
+            setGpsLocation({
+              latitude: data.latitude,
+              longitude: data.longitude,
+              city: data.user?.city,
+            });
+          }
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -117,6 +137,14 @@ export default function EditProviderProfilePage() {
           city: "Abidjan",
           address: "Cocody, Ambiance",
           isActive: true,
+          latitude: 5.3333,
+          longitude: -3.9833,
+        });
+        // Set mock GPS location
+        setGpsLocation({
+          latitude: 5.3333,
+          longitude: -3.9833,
+          city: "Abidjan",
         });
       }
     };
@@ -175,10 +203,23 @@ export default function EditProviderProfilePage() {
         }),
       });
 
+      // Update GPS location if coordinates are set
+      if (data.latitude && data.longitude) {
+        await fetch("/api/providers/location", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            latitude: data.latitude,
+            longitude: data.longitude,
+            city: data.city,
+          }),
+        });
+      }
+
       if (response.ok) {
         toast({
           title: "Profil mis à jour",
-          description: "Vos informations ont été enregistrées avec succès.",
+          description: "Vos informations et votre localisation GPS ont été enregistrées avec succès.",
         });
         router.push("/provider/profile");
       } else {
@@ -476,6 +517,26 @@ export default function EditProviderProfilePage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* GPS Location Picker */}
+            <GPSLocationPicker
+              value={{
+                latitude: gpsLocation.latitude,
+                longitude: gpsLocation.longitude,
+                city: form.watch("city"),
+              }}
+              onChange={(location) => {
+                setGpsLocation({
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                });
+                form.setValue("latitude", location.latitude);
+                form.setValue("longitude", location.longitude);
+                if (location.city) {
+                  form.setValue("city", location.city);
+                }
+              }}
+            />
 
             {/* Submit Button */}
             <div className="flex justify-end gap-3">
