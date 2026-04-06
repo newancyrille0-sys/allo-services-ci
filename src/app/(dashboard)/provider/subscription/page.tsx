@@ -13,6 +13,8 @@ import {
   Check,
   AlertTriangle,
   ChevronRight,
+  Zap,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -50,7 +52,7 @@ import { formatDate, getRelativeTime } from "@/lib/utils/formatters";
 
 // Mock data
 const MOCK_SUBSCRIPTION = {
-  plan: "MONTHLY" as SubscriptionPlanKey,
+  plan: "STANDARD" as SubscriptionPlanKey,
   status: "ACTIVE" as const,
   startDate: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20), // 20 days ago
   expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10), // 10 days from now
@@ -61,6 +63,9 @@ const MOCK_SUBSCRIPTION = {
     servicesMax: 15,
     hasAnalytics: true,
     hasPrioritySupport: false,
+    videosPublished: 12,
+    videosMax: 20,
+    livesStreamed: 3,
   },
 };
 
@@ -80,14 +85,6 @@ const MOCK_PAYMENTS = [
     method: "MTN Money",
     status: "SUCCESS",
     reference: "MTN987654321",
-  },
-  {
-    id: "pay-3",
-    amount: 15000,
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90),
-    method: "Orange Money",
-    status: "SUCCESS",
-    reference: "OM456789123",
   },
 ];
 
@@ -183,20 +180,20 @@ export default function ProviderSubscriptionPage() {
         <CardContent>
           <div className="flex items-start gap-4">
             <div
-              className={`p-3 rounded-xl ${
+              className={`p-3 rounded-xl text-white ${
                 subscription.plan === "PREMIUM"
-                  ? "bg-gradient-to-br from-amber-500 to-yellow-400 text-white"
-                  : subscription.plan === "MONTHLY"
-                  ? "bg-emerald-500/10 text-emerald-600"
-                  : "bg-gray-500/10 text-gray-600"
+                  ? "bg-gradient-to-br from-amber-500 to-yellow-400"
+                  : subscription.plan === "STANDARD"
+                  ? "bg-emerald-500"
+                  : "bg-blue-500"
               }`}
             >
               {subscription.plan === "PREMIUM" ? (
                 <Crown className="h-6 w-6" />
-              ) : subscription.plan === "MONTHLY" ? (
-                <CreditCard className="h-6 w-6" />
+              ) : subscription.plan === "STANDARD" ? (
+                <Star className="h-6 w-6" />
               ) : (
-                <CreditCard className="h-6 w-6" />
+                <Zap className="h-6 w-6" />
               )}
             </div>
             <div className="flex-1">
@@ -211,7 +208,7 @@ export default function ProviderSubscriptionPage() {
               </div>
               <p className="text-2xl font-bold mt-1">
                 {formatXOF(currentPlan.price)}
-                {currentPlan.price > 0 && <span className="text-sm font-normal text-muted-foreground">/mois</span>}
+                <span className="text-sm font-normal text-muted-foreground">/mois</span>
               </p>
               <div className="flex flex-wrap gap-4 mt-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
@@ -232,6 +229,20 @@ export default function ProviderSubscriptionPage() {
                   {subscription.features.servicesMax !== -1 && (
                     <Progress
                       value={(subscription.features.servicesUsed / subscription.features.servicesMax) * 100}
+                      className="h-2"
+                    />
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center justify-between text-sm mb-1">
+                    <span>Vidéos publiées ce mois</span>
+                    <span>
+                      {subscription.features.videosPublished}/{currentPlan.limits.maxVideosPerMonth === -1 ? "∞" : currentPlan.limits.maxVideosPerMonth}
+                    </span>
+                  </div>
+                  {currentPlan.limits.maxVideosPerMonth !== -1 && (
+                    <Progress
+                      value={(subscription.features.videosPublished / currentPlan.limits.maxVideosPerMonth) * 100}
                       className="h-2"
                     />
                   )}
@@ -342,7 +353,7 @@ export default function ProviderSubscriptionPage() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium">Fonctionnalité</th>
-                  <th className="text-center py-3 px-4 font-medium">Gratuit</th>
+                  <th className="text-center py-3 px-4 font-medium">Starter</th>
                   <th className="text-center py-3 px-4 font-medium">Standard</th>
                   <th className="text-center py-3 px-4 font-medium bg-amber-50">Premium</th>
                 </tr>
@@ -352,25 +363,25 @@ export default function ProviderSubscriptionPage() {
                   <tr key={index} className="border-b last:border-0">
                     <td className="py-3 px-4">{row.feature}</td>
                     <td className="text-center py-3 px-4">
-                      {typeof row.FREE === "boolean" ? (
-                        row.FREE ? (
-                          <Check className="h-5 w-5 mx-auto text-emerald-500" />
+                      {typeof row.STARTER === "boolean" ? (
+                        row.STARTER ? (
+                          <Check className="h-5 w-5 mx-auto text-blue-500" />
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )
                       ) : (
-                        row.FREE
+                        row.STARTER
                       )}
                     </td>
                     <td className="text-center py-3 px-4">
-                      {typeof row.MONTHLY === "boolean" ? (
-                        row.MONTHLY ? (
+                      {typeof row.STANDARD === "boolean" ? (
+                        row.STANDARD ? (
                           <Check className="h-5 w-5 mx-auto text-emerald-500" />
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )
                       ) : (
-                        row.MONTHLY
+                        row.STANDARD
                       )}
                     </td>
                     <td className="text-center py-3 px-4 bg-amber-50">

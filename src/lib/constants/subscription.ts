@@ -3,7 +3,7 @@
  * Provider subscription tiers
  */
 
-export type SubscriptionPlanKey = "FREE" | "MONTHLY" | "PREMIUM";
+export type SubscriptionPlanKey = "STARTER" | "STANDARD" | "PREMIUM";
 
 export interface SubscriptionPlanFeatures {
   maxServices: number;
@@ -15,6 +15,10 @@ export interface SubscriptionPlanFeatures {
   hasCustomProfile: boolean;
   hasAdvancedAnalytics: boolean;
   hasUnlimitedMessaging: boolean;
+  hasVideoPublishing: boolean;
+  hasLiveStreaming: boolean;
+  maxVideosPerMonth: number;
+  maxLivesPerMonth: number;
 }
 
 export interface SubscriptionPlan {
@@ -28,19 +32,24 @@ export interface SubscriptionPlan {
   color: string;
   gradient?: string;
   popular?: boolean;
+  badge?: string;
+  badgeColor?: string;
 }
 
+// Plans d'abonnement prestataire: 5 000, 15 000, 25 000 FCFA/mois
 export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanKey, SubscriptionPlan> = {
-  FREE: {
-    key: "FREE",
-    name: "Gratuit",
-    price: 0,
+  STARTER: {
+    key: "STARTER",
+    name: "Starter",
+    price: 5000,
     currency: "XOF",
     billingPeriod: "monthly",
     features: [
       "Profil visible sur la plateforme",
       "5 services maximum",
-      "Réception des réservations",
+      "Badge Starter",
+      "Publication de vidéos (5/mois)",
+      "Live streaming (2/mois)",
       "Messagerie basique",
       "Affichage dans les résultats",
     ],
@@ -54,11 +63,17 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanKey, SubscriptionPlan> =
       hasCustomProfile: false,
       hasAdvancedAnalytics: false,
       hasUnlimitedMessaging: false,
+      hasVideoPublishing: true,
+      hasLiveStreaming: true,
+      maxVideosPerMonth: 5,
+      maxLivesPerMonth: 2,
     },
-    color: "gray",
+    color: "#3B82F6", // Bleu
+    badge: "Starter",
+    badgeColor: "bg-blue-500",
   },
-  MONTHLY: {
-    key: "MONTHLY",
+  STANDARD: {
+    key: "STANDARD",
     name: "Standard",
     price: 15000,
     currency: "XOF",
@@ -67,8 +82,10 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanKey, SubscriptionPlan> =
       "Badge Vérifié ✓",
       "15 services maximum",
       "Statistiques de base",
-      "Support par email",
+      "Support par email prioritaire",
       "Messagerie illimitée",
+      "Publication de vidéos (20/mois)",
+      "Live streaming illimité",
       "Priorité dans les recherches",
       "Alertes réservations par SMS",
     ],
@@ -82,20 +99,29 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanKey, SubscriptionPlan> =
       hasCustomProfile: false,
       hasAdvancedAnalytics: false,
       hasUnlimitedMessaging: true,
+      hasVideoPublishing: true,
+      hasLiveStreaming: true,
+      maxVideosPerMonth: 20,
+      maxLivesPerMonth: -1, // illimité
     },
-    color: "emerald",
+    color: "#10B981", // Vert
+    gradient: "from-emerald-500 to-green-600",
     popular: true,
+    badge: "Vérifié",
+    badgeColor: "bg-emerald-500",
   },
   PREMIUM: {
     key: "PREMIUM",
     name: "Premium",
-    price: 50000,
+    price: 25000,
     currency: "XOF",
     billingPeriod: "monthly",
     features: [
       "TOP des résultats de recherche",
       "Services illimités",
       "Badge Premium ⭐",
+      "Vidéos illimitées",
+      "Live streaming illimité",
       "Analytics avancés",
       "Support prioritaire 24/7",
       "Mise en avant sur la page d'accueil",
@@ -114,9 +140,15 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlanKey, SubscriptionPlan> =
       hasCustomProfile: true,
       hasAdvancedAnalytics: true,
       hasUnlimitedMessaging: true,
+      hasVideoPublishing: true,
+      hasLiveStreaming: true,
+      maxVideosPerMonth: -1, // illimité
+      maxLivesPerMonth: -1, // illimité
     },
-    color: "gold",
+    color: "#F59E0B", // Or/Ambré
     gradient: "from-amber-500 via-yellow-400 to-amber-600",
+    badge: "Premium ⭐",
+    badgeColor: "bg-gradient-to-r from-amber-500 to-yellow-400",
   },
 };
 
@@ -138,7 +170,7 @@ export function getAllPlans(): SubscriptionPlan[] {
  * Compare plans and get upgrade path
  */
 export function getUpgradePath(currentPlan: SubscriptionPlanKey): SubscriptionPlan[] {
-  const planOrder: SubscriptionPlanKey[] = ["FREE", "MONTHLY", "PREMIUM"];
+  const planOrder: SubscriptionPlanKey[] = ["STARTER", "STANDARD", "PREMIUM"];
   const currentIndex = planOrder.indexOf(currentPlan);
   return planOrder.slice(currentIndex + 1).map(key => SUBSCRIPTION_PLANS[key]);
 }
@@ -220,57 +252,75 @@ export function getEnabledPaymentMethods(): PaymentMethod[] {
  */
 export const SUBSCRIPTION_COMPARISON = [
   {
+    feature: "Prix mensuel",
+    STARTER: "5 000 FCFA",
+    STANDARD: "15 000 FCFA",
+    PREMIUM: "25 000 FCFA",
+  },
+  {
     feature: "Nombre de services",
-    FREE: "5",
-    MONTHLY: "15",
+    STARTER: "5",
+    STANDARD: "15",
     PREMIUM: "Illimité",
   },
   {
-    feature: "Badge vérifié",
-    FREE: false,
-    MONTHLY: true,
-    PREMIUM: true,
+    feature: "Badge",
+    STARTER: "Starter",
+    STANDARD: "Vérifié ✓",
+    PREMIUM: "Premium ⭐",
+  },
+  {
+    feature: "Publication de vidéos",
+    STARTER: "5/mois",
+    STANDARD: "20/mois",
+    PREMIUM: "Illimité",
+  },
+  {
+    feature: "Live streaming",
+    STARTER: "2/mois",
+    STANDARD: "Illimité",
+    PREMIUM: "Illimité",
   },
   {
     feature: "Statistiques",
-    FREE: false,
-    MONTHLY: "Basiques",
+    STARTER: false,
+    STANDARD: "Basiques",
     PREMIUM: "Avancées",
   },
   {
     feature: "Priorité recherche",
-    FREE: "Normale",
-    MONTHLY: "Haute",
+    STARTER: "Normale",
+    STANDARD: "Haute",
     PREMIUM: "Maximum",
   },
   {
     feature: "Support client",
-    FREE: "Email",
-    MONTHLY: "Email prioritaire",
+    STARTER: "Email",
+    STANDARD: "Email prioritaire",
     PREMIUM: "24/7 Téléphone",
   },
   {
     feature: "Mise en avant homepage",
-    FREE: false,
-    MONTHLY: false,
+    STARTER: false,
+    STANDARD: false,
     PREMIUM: true,
   },
   {
     feature: "Profil personnalisable",
-    FREE: "Basique",
-    MONTHLY: "Basique",
+    STARTER: "Basique",
+    STANDARD: "Basique",
     PREMIUM: "Avancé",
   },
   {
     feature: "Alertes SMS",
-    FREE: false,
-    MONTHLY: true,
+    STARTER: false,
+    STANDARD: true,
     PREMIUM: true,
   },
   {
     feature: "Formations",
-    FREE: false,
-    MONTHLY: false,
+    STARTER: false,
+    STANDARD: false,
     PREMIUM: true,
   },
 ] as const;

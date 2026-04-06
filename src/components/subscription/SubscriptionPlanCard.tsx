@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Crown, Zap, CreditCard } from "lucide-react";
+import { Check, Crown, Zap, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,9 +20,42 @@ interface SubscriptionPlanCardProps {
 }
 
 const planIcons: Record<SubscriptionPlanKey, React.ElementType> = {
-  FREE: Zap,
-  MONTHLY: CreditCard,
+  STARTER: Zap,
+  STANDARD: Star,
   PREMIUM: Crown,
+};
+
+// Couleurs par plan
+const planColors: Record<SubscriptionPlanKey, {
+  bg: string;
+  text: string;
+  border: string;
+  check: string;
+  button: string;
+  gradient?: string;
+}> = {
+  STARTER: {
+    bg: "bg-blue-500/10",
+    text: "text-blue-600",
+    border: "border-blue-400/50",
+    check: "text-blue-500",
+    button: "bg-blue-500 hover:bg-blue-600",
+  },
+  STANDARD: {
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-600",
+    border: "border-emerald-400/50",
+    check: "text-emerald-500",
+    button: "bg-emerald-500 hover:bg-emerald-600",
+  },
+  PREMIUM: {
+    bg: "bg-gradient-to-br from-amber-500 to-yellow-400",
+    text: "text-amber-600",
+    border: "border-amber-400/50",
+    check: "text-amber-500",
+    button: "bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-white",
+    gradient: "from-amber-500 via-yellow-400 to-amber-600",
+  },
 };
 
 export function SubscriptionPlanCard({
@@ -32,13 +65,15 @@ export function SubscriptionPlanCard({
   isLoading = false,
 }: SubscriptionPlanCardProps) {
   const Icon = planIcons[plan.key];
+  const colors = planColors[plan.key];
 
   return (
     <div
       className={cn(
         "relative rounded-2xl border p-6 transition-all",
         plan.key === "PREMIUM" && "border-amber-400/50 bg-gradient-to-b from-amber-50/50 to-white",
-        plan.key === "MONTHLY" && "border-emerald-400/50",
+        plan.key === "STANDARD" && "border-emerald-400/50",
+        plan.key === "STARTER" && "border-blue-400/50",
         isCurrentPlan && "ring-2 ring-primary",
         !isCurrentPlan && "hover:border-primary/50 hover:shadow-lg"
       )}
@@ -65,10 +100,10 @@ export function SubscriptionPlanCard({
       <div className="flex items-center gap-3 mb-4">
         <div
           className={cn(
-            "p-3 rounded-xl",
-            plan.key === "PREMIUM" && "bg-gradient-to-br from-amber-500 to-yellow-400 text-white",
-            plan.key === "MONTHLY" && "bg-emerald-500/10 text-emerald-600",
-            plan.key === "FREE" && "bg-gray-500/10 text-gray-600"
+            "p-3 rounded-xl text-white",
+            plan.key === "PREMIUM" && "bg-gradient-to-br from-amber-500 to-yellow-400",
+            plan.key === "STANDARD" && "bg-emerald-500",
+            plan.key === "STARTER" && "bg-blue-500"
           )}
         >
           <Icon className="h-6 w-6" />
@@ -77,9 +112,7 @@ export function SubscriptionPlanCard({
           <h3 className="font-bold text-lg">{plan.name}</h3>
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold">{formatXOF(plan.price)}</span>
-            {plan.price > 0 && (
-              <span className="text-sm text-muted-foreground">/mois</span>
-            )}
+            <span className="text-sm text-muted-foreground">/mois</span>
           </div>
         </div>
       </div>
@@ -91,9 +124,7 @@ export function SubscriptionPlanCard({
             <Check
               className={cn(
                 "h-5 w-5 shrink-0 mt-0.5",
-                plan.key === "PREMIUM" && "text-amber-500",
-                plan.key === "MONTHLY" && "text-emerald-500",
-                plan.key === "FREE" && "text-gray-500"
+                colors.check
               )}
             />
             <span className="text-sm">{feature}</span>
@@ -105,9 +136,8 @@ export function SubscriptionPlanCard({
       {!isCurrentPlan && (
         <Button
           className={cn(
-            "w-full",
-            plan.key === "PREMIUM" && "bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-white",
-            plan.key === "MONTHLY" && "bg-emerald-500 hover:bg-emerald-600"
+            "w-full text-white",
+            colors.button
           )}
           onClick={onSelect}
           disabled={isLoading}
@@ -159,6 +189,34 @@ export function SubscriptionPlanComparison({ currentPlan }: PlanComparisonProps)
       ))}
     </div>
   );
+}
+
+// Fonction utilitaire pour obtenir la couleur du badge selon le plan
+export function getPlanBadgeColor(planKey: SubscriptionPlanKey): string {
+  switch (planKey) {
+    case "STARTER":
+      return "bg-blue-500 text-white";
+    case "STANDARD":
+      return "bg-emerald-500 text-white";
+    case "PREMIUM":
+      return "bg-gradient-to-r from-amber-500 to-yellow-400 text-white";
+    default:
+      return "bg-gray-500 text-white";
+  }
+}
+
+// Fonction utilitaire pour obtenir la couleur de thème selon le plan
+export function getPlanThemeColor(planKey: SubscriptionPlanKey): string {
+  switch (planKey) {
+    case "STARTER":
+      return "#3B82F6"; // Bleu
+    case "STANDARD":
+      return "#10B981"; // Vert
+    case "PREMIUM":
+      return "#F59E0B"; // Or
+    default:
+      return "#6B7280"; // Gris
+  }
 }
 
 export default SubscriptionPlanCard;

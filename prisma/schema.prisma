@@ -32,9 +32,9 @@ enum KycStatus {
 }
 
 enum SubscriptionPlan {
-  FREE
-  MONTHLY
-  PREMIUM
+  STARTER    // 5 000 FCFA/mois - Bleu
+  STANDARD   // 15 000 FCFA/mois - Vert
+  PREMIUM    // 25 000 FCFA/mois - Or
 }
 
 enum ReservationStatus {
@@ -96,11 +96,13 @@ model Provider {
   totalReservations Int @default(0)
   totalReviews Int @default(0)
   averageRating Float @default(0)
-  subscriptionStatus SubscriptionPlan @default(FREE)
+  subscriptionStatus SubscriptionPlan @default(STARTER)
   subscriptionExpiresAt DateTime?
   isActive  Boolean @default(false)
   latitude  Float?
   longitude Float?
+  videosPublishedThisMonth Int @default(0)
+  livesStreamedThisMonth Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -314,6 +316,8 @@ model ProviderPublication {
   mediaUrl    String
   thumbnailUrl String?
   caption     String?
+  servicePrice Float?  // Prix du service défini par le prestataire
+  serviceDescription String? // Description du service proposé
   expiresAt   DateTime? // Pour les stories (24h)
   viewCount   Int      @default(0)
   likeCount   Int      @default(0)
