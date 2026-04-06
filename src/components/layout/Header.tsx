@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, Search, X, Newspaper, Briefcase, Megaphone } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -36,26 +36,6 @@ export function Header() {
             className="text-slate-600 hover:text-teal-800 transition-colors font-semibold"
           >
             Prestataires
-          </Link>
-          <Link 
-            href="/blog" 
-            className="text-slate-600 hover:text-[#fd7613] transition-colors font-semibold flex items-center gap-1"
-          >
-            <Newspaper className="h-4 w-4" />
-            Blog
-          </Link>
-          <Link 
-            href="/careers" 
-            className="text-slate-600 hover:text-[#fd7613] transition-colors font-semibold flex items-center gap-1"
-          >
-            <Briefcase className="h-4 w-4" />
-            Carrières
-          </Link>
-          <Link 
-            href="/press" 
-            className="text-slate-600 hover:text-[#fd7613] transition-colors font-semibold"
-          >
-            Presse
           </Link>
           <Link 
             href="/login" 
@@ -95,30 +75,6 @@ export function Header() {
                 onClick={() => setIsOpen(false)}
               >
                 Prestataires
-              </Link>
-              <Link 
-                href="/blog" 
-                className="text-[#181c1d] hover:text-[#fd7613] transition-colors font-semibold py-2 flex items-center gap-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <Newspaper className="h-4 w-4" />
-                Blog
-              </Link>
-              <Link 
-                href="/careers" 
-                className="text-[#181c1d] hover:text-[#fd7613] transition-colors font-semibold py-2 flex items-center gap-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <Briefcase className="h-4 w-4" />
-                Carrières
-              </Link>
-              <Link 
-                href="/press" 
-                className="text-[#181c1d] hover:text-[#fd7613] transition-colors font-semibold py-2 flex items-center gap-2"
-                onClick={() => setIsOpen(false)}
-              >
-                <Megaphone className="h-4 w-4" />
-                Presse
               </Link>
               <Link 
                 href="/login" 
