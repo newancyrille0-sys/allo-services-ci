@@ -312,16 +312,27 @@ model ProviderPublication {
   provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
   type        String   // photo, video
   mediaUrl    String
+  thumbnailUrl String?
   caption     String?
   expiresAt   DateTime? // Pour les stories (24h)
   viewCount   Int      @default(0)
+  likeCount   Int      @default(0)
+  commentCount Int     @default(0)
+  shareCount  Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
+  likes       PublicationLike[]
+  comments    PublicationComment[]
+  bookmarks   PublicationBookmark[]
+  views       PublicationView[]
+
   @@index([providerId])
   @@index([type])
   @@index([isActive])
+  @@index([createdAt])
 }
 
 // ==================== PROVIDER LIVE MODEL ====================
@@ -336,11 +347,108 @@ model ProviderLive {
   streamUrl   String?
   status      String   @default("scheduled") // scheduled, live, ended
   viewerCount Int      @default(0)
+  likeCount   Int      @default(0)
+  commentCount Int     @default(0)
   startedAt   DateTime?
   endedAt     DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Relations
+  likes       LiveLike[]
+  comments    LiveComment[]
+
   @@index([providerId])
   @@index([status])
+}
+
+// ==================== PUBLICATION INTERACTIONS ====================
+
+model PublicationLike {
+  id           String   @id @default(cuid())
+  publicationId String
+  publication  ProviderPublication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  userId       String
+  createdAt    DateTime @default(now())
+
+  @@unique([publicationId, userId])
+  @@index([publicationId])
+  @@index([userId])
+}
+
+model PublicationComment {
+  id           String   @id @default(cuid())
+  publicationId String
+  publication  ProviderPublication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  userId       String
+  content      String
+  likeCount    Int      @default(0)
+  parentId     String?  // For replies
+  parent       PublicationComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      PublicationComment[] @relation("CommentReplies")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([publicationId])
+  @@index([userId])
+}
+
+model PublicationBookmark {
+  id           String   @id @default(cuid())
+  publicationId String
+  publication  ProviderPublication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  userId       String
+  createdAt    DateTime @default(now())
+
+  @@unique([publicationId, userId])
+  @@index([userId])
+}
+
+model PublicationView {
+  id           String   @id @default(cuid())
+  publicationId String
+  publication  ProviderPublication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  userId       String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  @@index([publicationId])
+}
+
+// ==================== LIVE INTERACTIONS ====================
+
+model LiveLike {
+  id        String   @id @default(cuid())
+  liveId    String
+  live      ProviderLive @relation(fields: [liveId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([liveId, userId])
+  @@index([liveId])
+}
+
+model LiveComment {
+  id        String   @id @default(cuid())
+  liveId    String
+  live      ProviderLive @relation(fields: [liveId], references: [id], onDelete: Cascade)
+  userId    String
+  content   String
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([liveId])
+}
+
+// ==================== USER FOLLOWS ====================
+
+model UserFollow {
+  id          String   @id @default(cuid())
+  followerId  String   // User who follows
+  followingId String   // Provider being followed
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }
