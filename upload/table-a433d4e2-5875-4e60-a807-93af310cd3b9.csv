@@ -1,0 +1,40 @@
+﻿Permission,Super Admin,Admin Senior,Modérateur,Support
+👥 Utilisateurs,,,,
+Voir la liste des utilisateurs,✅,✅,✅,✅
+Voir les détails d'un utilisateur,✅,✅,✅,✅ (lecture seule)
+Modifier un profil utilisateur,✅,✅,❌,❌
+Suspender un compte,✅,✅,✅ (temporaire),❌
+Bannir définitivement,✅,✅,❌,❌
+Changer le rôle d'un utilisateur,✅,❌,❌,❌
+🔧 Prestataires,,,,
+Valider KYC prestataire,✅,✅,❌,❌
+Refuser une inscription prestataire,✅,✅,❌,❌
+Vérifier les documents,✅,✅,❌,❌
+Gérer les abonnements prestataires,✅,✅,❌,❌
+📋 Réservations & Litiges,,,,
+Voir toutes les réservations,✅,✅,✅,✅
+Annuler une réservation,✅,✅,❌,❌
+Rembourser un client,✅,✅,❌,❌
+Arbitrer un litige,✅,✅,❌,❌
+Modifier les prix/commissions,✅,❌,❌,❌
+📢 Contenu & Modération,,,,
+Supprimer un post/publication,✅,✅,✅,❌
+Supprimer un avis/commentaire,✅,✅,✅,❌
+Bloquer un message,✅,✅,✅,❌
+Gérer les signalements,✅,✅,✅,✅ (créer seulement)
+💰 Finance,,,,
+Voir les revenus de la plateforme,✅,✅,❌,❌
+Voir les gains des prestataires,✅,✅,❌,❌
+Exporter les rapports financiers,✅,✅,❌,❌
+Modifier les taux de commission,✅,❌,❌,❌
+Gérer les paiements sortants,✅,✅,❌,❌
+⚙️ Système,,,,
+Créer/modifier un compte admin,✅,❌,❌,❌
+Voir les logs d'audit admin,✅,✅,❌,❌
+Modifier les configurations système,✅,❌,❌,❌
+Gérer les clés API,✅,❌,❌,❌
+Accéder à la base de données directe,✅,❌,❌,❌
+📊 Analytics,,,,
+Voir les statistiques générales,✅,✅,✅,❌
+Exporter les rapports,✅,✅,❌,❌
+"Voir les données sensibles (IP, etc.)",✅,✅,❌,❌

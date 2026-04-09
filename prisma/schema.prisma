@@ -46,6 +46,21 @@ enum ReservationStatus {
   DISPUTED
 }
 
+// ==================== ADMIN ENUMS ====================
+
+enum AdminRole {
+  SUPER_ADMIN      // Accès total - 1-2 personnes
+  ADMIN_SENIOR     // Gestion complète - 3-5 personnes
+  ADMIN_MODERATOR  // Modération seulement - 5-10 personnes
+  SUPPORT          // Support client uniquement - Nombre illimité
+}
+
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
 // ==================== USER MODEL ====================
 
 model User {
@@ -455,4 +470,172 @@ model UserFollow {
   @@unique([followerId, followingId])
   @@index([followerId])
   @@index([followingId])
+}
+
+// ==================== ADMIN MODELS ====================
+
+model Admin {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  passwordHash  String
+  fullName      String
+  phone         String?
+  role          AdminRole   @default(SUPPORT)
+  status        AdminStatus @default(ACTIVE)
+  avatarUrl     String?
+
+  // Permissions personnalisées (optionnel - pour affiner)
+  permissions   String?     // JSON string: ["users.read", "users.write", ...]
+
+  // Sécurité
+  twoFactorEnabled Boolean  @default(false)
+  twoFactorSecret  String?
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+
+  // Audit
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  createdById   String?     // Admin qui a créé ce compte (pour traçabilité)
+
+  // Relations
+  createdBy     Admin?      @relation("AdminCreator", fields: [createdById], references: [id])
+  createdAdmins Admin[]     @relation("AdminCreator")
+  auditLogs     AdminLog[]
+  sessions      AdminSession[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+// Session admin (pour l'authentification)
+model AdminSession {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  adminId      String
+  admin        Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  expires      DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  @@index([adminId])
+  @@index([sessionToken])
+}
+
+// Log de toutes les actions admin (AUDIT OBLIGATOIRE)
+model AdminLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  action      String   // "USER_SUSPENDED", "KYC_APPROVED", "REFUND_PROCESSED", etc.
+  targetType  String   // "USER", "PROVIDER", "RESERVATION", etc.
+  targetId    String?  // ID de l'élément ciblé
+  details     String?  // JSON string: détails de l'action (avant/après, raisons, etc.)
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  admin       Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}
+
+// Permissions détaillées (pour granularité fine)
+model AdminPermission {
+  id          String   @id @default(cuid())
+  name        String   @unique  // "users.read", "users.write", "finance.export", etc.
+  description String?
+  category    String   // "USERS", "PROVIDERS", "FINANCE", "CONTENT", "SYSTEM"
+  createdAt   DateTime @default(now())
+
+  // Relations
+  roles       AdminRolePermission[]
+
+  @@index([category])
+}
+
+// Liaison rôles <-> permissions
+model AdminRolePermission {
+  id           String   @id @default(cuid())
+  role         AdminRole
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  // Relations
+  permission   AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([role, permissionId])
+  @@index([role])
+}
+
+// Signalements utilisateurs (pour modération)
+model UserReport {
+  id          String   @id @default(cuid())
+  reporterId  String   // User who reported
+  reportedId  String   // User being reported
+  reason      String   // spam, harassment, fake_profile, inappropriate_content, other
+  description String?
+  status      String   @default("pending") // pending, reviewed, resolved, dismissed
+  reviewedById String?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([reporterId])
+  @@index([reportedId])
+  @@index([status])
+}
+
+// Signalements de contenus (publications, commentaires)
+model ContentReport {
+  id              String   @id @default(cuid())
+  reporterId      String
+  contentType     String   // publication, comment, live
+  contentId       String
+  reason          String
+  description     String?
+  status          String   @default("pending")
+  reviewedById    String?
+  reviewedAt      DateTime?
+  action          String?  // removed, warning_given, no_action
+  createdAt       DateTime @default(now())
+
+  @@index([contentType, contentId])
+  @@index([status])
+}
+
+// Tickets support
+model SupportTicket {
+  id          String   @id @default(cuid())
+  userId      String
+  subject     String
+  message     String
+  status      String   @default("open") // open, in_progress, resolved, closed
+  priority    String   @default("normal") // low, normal, high, urgent
+  assignedTo  String?  // Admin ID
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  responses   SupportTicketResponse[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedTo])
+}
+
+model SupportTicketResponse {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  adminId   String?  // null si réponse de l'utilisateur
+  userId    String?  // null si réponse de l'admin
+  message   String
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
 }

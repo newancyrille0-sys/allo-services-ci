@@ -21,10 +21,6 @@ import {
 const adminLoginSchema = z.object({
   email: z.string().email("Email invalide"),
   password: z.string().min(1, "Mot de passe requis"),
-  secretCode: z
-    .string()
-    .min(1, "Code secret requis")
-    .regex(/^[A-Za-z0-9-]+$/, "Format de code invalide"),
 });
 
 type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
@@ -32,7 +28,6 @@ type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 export default function AdminLoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [showSecretCode, setShowSecretCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +36,6 @@ export default function AdminLoginPage() {
     defaultValues: {
       email: "",
       password: "",
-      secretCode: "",
     },
   });
 
@@ -50,7 +44,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/admin/login", {
+      const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -58,7 +52,7 @@ export default function AdminLoginPage() {
 
       const result = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !result.success) {
         setError(result.error || "Erreur de connexion");
         setIsLoading(false);
         return;
@@ -73,7 +67,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary via-secondary/95 to-secondary/90 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-4">
       {/* Background Pattern */}
       <div
         className="absolute inset-0 opacity-5"
@@ -82,7 +76,7 @@ export default function AdminLoginPage() {
         }}
       />
 
-      <Card className="w-full max-w-md border-0 shadow-2xl relative">
+      <Card className="w-full max-w-md border-0 shadow-2xl relative bg-gray-900/80 border-gray-800">
         <CardHeader className="space-y-1 text-center pb-4">
           {/* Logo */}
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -117,7 +111,7 @@ export default function AdminLoginPage() {
                         <Input
                           type="email"
                           placeholder="admin@alloservices.ci"
-                          className="pl-10 bg-secondary/50 border-gray-700 text-white placeholder:text-gray-500"
+                          className="pl-10 bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500"
                           {...field}
                         />
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -140,7 +134,7 @@ export default function AdminLoginPage() {
                         <Input
                           type={showPassword ? "text" : "password"}
                           placeholder="Votre mot de passe"
-                          className="pl-10 pr-10 bg-secondary/50 border-gray-700 text-white placeholder:text-gray-500"
+                          className="pl-10 pr-10 bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500"
                           {...field}
                         />
                         <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -150,40 +144,6 @@ export default function AdminLoginPage() {
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
                         >
                           {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Secret Code Field */}
-              <FormField
-                control={form.control}
-                name="secretCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-300">Code secret</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showSecretCode ? "text" : "password"}
-                          placeholder="Ex: Cy-73-admi-03"
-                          className="pl-10 pr-10 bg-secondary/50 border-gray-700 text-white placeholder:text-gray-500"
-                          {...field}
-                        />
-                        <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                        <button
-                          type="button"
-                          onClick={() => setShowSecretCode(!showSecretCode)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
-                        >
-                          {showSecretCode ? (
                             <EyeOff className="h-4 w-4" />
                           ) : (
                             <Eye className="h-4 w-4" />
@@ -217,8 +177,31 @@ export default function AdminLoginPage() {
             </form>
           </Form>
 
+          {/* Role Info */}
+          <div className="mt-6 space-y-2">
+            <p className="text-xs text-gray-500 text-center font-medium">Rôles disponibles</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                <div className="w-2 h-2 rounded-full bg-red-500" />
+                <span className="text-xs text-gray-400">Super Admin</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                <div className="w-2 h-2 rounded-full bg-orange-500" />
+                <span className="text-xs text-gray-400">Admin Senior</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                <span className="text-xs text-gray-400">Modérateur</span>
+              </div>
+              <div className="flex items-center gap-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-xs text-gray-400">Support</span>
+              </div>
+            </div>
+          </div>
+
           {/* Security Notice */}
-          <div className="mt-6 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
             <p className="text-xs text-yellow-400 text-center">
               <strong>Zone sécurisée</strong>
               <br />
