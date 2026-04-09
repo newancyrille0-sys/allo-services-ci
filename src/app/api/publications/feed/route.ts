@@ -8,10 +8,10 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
-    
+
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category") || "all";
-    const type = searchParams.get("type") || "video"; // video, photo, all
+    const type = searchParams.get("type") || "all"; // video, photo, all
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -52,10 +52,10 @@ export async function GET(request: NextRequest) {
             }
           : false,
         comments: {
-          take: 3,
+          take: 5,
           orderBy: { createdAt: "desc" },
           include: {
-            // We'll need user info for comments
+            // Get user info for each comment
           },
         },
         _count: {
@@ -82,30 +82,74 @@ export async function GET(request: NextRequest) {
       followingIds = follows.map((f) => f.followingId);
     }
 
-    // Format response
-    const formattedPublications = publications.map((pub) => ({
-      id: pub.id,
-      type: pub.type,
-      videoUrl: pub.mediaUrl,
-      thumbnailUrl: pub.thumbnailUrl || pub.mediaUrl,
-      caption: pub.caption || "",
-      likes: pub.likeCount,
-      comments: pub.commentCount,
-      shares: pub.shareCount,
-      views: pub.viewCount,
-      isLiked: userId ? (pub.likes as any[])?.length > 0 : false,
-      isBookmarked: userId ? (pub.bookmarks as any[])?.length > 0 : false,
-      createdAt: pub.createdAt.toISOString(),
-      provider: {
-        id: pub.provider.id,
-        name: pub.provider.user.fullName || "Prestataire",
-        avatar: pub.provider.user.avatarUrl,
-        businessName: pub.provider.businessName || pub.provider.user.fullName || "Prestataire",
-        category: pub.provider.categories ? JSON.parse(pub.provider.categories)[0] : "Services",
-        isVerified: pub.provider.isVerified,
-        isFollowing: followingIds.includes(pub.provider.id),
+    // Get comment user info separately
+    const commentUserIds = publications.flatMap(p =>
+      p.comments.map(c => c.userId)
+    );
+    const uniqueCommentUserIds = [...new Set(commentUserIds)];
+
+    const commentUsers = await db.user.findMany({
+      where: {
+        id: { in: uniqueCommentUserIds },
       },
-    }));
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+      },
+    });
+
+    const commentUserMap = new Map(commentUsers.map(u => [u.id, u]));
+
+    // Format response
+    const formattedPublications = publications.map((pub) => {
+      // Format comments with user info
+      const formattedComments = pub.comments.map((comment) => {
+        const commentUser = commentUserMap.get(comment.userId);
+        return {
+          id: comment.id,
+          content: comment.content,
+          createdAt: comment.createdAt.toISOString(),
+          user: {
+            id: comment.userId,
+            name: commentUser?.fullName || "Utilisateur",
+            avatar: commentUser?.avatarUrl,
+          },
+          likes: comment.likeCount,
+        };
+      });
+
+      // Parse subscription plan
+      const subscriptionPlan = pub.provider.subscriptionStatus || "STARTER";
+
+      return {
+        id: pub.id,
+        type: pub.type,
+        mediaUrl: pub.mediaUrl,
+        thumbnailUrl: pub.thumbnailUrl || pub.mediaUrl,
+        caption: pub.caption || "",
+        servicePrice: pub.servicePrice,
+        serviceDescription: pub.serviceDescription,
+        likes: pub.likeCount,
+        comments: pub.commentCount,
+        shares: pub.shareCount,
+        views: pub.viewCount,
+        isLiked: userId ? (pub.likes as any[])?.length > 0 : false,
+        isBookmarked: userId ? (pub.bookmarks as any[])?.length > 0 : false,
+        createdAt: pub.createdAt.toISOString(),
+        provider: {
+          id: pub.provider.id,
+          name: pub.provider.user.fullName || "Prestataire",
+          avatar: pub.provider.user.avatarUrl,
+          businessName: pub.provider.businessName || pub.provider.user.fullName || "Prestataire",
+          category: pub.provider.categories ? JSON.parse(pub.provider.categories)[0] : "Services",
+          isVerified: pub.provider.isVerified,
+          subscriptionPlan: subscriptionPlan,
+          isFollowing: followingIds.includes(pub.provider.id),
+        },
+        commentsList: formattedComments,
+      };
+    });
 
     // Sort by category
     let result = formattedPublications;
@@ -133,11 +177,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Créer une nouvelle publication
+// POST - Créer une nouvelle publication (Providers only)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, error: "Non autorisé" },
@@ -158,7 +202,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { type, mediaUrl, thumbnailUrl, caption } = body;
+    const { type, mediaUrl, thumbnailUrl, caption, servicePrice, serviceDescription } = body;
 
     if (!mediaUrl) {
       return NextResponse.json(
@@ -170,12 +214,24 @@ export async function POST(request: NextRequest) {
     const publication = await db.providerPublication.create({
       data: {
         providerId: provider.id,
-        type: type || "video",
+        type: type || "photo",
         mediaUrl,
         thumbnailUrl,
         caption,
+        servicePrice: servicePrice ? parseFloat(servicePrice) : null,
+        serviceDescription,
       },
     });
+
+    // Update provider's video count if it's a video
+    if (type === "video") {
+      await db.provider.update({
+        where: { id: provider.id },
+        data: {
+          videosPublishedThisMonth: { increment: 1 },
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

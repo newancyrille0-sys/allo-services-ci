@@ -141,8 +141,8 @@ const MOCK_SERVICES: Service[] = [
 ];
 
 const MOCK_SUBSCRIPTION = {
-  plan: "MONTHLY" as const,
-  maxServices: SUBSCRIPTION_PLANS.MONTHLY.limits.maxServices,
+  plan: "STARTER" as const,
+  maxServices: SUBSCRIPTION_PLANS.STARTER.limits.maxServices,
 };
 
 function formatDuration(minutes: number): string {
