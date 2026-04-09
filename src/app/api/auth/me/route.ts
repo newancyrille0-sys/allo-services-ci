@@ -3,31 +3,58 @@ import { db } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
-    // In a real app with sessions/JWT, you would verify the session here
-    // For demo purposes, we'll check for a user ID header or return unauthorized
-    
-    const userId = request.headers.get("x-user-id");
+    // Get session token from cookie
+    const sessionToken = request.cookies.get("session_token")?.value;
 
-    if (!userId) {
+    if (!sessionToken) {
       return NextResponse.json(
         { user: null, provider: null },
         { status: 200 }
       );
     }
 
-    const user = await db.user.findUnique({
-      where: { id: userId },
+    // Find session in database
+    const session = await db.session.findUnique({
+      where: { sessionToken },
       include: {
-        provider: true,
+        user: {
+          include: {
+            provider: true,
+          },
+        },
       },
     });
 
-    if (!user) {
-      return NextResponse.json(
+    // Check if session exists and is not expired
+    if (!session || session.expires < new Date()) {
+      // Delete expired session
+      if (session) {
+        await db.session.delete({ where: { id: session.id } });
+      }
+      
+      // Clear cookie
+      const response = NextResponse.json(
         { user: null, provider: null },
         { status: 200 }
       );
+      response.cookies.delete("session_token");
+      return response;
     }
+
+    // Check user status
+    if (session.user.status === "BANNED" || session.user.status === "SUSPENDED") {
+      // Delete session for banned/suspended users
+      await db.session.delete({ where: { id: session.id } });
+      
+      const response = NextResponse.json(
+        { user: null, provider: null },
+        { status: 200 }
+      );
+      response.cookies.delete("session_token");
+      return response;
+    }
+
+    const user = session.user;
 
     const userData = {
       id: user.id,
@@ -51,6 +78,9 @@ export async function GET(request: NextRequest) {
           isVerified: user.provider.isVerified,
           kycStatus: user.provider.kycStatus,
           subscriptionStatus: user.provider.subscriptionStatus,
+          badgeVerified: user.provider.badgeVerified,
+          averageRating: user.provider.averageRating,
+          totalReviews: user.provider.totalReviews,
         }
       : null;
 

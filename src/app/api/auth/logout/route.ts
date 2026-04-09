@@ -1,19 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
-    // In a real app with sessions, you would destroy the session here
-    // With JWT, the client just needs to delete the token
-    
-    return NextResponse.json({
+    // Get session token from cookie
+    const sessionToken = request.cookies.get("session_token")?.value;
+
+    if (sessionToken) {
+      // Delete session from database
+      try {
+        await db.session.deleteMany({
+          where: { sessionToken },
+        });
+      } catch {
+        // Ignore errors if session doesn't exist
+      }
+    }
+
+    // Create response and clear cookie
+    const response = NextResponse.json({
       success: true,
       message: "Déconnexion réussie",
     });
+
+    response.cookies.delete("session_token");
+
+    return response;
   } catch (error) {
     console.error("Logout error:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la déconnexion" },
-      { status: 500 }
-    );
+    
+    // Still try to clear the cookie
+    const response = NextResponse.json({
+      success: true,
+      message: "Déconnexion réussie",
+    });
+    response.cookies.delete("session_token");
+    
+    return response;
   }
 }
