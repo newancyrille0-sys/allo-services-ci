@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AdminAssistantChat } from "@/components/assistant";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -432,6 +433,9 @@ export default function AdminLayout({
         {/* Page Content */}
         <main className="p-6">{children}</main>
       </div>
+
+      {/* Admin Assistant Chat */}
+      <AdminAssistantChat />
     </div>
   );
 }

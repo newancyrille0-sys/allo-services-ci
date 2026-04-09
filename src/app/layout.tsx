@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { AssistantChat } from "@/components/assistant/AssistantChat";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -59,6 +60,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${manrope.variable} font-body antialiased bg-background text-foreground`}>
         {children}
         <Toaster />
+        <AssistantChat />
       </body>
     </html>
   );
