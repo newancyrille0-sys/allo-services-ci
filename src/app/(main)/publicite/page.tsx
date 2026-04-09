@@ -684,18 +684,46 @@ export default function PublicitePage() {
   };
 
   // Play/Pause video
-  const togglePlayPause = (videoId: string) => {
+  const togglePlayPause = async (videoId: string) => {
     const video = videoRefs.current[videoId];
     if (!video) return;
 
-    if (video.paused) {
-      video.play().catch(() => {});
-      setPlayingVideoId(videoId);
-    } else {
-      video.pause();
-      setPlayingVideoId(null);
+    try {
+      // Pause all other videos first
+      Object.entries(videoRefs.current).forEach(([id, v]) => {
+        if (id !== videoId && v && !v.paused) {
+          v.pause().catch(() => {});
+        }
+      });
+
+      if (video.paused) {
+        // Reset video if ended
+        if (video.ended) {
+          video.currentTime = 0;
+        }
+        await video.play();
+        setPlayingVideoId(videoId);
+      } else {
+        video.pause();
+        setPlayingVideoId(null);
+      }
+    } catch (error) {
+      // Silently handle play interruption errors
+      console.debug("Video play interrupted:", error);
     }
   };
+
+  // Cleanup videos on unmount
+  React.useEffect(() => {
+    return () => {
+      Object.values(videoRefs.current).forEach((video) => {
+        if (video) {
+          video.pause();
+          video.src = "";
+        }
+      });
+    };
+  }, []);
 
   // Format number
   const formatNumber = (num: number): string => {
@@ -982,6 +1010,7 @@ export default function PublicitePage() {
                             loop
                             muted={isMuted}
                             playsInline
+                            preload="none"
                           />
                           <button
                             className="absolute inset-0 flex items-center justify-center z-10"
