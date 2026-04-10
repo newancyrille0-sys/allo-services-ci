@@ -92,7 +92,6 @@ model User {
   accounts     Account[]
   sessions     Session[]
   otpCodes     OTPCode[]
-  emailOTPs    EmailOTP[]
 }
 
 // ==================== PROVIDER MODEL ====================
@@ -307,7 +306,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ==================== OTP CODE MODEL (SMS) ====================
+// ==================== OTP CODE MODEL ====================
 
 model OTPCode {
   id        String   @id @default(cuid())
@@ -320,22 +319,6 @@ model OTPCode {
   createdAt DateTime @default(now())
 
   @@index([phone, code])
-}
-
-// ==================== EMAIL OTP MODEL ====================
-
-model EmailOTP {
-  id        String   @id @default(cuid())
-  email     String
-  code      String   // 6-digit code
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@index([email, code])
-  @@index([email, expiresAt])
 }
 
 // ==================== PROVIDER PUBLICATION MODEL ====================

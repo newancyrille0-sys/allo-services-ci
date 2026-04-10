@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Mail, Loader2, ArrowLeft, Shield, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, Mail, Phone, Loader2 } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,163 +19,68 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { useAuth } from "@/hooks/useAuth";
 import { signIn } from "next-auth/react";
 
-// Step 1: Email schema
-const emailSchema = z.object({
-  email: z
+const loginSchema = z.object({
+  emailOrPhone: z
     .string()
-    .min(1, "L'email est requis")
-    .email("Veuillez entrer une adresse email valide"),
+    .min(1, "Ce champ est requis")
+    .refine(
+      (val) => {
+        // Check if it's a valid email or CI phone number
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^(\+225|0)?[0-9]{8,10}$/;
+        return emailRegex.test(val) || phoneRegex.test(val.replace(/\s/g, ""));
+      },
+      { message: "Veuillez entrer un email ou numéro de téléphone valide" }
+    ),
+  password: z
+    .string()
+    .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 });
 
-type EmailFormValues = z.infer<typeof emailSchema>;
-
-type LoginStep = "email" | "otp" | "new-user" | "success";
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState<LoginStep>("email");
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const [isNewUser, setIsNewUser] = useState(false);
-  const [newUserName, setNewUserName] = useState("");
-  const [newUserRole, setNewUserRole] = useState<"CLIENT" | "PROVIDER">("CLIENT");
+  const { login, error, clearError, isLoading } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const emailForm = useForm<EmailFormValues>({
-    resolver: zodResolver(emailSchema),
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      emailOrPhone: "",
+      password: "",
     },
   });
 
-  // Countdown timer for resend
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [countdown]);
+  const onSubmit = async (data: LoginFormValues) => {
+    clearError();
+    const result = await login({
+      emailOrPhone: data.emailOrPhone,
+      password: data.password,
+    });
 
-  // Auto-verify when OTP is complete
-  useEffect(() => {
-    if (otp.length === 6 && step === "otp") {
-      verifyOTP();
-    }
-  }, [otp]);
-
-  // Send OTP code
-  const sendOTP = async (emailAddress: string) => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/auth/email-otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailAddress }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Erreur lors de l'envoi du code");
-        return false;
-      }
-
-      setIsNewUser(data.isNewUser);
-      setCountdown(60); // 60 seconds cooldown
-      return true;
-    } catch (err) {
-      setError("Erreur de connexion. Veuillez réessayer.");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Verify OTP code
-  const verifyOTP = async () => {
-    if (otp.length !== 6) return;
-
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/auth/email-otp/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          otp,
-          fullName: isNewUser ? newUserName : undefined,
-          role: isNewUser ? newUserRole : undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Code invalide");
-        setOtp("");
-        return;
-      }
-
-      // Success - redirect based on role
-      setStep("success");
-
-      setTimeout(() => {
-        if (data.user?.role === "PROVIDER") {
-          router.push("/provider");
-        } else {
+    if (result.success && result.role) {
+      // Redirect based on role
+      switch (result.role) {
+        case "CLIENT":
           router.push("/client");
-        }
-      }, 1000);
-    } catch (err) {
-      setError("Erreur de vérification. Veuillez réessayer.");
-      setOtp("");
-    } finally {
-      setIsLoading(false);
+          break;
+        case "PROVIDER":
+          router.push("/provider");
+          break;
+        case "ADMIN":
+          router.push("/admin/dashboard");
+          break;
+        default:
+          router.push("/");
+      }
     }
   };
 
-  // Handle email form submit
-  const onEmailSubmit = async (data: EmailFormValues) => {
-    setEmail(data.email);
-    const success = await sendOTP(data.email);
-    if (success) {
-      setStep("otp");
-    }
-  };
-
-  // Handle new user form submit
-  const onNewUserSubmit = async () => {
-    if (!newUserName.trim()) {
-      setError("Veuillez entrer votre nom complet");
-      return;
-    }
-
-    setStep("otp");
-    await sendOTP(email);
-  };
-
-  // Resend OTP
-  const resendOTP = async () => {
-    if (countdown > 0) return;
-    setOtp("");
-    await sendOTP(email);
-  };
-
-  // Google login
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
@@ -183,7 +88,7 @@ export default function LoginPage() {
         callbackUrl: "/client",
         redirect: true,
       });
-
+      
       if (result?.error) {
         console.error("Google login error:", result.error);
       }
@@ -194,209 +99,6 @@ export default function LoginPage() {
     }
   };
 
-  // Render success state
-  if (step === "success") {
-    return (
-      <AuthLayout
-        title="Connexion réussie !"
-        description=""
-        backHref="/"
-        backLabel="Retour à l'accueil"
-      >
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          <p className="text-gray-600 text-center">
-            Redirection en cours...
-          </p>
-        </div>
-      </AuthLayout>
-    );
-  }
-
-  // Render OTP step
-  if (step === "otp") {
-    return (
-      <AuthLayout
-        title="Vérification"
-        description="Entrez le code à 6 chiffres"
-        backHref="/login"
-        backLabel=""
-        onBack={() => {
-          setStep("email");
-          setOtp("");
-          setError("");
-        }}
-      >
-        <div className="space-y-6">
-          {/* Error Message */}
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          {/* Email Info */}
-          <div className="text-center">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Mail className="w-6 h-6 text-primary" />
-            </div>
-            <p className="text-sm text-gray-600">
-              Code envoyé à
-            </p>
-            <p className="font-medium text-gray-900">{email}</p>
-          </div>
-
-          {/* OTP Input */}
-          <div className="flex justify-center">
-            <InputOTP
-              maxLength={6}
-              value={otp}
-              onChange={(value) => setOtp(value)}
-              disabled={isLoading}
-            >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-              </InputOTPGroup>
-            </InputOTP>
-          </div>
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Vérification en cours...
-            </div>
-          )}
-
-          {/* Resend */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              Vous n'avez pas reçu le code ?
-            </p>
-            <Button
-              variant="ghost"
-              className="text-primary"
-              onClick={resendOTP}
-              disabled={countdown > 0 || isLoading}
-            >
-              {countdown > 0
-                ? `Renvoyer dans ${countdown}s`
-                : "Renvoyer le code"}
-            </Button>
-          </div>
-
-          {/* Security note */}
-          <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
-            <Shield className="w-4 h-4 text-gray-400 mt-0.5" />
-            <p className="text-xs text-gray-500">
-              Pour votre sécurité, le code expire dans 10 minutes. Ne partagez jamais ce code.
-            </p>
-          </div>
-        </div>
-      </AuthLayout>
-    );
-  }
-
-  // Render new user step
-  if (step === "new-user") {
-    return (
-      <AuthLayout
-        title="Créer votre compte"
-        description="Complétez votre profil"
-        backHref="/login"
-        backLabel=""
-        onBack={() => {
-          setStep("email");
-          setError("");
-        }}
-      >
-        <div className="space-y-4">
-          {/* Error Message */}
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          {/* Name Input */}
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              Nom complet
-            </label>
-            <Input
-              type="text"
-              placeholder="Votre nom complet"
-              value={newUserName}
-              onChange={(e) => setNewUserName(e.target.value)}
-            />
-          </div>
-
-          {/* Role Selection */}
-          <div>
-            <label className="block text-sm font-medium mb-1.5">
-              Type de compte
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setNewUserRole("CLIENT")}
-                className={`p-4 border rounded-lg text-center transition-all ${
-                  newUserRole === "CLIENT"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <span className="block text-2xl mb-1">👤</span>
-                <span className="font-medium">Client</span>
-                <span className="block text-xs text-gray-500 mt-1">
-                  Je cherche des services
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setNewUserRole("PROVIDER")}
-                className={`p-4 border rounded-lg text-center transition-all ${
-                  newUserRole === "PROVIDER"
-                    ? "border-primary bg-primary/5 text-primary"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <span className="block text-2xl mb-1">🔧</span>
-                <span className="font-medium">Prestataire</span>
-                <span className="block text-xs text-gray-500 mt-1">
-                  J'offre des services
-                </span>
-              </button>
-            </div>
-          </div>
-
-          <Button
-            className="w-full bg-primary hover:bg-primary/90"
-            onClick={onNewUserSubmit}
-            disabled={isLoading || !newUserName.trim()}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Inscription en cours...
-              </>
-            ) : (
-              "Continuer"
-            )}
-          </Button>
-        </div>
-      </AuthLayout>
-    );
-  }
-
-  // Render email step (default)
   return (
     <AuthLayout
       title="Connexion"
@@ -404,8 +106,8 @@ export default function LoginPage() {
       backHref="/"
       backLabel="Retour à l'accueil"
     >
-      <Form {...emailForm}>
-        <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Error Message */}
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
@@ -413,24 +115,69 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Email Field */}
+          {/* Email or Phone Field */}
           <FormField
-            control={emailForm.control}
-            name="email"
+            control={form.control}
+            name="emailOrPhone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Adresse email</FormLabel>
+                <FormLabel>Email ou téléphone</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
-                      type="email"
-                      placeholder="votre@email.com"
+                      type="text"
+                      placeholder="Email ou numéro +225 XX XX XX XX XX"
                       className="pl-10"
                       {...field}
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <Mail className="h-4 w-4" />
+                      {field.value.includes("@") ? (
+                        <Mail className="h-4 w-4" />
+                      ) : (
+                        <Phone className="h-4 w-4" />
+                      )}
                     </div>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Password Field */}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Mot de passe</FormLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Votre mot de passe"
+                      className="pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -447,10 +194,10 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Envoi du code...
+                Connexion en cours...
               </>
             ) : (
-              "Recevoir un code de connexion"
+              "Se connecter"
             )}
           </Button>
         </form>
@@ -497,13 +244,6 @@ export default function LoginPage() {
           )}
           Continuer avec Google
         </Button>
-      </div>
-
-      {/* Info */}
-      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-        <p className="text-xs text-blue-700 text-center">
-          💡 Un code à 6 chiffres sera envoyé à votre email pour vous connecter en toute sécurité.
-        </p>
       </div>
 
       {/* Register Link */}
