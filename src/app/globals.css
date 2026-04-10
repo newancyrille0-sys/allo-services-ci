@@ -4,56 +4,87 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Sovereign Ledger Design System */
+  
   /* Background and foreground */
-  --background: 247 250 251;
-  --foreground: 24 28 29;
+  --background: 247 249 251;
+  --foreground: 25 28 30;
   
-  /* Primary colors - Deep teal */
-  --primary: 0 65 80;
+  /* Primary colors - Deep Ocean Blue */
+  --primary: 0 30 64;
   --primary-foreground: 255 255 255;
+  --primary-container: 0 51 102;
+  --primary-fixed: 213 227 255;
+  --primary-fixed-dim: 167 200 255;
   
-  /* Secondary colors - Orange */
-  --secondary: 156 68 0;
+  /* Secondary colors - Slate */
+  --secondary: 80 95 118;
   --secondary-foreground: 255 255 255;
+  --secondary-container: 208 225 251;
+  --secondary-fixed: 211 228 254;
+  --secondary-fixed-dim: 183 200 225;
+  
+  /* Tertiary colors - Success Green */
+  --tertiary: 0 36 22;
+  --tertiary-foreground: 255 255 255;
+  --tertiary-container: 0 60 39;
+  --tertiary-fixed: 111 251 190;
+  --tertiary-fixed-dim: 78 222 163;
+  --on-tertiary-container: 0 178 123;
   
   /* Muted colors */
-  --muted: 224 227 228;
-  --muted-foreground: 63 72 76;
+  --muted: 224 227 229;
+  --muted-foreground: 67 71 79;
   
   /* Accent */
-  --accent: 224 227 228;
-  --accent-foreground: 24 28 29;
+  --accent: 224 227 229;
+  --accent-foreground: 25 28 30;
   
   /* Destructive/Error */
   --destructive: 186 26 26;
   --destructive-foreground: 255 255 255;
+  --error-container: 255 218 214;
+  --on-error-container: 147 0 10;
   
   /* Border and input */
-  --border: 191 200 204;
-  --input: 191 200 204;
-  --ring: 0 65 80;
+  --border: 195 198 209;
+  --input: 195 198 209;
+  --ring: 58 95 148;
   
   /* Card */
   --card: 255 255 255;
-  --card-foreground: 24 28 29;
+  --card-foreground: 25 28 30;
   
   /* Popover */
   --popover: 255 255 255;
-  --popover-foreground: 24 28 29;
+  --popover-foreground: 25 28 30;
   
   /* Radius */
   --radius: 0.75rem;
   
-  /* Custom colors */
-  --surface: 247 250 251;
-  --surface-dim: 215 218 219;
-  --outline: 112 120 124;
-  --outline-variant: 191 200 204;
-  --inverse-surface: 45 49 50;
-  --inverse-primary: 142 208 231;
+  /* Surface colors - Tonal Depth System */
+  --surface: 247 249 251;
+  --surface-bright: 247 249 251;
+  --surface-dim: 216 218 220;
+  --surface-tint: 58 95 148;
+  --surface-variant: 224 227 229;
+  --surface-container: 236 238 240;
+  --surface-container-low: 242 244 246;
+  --surface-container-lowest: 255 255 255;
+  --surface-container-high: 230 232 234;
+  --surface-container-highest: 224 227 229;
+  
+  /* Outline */
+  --outline: 115 119 128;
+  --outline-variant: 195 198 209;
+  
+  /* Inverse colors */
+  --inverse-surface: 45 49 51;
+  --inverse-primary: 167 200 255;
+  --inverse-on-surface: 239 241 243;
   
   /* Trust/Success colors */
-  --success: 0 70 14;
+  --success: 0 178 123;
   --success-foreground: 255 255 255;
   
   /* Warning */
@@ -65,24 +96,39 @@
   --background: 13 17 23;
   --foreground: 230 237 243;
   
-  --primary: 142 208 231;
-  --primary-foreground: 0 31 40;
+  --primary: 167 200 255;
+  --primary-foreground: 0 30 64;
+  --primary-container: 0 51 102;
+  --primary-fixed: 213 227 255;
+  --primary-fixed-dim: 167 200 255;
   
-  --secondary: 253 118 19;
-  --secondary-foreground: 255 255 255;
+  --secondary: 183 200 225;
+  --secondary-foreground: 0 30 64;
+  --secondary-container: 80 95 118;
+  --secondary-fixed: 211 228 254;
+  --secondary-fixed-dim: 183 200 225;
   
-  --muted: 45 49 50;
-  --muted-foreground: 191 200 204;
+  --tertiary: 78 222 163;
+  --tertiary-foreground: 0 36 22;
+  --tertiary-container: 0 60 39;
+  --tertiary-fixed: 111 251 190;
+  --tertiary-fixed-dim: 78 222 163;
+  --on-tertiary-container: 0 178 123;
   
-  --accent: 45 49 50;
+  --muted: 45 49 51;
+  --muted-foreground: 191 198 209;
+  
+  --accent: 45 49 51;
   --accent-foreground: 230 237 243;
   
   --destructive: 249 113 113;
   --destructive-foreground: 255 255 255;
+  --error-container: 186 26 26;
+  --on-error-container: 255 218 214;
   
   --border: 48 54 61;
   --input: 48 54 61;
-  --ring: 142 208 231;
+  --ring: 167 200 255;
   
   --card: 22 27 34;
   --card-foreground: 230 237 243;
@@ -91,14 +137,27 @@
   --popover-foreground: 230 237 243;
   
   --surface: 22 27 34;
+  --surface-bright: 247 249 251;
   --surface-dim: 13 17 23;
-  --outline: 112 120 124;
-  --outline-variant: 48 54 61;
-  --inverse-surface: 224 227 228;
-  --inverse-primary: 0 65 80;
+  --surface-tint: 167 200 255;
+  --surface-variant: 48 54 61;
+  --surface-container: 236 238 240;
+  --surface-container-low: 242 244 246;
+  --surface-container-lowest: 255 255 255;
+  --surface-container-high: 230 232 234;
+  --surface-container-highest: 224 227 229;
   
-  --success: 7 96 24;
-  --success-foreground: 255 255 255;
+  --outline: 115 119 128;
+  --outline-variant: 48 54 61;
+  --inverse-surface: 224 227 229;
+  --inverse-primary: 0 30 64;
+  --inverse-on-surface: 239 241 243;
+  
+  --success: 78 222 163;
+  --success-foreground: 0 36 22;
+  
+  --warning: 253 118 19;
+  --warning-foreground: 255 255 255;
 }
 
 @layer base {
@@ -371,4 +430,273 @@ html {
 ::selection {
   background: #8ed0e7;
   color: #001f28;
+}
+
+/* ============================================
+   SOVEREIGN LEDGER DESIGN SYSTEM
+   ============================================ */
+
+/* Primary Gradient */
+.bg-primary-gradient {
+  background: linear-gradient(135deg, #001e40 0%, #003366 100%);
+}
+
+/* Ambient Shadow */
+.shadow-ambient {
+  box-shadow: 0px 12px 32px rgba(25, 28, 30, 0.06);
+}
+
+.shadow-ambient-lg {
+  box-shadow: 0px 20px 48px rgba(25, 28, 30, 0.08);
+}
+
+/* Status Glow Effect */
+.status-glow {
+  box-shadow: 0 0 8px rgba(0, 178, 123, 0.6);
+}
+
+.status-glow-active {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 178, 123, 0.6); }
+  50% { box-shadow: 0 0 16px rgba(0, 178, 123, 0.8); }
+}
+
+/* Glass Header */
+.glass-header {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass-header {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* No-Border Rule - Tonal Shift */
+.tonal-shift {
+  border: none !important;
+}
+
+/* Scale Active */
+.scale-98-active:active {
+  transform: scale(0.98);
+}
+
+/* Zebra Table Layering */
+.zebra-row:nth-child(even) {
+  background: rgb(var(--surface-container-low));
+}
+
+/* Admin Sidebar Styling */
+.admin-sidebar {
+  background: #f8fafc;
+  border-right: none;
+}
+
+.dark .admin-sidebar {
+  background: #0f172a;
+}
+
+/* Material Symbols Styling */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Data Table Sovereign Style */
+.data-table-sovereign thead {
+  background: rgb(var(--surface-variant) / 0.3);
+}
+
+.data-table-sovereign th {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgb(var(--primary));
+}
+
+.data-table-sovereign tbody tr {
+  transition: background 0.15s ease;
+}
+
+.data-table-sovereign tbody tr:hover {
+  background: rgb(var(--surface-bright));
+}
+
+/* KPI Card Sovereign Style */
+.kpi-card-sovereign {
+  background: rgb(var(--surface-container-lowest));
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.kpi-card-sovereign:hover {
+  background: rgb(var(--surface-bright));
+  box-shadow: 0px 12px 32px rgba(25, 28, 30, 0.06);
+}
+
+/* Tech Card Sovereign Style */
+.tech-card-sovereign {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--surface-container-lowest));
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.tech-card-sovereign:hover {
+  background: rgb(var(--surface-bright));
+  box-shadow: 0px 12px 32px rgba(25, 28, 30, 0.06);
+}
+
+.tech-card-sovereign::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6rem;
+  height: 6rem;
+  background: rgb(var(--tertiary-container) / 0.05);
+  border-radius: 9999px;
+  transform: translate(1.5rem, -1.5rem);
+  transition: transform 0.5s ease;
+}
+
+.tech-card-sovereign:hover::before {
+  transform: translate(1.5rem, -1.5rem) scale(1.5);
+}
+
+/* Progress Bar Sovereign */
+.progress-sovereign {
+  height: 0.25rem;
+  background: rgb(var(--surface-container-low));
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-sovereign-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+
+/* Badge Sovereign Styles */
+.badge-sovereign {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-sovereign-success {
+  background: rgb(var(--tertiary-fixed) / 0.3);
+  color: rgb(var(--on-tertiary-fixed));
+}
+
+.badge-sovereign-warning {
+  background: rgb(var(--secondary-fixed-dim) / 0.3);
+  color: rgb(var(--on-secondary-fixed));
+}
+
+.badge-sovereign-error {
+  background: rgb(var(--error-container));
+  color: rgb(var(--on-error-container));
+}
+
+.badge-sovereign-neutral {
+  background: rgb(var(--secondary-container));
+  color: rgb(var(--on-secondary-container));
+}
+
+/* Input Sovereign Style */
+.input-sovereign {
+  background: rgb(var(--surface-container-low));
+  border: none;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.input-sovereign:focus {
+  outline: 2px solid rgb(var(--surface-tint) / 0.5);
+  outline-offset: 0;
+}
+
+/* Toggle Switch Sovereign */
+.toggle-sovereign {
+  width: 3rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.toggle-sovereign-knob {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: white;
+  top: 0.25rem;
+  transition: left 0.2s ease;
+}
+
+.toggle-sovereign[data-state="on"] .toggle-sovereign-knob {
+  left: 1.75rem;
+}
+
+.toggle-sovereign[data-state="off"] .toggle-sovereign-knob {
+  left: 0.25rem;
+}
+
+/* Section Title Sovereign */
+.section-title-sovereign {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgb(var(--primary));
+}
+
+/* Filter Bar Sovereign */
+.filter-bar-sovereign {
+  background: rgb(var(--surface-container-low));
+  border-radius: 1rem;
+}
+
+/* Chip Sovereign */
+.chip-sovereign {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.chip-sovereign:hover {
+  background: rgb(var(--surface-container));
+}
+
+/* Admin Page Layout */
+.admin-page-content {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .admin-page-content {
+    padding: 2rem 3rem;
+  }
 }

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ALLO SERVICES CI | Command Center</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#0b1c30",
+                        "inverse-primary": "#a7c8ff",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary-container": "#00b27b",
+                        "tertiary": "#002416",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "surface": "#f7f9fb",
+                        "inverse-surface": "#2d3133",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#6ffbbe",
+                        "tertiary-container": "#003c27",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#eff1f3",
+                        "primary-fixed": "#d5e3ff",
+                        "primary": "#001e40",
+                        "secondary-fixed": "#d3e4fe",
+                        "background": "#f7f9fb",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-primary-fixed": "#001b3c",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#505f76",
+                        "outline-variant": "#c3c6d1",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-primary-container": "#799dd6",
+                        "primary-container": "#003366",
+                        "on-surface": "#191c1e",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-tertiary-fixed": "#002113",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-container-low": "#f2f4f6",
+                        "on-error-container": "#93000a",
+                        "outline": "#737780",
+                        "on-secondary-container": "#54647a",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#d0e1fb",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#43474f",
+                        "surface-dim": "#d8dadc",
+                        "on-background": "#191c1e",
+                        "surface-tint": "#3a5f94",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "on-primary-fixed-variant": "#1f477b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #001e40 0%, #003366 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-slate-50 dark:bg-slate-900 border-r border-transparent flex flex-col py-6 px-4 z-50">
+<div class="mb-10 px-2">
+<h1 class="text-xl font-bold tracking-tighter text-blue-950 dark:text-white">ALLO SERVICES</h1>
+<p class="text-[10px] uppercase tracking-widest text-secondary font-bold opacity-70">Command Center</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Item: Dashboard mapping to Accueil -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-blue-900 dark:text-blue-300 font-bold border-r-4 border-blue-900 dark:border-blue-500 bg-slate-100 dark:bg-slate-800 transition-all scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 font-medium hover:text-blue-900 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="engineering">engineering</span>
+<span class="text-sm">Service Requests</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 font-medium hover:text-blue-900 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span class="text-sm">Technicians</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 font-medium hover:text-blue-900 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="text-sm">Financials</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 font-medium hover:text-blue-900 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-sm">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-500 dark:text-slate-400 font-medium hover:text-blue-900 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800 space-y-1">
+<button class="w-full bg-primary-gradient text-white py-3 px-4 rounded-xl text-sm font-bold shadow-lg shadow-blue-900/20 mb-6 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New Service Dispatch
+            </button>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 font-medium hover:text-blue-900" href="#">
+<span class="material-symbols-outlined" data-icon="help_center">help_center</span>
+<span class="text-sm">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-500 font-medium hover:text-error" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl h-16 flex justify-between items-center px-8 ml-64 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-6 flex-1">
+<span class="text-lg font-black text-blue-950 dark:text-blue-50">ALLO SERVICES CI</span>
+<div class="relative w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-surface-tint/20 placeholder:text-slate-400" placeholder="Search operations, users, or data..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg relative transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-white"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="apps">apps</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden xl:block">
+<p class="text-xs font-bold text-on-surface">Administrator</p>
+<p class="text-[10px] text-slate-500">Super Admin</p>
+</div>
+<img alt="Administrator Profile" class="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-container/10" data-alt="Close-up portrait of a professional male administrator in a clean office setting, soft professional lighting, high-end feel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTobIV2d_lCzmv9z4c9_25h5xMfeYtyNLj27A1xZhDCZJCAmrOn8j6CMBcZ4VxwpCgri4sjGKmZDRZUILbnuTS_-4XvVO1_LUimtXBqEXNmzbXCiqJGO-5ucRjSRULTlag4lS0eH6ABy2Gb81qoF0uMYn9q-ZvJ_rGk2uDWjlwyODB2E0MSnH5czjaTNVmWBFvAN0PWhgVmTkFNrsws15oHyjJr3inpxfGOKkVkgwRbzI73uhlDhvl7EOpk9VW0M0nprXehOM_kIF3"/>
+</div>
+</div>
+</header>
+<!-- Main Content Grid -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="p-8 grid grid-cols-12 gap-8">
+<!-- Center Column: Main Feed -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Résumé Performances -->
+<section>
+<div class="flex items-end justify-between mb-6">
+<div>
+<h2 class="text-2xl font-extrabold tracking-tight text-primary">Résumé Performances</h2>
+<p class="text-sm text-on-surface-variant">Analyse des 28 derniers jours d'activité</p>
+</div>
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold rounded-full uppercase tracking-tighter">Live Monitor</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm group hover:bg-surface-bright transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-secondary-container rounded-lg text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+<span class="text-tertiary-container font-bold text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                                    +12%
+                                </span>
+</div>
+<p class="text-4xl font-extrabold text-primary mb-1 tracking-tighter">1,247</p>
+<p class="text-sm font-medium text-slate-500">Utilisateurs actifs</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm group hover:bg-surface-bright transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-tertiary-container text-tertiary-fixed-dim rounded-lg">
+<span class="material-symbols-outlined" data-icon="handyman">handyman</span>
+</div>
+<span class="text-tertiary-container font-bold text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                                    +5%
+                                </span>
+</div>
+<p class="text-4xl font-extrabold text-primary mb-1 tracking-tighter">328</p>
+<p class="text-sm font-medium text-slate-500">Prestations terminées</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm group hover:bg-surface-bright transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-container text-primary-fixed rounded-lg">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+</div>
+<span class="text-tertiary-container font-bold text-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span>
+                                    +18%
+                                </span>
+</div>
+<p class="text-4xl font-extrabold text-primary mb-1 tracking-tighter">2,156</p>
+<p class="text-sm font-medium text-slate-500">Réservations validées</p>
+</div>
+</div>
+</section>
+<!-- Bento Middle Layer: Tasks & Creation -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Liste de tâches -->
+<section class="bg-surface-container-lowest rounded-xl p-8">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-primary">Liste de tâches</h3>
+<button class="text-xs font-bold text-surface-tint hover:underline">Tout voir</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl group hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Messages non lus</p>
+<p class="text-xs text-on-surface-variant">Réponses requises rapidement</p>
+</div>
+</div>
+<span class="w-8 h-8 rounded-full bg-error text-white text-[10px] font-bold flex items-center justify-center">5</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl group hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">KYC en attente</p>
+<p class="text-xs text-on-surface-variant">Vérification d'identité prestataire</p>
+</div>
+</div>
+<span class="w-8 h-8 rounded-full bg-primary-container text-white text-[10px] font-bold flex items-center justify-center">3</span>
+</div>
+<div class="flex items-center justify-between p-4 bg-surface-container-low rounded-xl group hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">Litiges à arbitrer</p>
+<p class="text-xs text-on-surface-variant">Conflits client vs technicien</p>
+</div>
+</div>
+<span class="w-8 h-8 rounded-full bg-secondary text-white text-[10px] font-bold flex items-center justify-center">2</span>
+</div>
+</div>
+</section>
+<!-- Création Rapide -->
+<section class="flex flex-col">
+<h3 class="text-lg font-bold text-primary mb-6">Création Rapide</h3>
+<div class="grid grid-cols-1 gap-4 flex-1">
+<button class="flex items-center justify-between p-5 bg-primary-gradient text-white rounded-xl shadow-lg shadow-primary/10 transition-all hover:-translate-y-1 active:scale-95">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-2xl" data-icon="edit_note">edit_note</span>
+<span class="font-bold">Nouveau Post Contenu</span>
+</div>
+<span class="material-symbols-outlined opacity-50" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center justify-between p-5 bg-surface-container-highest text-on-surface rounded-xl transition-all hover:bg-surface-container-high active:scale-95">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-2xl" data-icon="alternate_email">alternate_email</span>
+<span class="font-bold">Email Campagne</span>
+</div>
+<span class="material-symbols-outlined text-slate-400" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center justify-between p-5 bg-surface-container-highest text-on-surface rounded-xl transition-all hover:bg-surface-container-high active:scale-95">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-2xl" data-icon="bar_chart">bar_chart</span>
+<span class="font-bold">Générer Rapport</span>
+</div>
+<span class="material-symbols-outlined text-slate-400" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</section>
+</div>
+<!-- Aperçu contenu récent -->
+<section class="bg-surface-container-lowest rounded-xl p-8">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-lg font-bold text-primary">Aperçu contenu récent</h3>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+</div>
+<div class="space-y-0 border-collapse">
+<!-- Custom Data Table Component with Zebra Layering -->
+<div class="grid grid-cols-12 px-4 py-3 bg-surface-container-low rounded-t-xl text-[10px] uppercase tracking-widest font-black text-primary/60">
+<div class="col-span-6">Titre / Catégorie</div>
+<div class="col-span-3 text-center">Date</div>
+<div class="col-span-3 text-right">Statut</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-5 items-center hover:bg-surface-bright transition-colors">
+<div class="col-span-6 flex items-center gap-4">
+<img alt="Service item" class="w-12 h-12 rounded-lg object-cover" data-alt="Professional cleaning supplies neatly arranged on a bright surface, crisp focus, commercial aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2i6JXn2moBZs0Z629NVzu_KieNvn1dJrS8W7kN9bzZJLsk90eeLeEFltYPKQJ9d896AJadiAtfcNEFksSqKLwlmgZGroxFTgoAkmh1H3FuwsEoGIh9fHi23LKR0w_WMZ2V1Q7D2UhMzSurpZzL9c_rUHkyTDKa_BM7MZrNUSLuthLO-4G-eT45VZcHfyBR5hWW34xBHkDhTqhCPnZS7JBBvSQDVbDFzxb4ZNEEejTeXN-F6aCGWby40_fGEYRQ95zg5qP4ypiffGi"/>
+<div>
+<p class="text-sm font-bold text-on-surface">Guide: Nettoyage Industriel</p>
+<p class="text-[10px] font-medium text-slate-400">Marketing &amp; SEO</p>
+</div>
+</div>
+<div class="col-span-3 text-center text-xs font-medium text-on-surface-variant">Il y a 2h</div>
+<div class="col-span-3 text-right">
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded-full">Publié</span>
+</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-5 items-center bg-surface-container-low/30 hover:bg-surface-bright transition-colors">
+<div class="col-span-6 flex items-center gap-4">
+<img alt="Service item" class="w-12 h-12 rounded-lg object-cover" data-alt="Close up of a smart home thermostat on a modern wall, clean design, tech focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrMnR_awfzFpY253DDBmm_ZEyr2dd6SeKZVgvAyxwIfXYQ1ckY7wkhtByhQd5oRIGpn7QTJoQZDIp4jYJcW9aDhfw1qDvRLxLK492NTyyB2ZSv5QYkuFONQaBLelcrpsyzpwO9i8m8tJ7yj22r6TQn5VnxMbZ1_rJnt6hovhZAgUC96tqB6Mjpe4dU7kRm0jIwsbV5-1L1_bsR60AHRy8se2zAyeEGOAv6KsWkbJ3J2iO3ClycA-PLiC3AeRl3eABbrt2wKyAxABHs"/>
+<div>
+<p class="text-sm font-bold text-on-surface">Offre: Installation Domotique</p>
+<p class="text-[10px] font-medium text-slate-400">Promotions</p>
+</div>
+</div>
+<div class="col-span-3 text-center text-xs font-medium text-on-surface-variant">Hier</div>
+<div class="col-span-3 text-right">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full">Brouillon</span>
+</div>
+</div>
+<div class="grid grid-cols-12 px-4 py-5 items-center rounded-b-xl hover:bg-surface-bright transition-colors">
+<div class="col-span-6 flex items-center gap-4">
+<img alt="Service item" class="w-12 h-12 rounded-lg object-cover" data-alt="An electrician working on a panel with colorful wires, organized professional workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_3_JHjl1vw3WuiIuQLqSw9AquimuajDlFFrw_yK6ICH3_le1cYSG8FHx0HGVASA1kFq2DsPt6eJNeGGloyXVodbri6lZA_lZ1OEnNGj7tdsAqetzColBNpYfYahfDrrQgb6w2VgamyLwY5LdiZFjAhaeBc1TnjP2870gBhft1ZyjDkT7AnA38_d472YC9pQLBAdcPN5rVC1VkITjA7M5LQh42_Vj62btRSrFoe2kFMK-E-bmUDT56MXQPdl_l1oXPbmlXYUrychg9"/>
+<div>
+<p class="text-sm font-bold text-on-surface">News: Nouveaux Tarifs 2024</p>
+<p class="text-[10px] font-medium text-slate-400">Annonces</p>
+</div>
+</div>
+<div class="col-span-3 text-center text-xs font-medium text-on-surface-variant">02 Mai</div>
+<div class="col-span-3 text-right">
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded-full">Publié</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Column: Context Panel -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Objectifs Section -->
+<section class="bg-primary text-white rounded-xl p-8 shadow-xl shadow-primary/10 overflow-hidden relative">
+<div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary-container rounded-full opacity-20"></div>
+<div class="relative z-10">
+<h3 class="text-lg font-extrabold mb-6 tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" data-icon="rocket_launch">rocket_launch</span>
+                            Objectifs du jour
+                        </h3>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-bold">
+<span>Croissance Inscrits</span>
+<span>70%</span>
+</div>
+<div class="h-2 bg-primary-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim w-[70%]"></div>
+</div>
+<p class="text-[10px] text-primary-fixed-dim">+10% inscrits ciblés</p>
+</div>
+<div class="flex items-center gap-4 bg-primary-container/40 p-4 rounded-xl">
+<div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-tertiary-fixed-dim flex items-center justify-center">
+<span class="material-symbols-outlined text-sm text-tertiary-fixed-dim" data-icon="check">check</span>
+</div>
+<span class="text-sm font-medium">Vérifier 3 KYC prioritaires</span>
+</div>
+<div class="flex items-center gap-4 bg-primary-container/40 p-4 rounded-xl border border-white/5">
+<div class="flex-shrink-0 w-8 h-8 rounded-full border-2 border-white/20 flex items-center justify-center"></div>
+<span class="text-sm font-medium">Répondre tickets support Nv 2</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Conseils Section -->
+<section class="bg-surface-container-lowest rounded-xl p-8">
+<h3 class="text-lg font-bold text-primary mb-6">Conseils &amp; Updates</h3>
+<div class="space-y-4">
+<div class="p-4 bg-surface-container-low rounded-xl border-l-4 border-surface-tint">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-surface-tint text-xl" data-icon="sms">sms</span>
+<span class="text-xs font-black uppercase text-surface-tint tracking-widest">Optimisation</span>
+</div>
+<p class="text-sm font-bold text-on-surface mb-1">Activer les SMS transactionnels</p>
+<p class="text-xs text-on-surface-variant">Réduisez le taux d'annulation de 15% en activant les rappels automatiques.</p>
+</div>
+<div class="p-4 bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-tertiary-container text-xl" data-icon="new_releases">new_releases</span>
+<span class="text-xs font-black uppercase text-tertiary-container tracking-widest">Nouveau</span>
+</div>
+<p class="text-sm font-bold text-on-surface mb-1">Tracking Live Techniciens</p>
+<p class="text-xs text-on-surface-variant">La mise à jour v4.2 est disponible pour le suivi cartographique en temps réel.</p>
+</div>
+<div class="p-4 bg-tertiary-container rounded-xl">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-xl" data-icon="sell">sell</span>
+<span class="text-xs font-black uppercase text-tertiary-fixed-dim tracking-widest">Promotion</span>
+</div>
+<p class="text-sm font-bold text-white mb-1">Promo d'été: -20% frais</p>
+<p class="text-xs text-tertiary-fixed-dim/80">Campagne d'activation pour les nouveaux prestataires ce weekend.</p>
+</div>
+</div>
+</section>
+<!-- Quick Stats Footer -->
+<section class="bg-white/50 border border-slate-200/50 rounded-xl p-6 flex flex-col items-center text-center">
+<p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Health Status</p>
+<div class="flex items-center gap-2 mb-4">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse shadow-[0_0_8px_#4edea3]"></span>
+<span class="text-xs font-bold text-primary">All Systems Operational</span>
+</div>
+<img alt="System Chart" class="w-full h-24 object-cover rounded-lg opacity-40 grayscale" data-alt="Abstract data visualization chart showing a steady upward trend with soft blue and green glowing lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBY29wStrlUZJgyVyl3IB-oe9w0z47cG6DIF8lvziWO3pHAX-zCN8Q4cB8-Fcv9gXF4nODu2CsujV4epfDmPAhKdDrSXaQ6YyRTofbJxf2br0kJv1kdH6REvGmQ0fDCE8LoCqpmHQneYMu4NHmXxTTU_IXaFLNfTPbOWYywZJvNIyRxn8ojyeplr0jeCBZ2n6khpDMEOeLGE5q3Jb_puarrE4V1NClSOpFVr-I8vfLTelCjG9SSKTZf2Jglm-Z__bv_9xdFYfocmKbb"/>
+</section>
+</div>
+</div>
+</main>
+</body></html>
