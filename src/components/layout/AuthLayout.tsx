@@ -13,6 +13,7 @@ interface AuthLayoutProps {
   showBackButton?: boolean;
   backHref?: string;
   backLabel?: string;
+  onBack?: () => void;
 }
 
 export function AuthLayout({
@@ -22,6 +23,7 @@ export function AuthLayout({
   showBackButton = true,
   backHref = "/",
   backLabel = "Retour à l'accueil",
+  onBack,
 }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex">
@@ -81,16 +83,27 @@ export function AuthLayout({
         {/* Back Button */}
         {showBackButton && (
           <div className="p-4 lg:p-6">
-            <Button
-              variant="ghost"
-              asChild
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <Link href={backHref}>
+            {onBack ? (
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="text-gray-600 hover:text-gray-900"
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                {backLabel}
-              </Link>
-            </Button>
+                {backLabel || "Retour"}
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                asChild
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <Link href={backHref}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  {backLabel}
+                </Link>
+              </Button>
+            )}
           </div>
         )}
 

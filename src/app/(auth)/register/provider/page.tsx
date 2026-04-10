@@ -7,12 +7,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Eye,
-  EyeOff,
   Loader2,
   Check,
   User,
-  Phone,
   Mail,
   Building,
   FileText,
@@ -24,9 +21,9 @@ import {
   Video,
   RefreshCw,
   AlertCircle,
-  Play,
   Square,
   Clock,
+  Shield,
 } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
@@ -54,7 +51,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { SERVICE_CATEGORIES } from "@/lib/constants/services";
 import { CITIES_CI, POPULAR_CITIES } from "@/lib/constants/cities";
 import { SUBSCRIPTION_PLANS, formatXOF } from "@/lib/constants/subscription";
@@ -68,12 +69,6 @@ const personalInfoSchema = z.object({
     { message: "Format invalide. Ex: +225 XX XX XX XX XX" }
   ),
   email: z.string().email("Email invalide"),
-  password: z
-    .string()
-    .min(8, "Le mot de passe doit contenir au moins 8 caractères")
-    .regex(/[A-Z]/, "Doit contenir au moins une majuscule")
-    .regex(/[a-z]/, "Doit contenir au moins une minuscule")
-    .regex(/[0-9]/, "Doit contenir au moins un chiffre"),
 });
 
 const professionalInfoSchema = z.object({
@@ -100,15 +95,14 @@ const STEPS = [
   { id: 2, title: "Informations professionnelles", description: "Votre activité" },
   { id: 3, title: "Documents & Vidéo de vérification", description: "Vérification d'identité" },
   { id: 4, title: "Choix de l'abonnement", description: "Sélectionnez votre offre" },
+  { id: 5, title: "Vérification email", description: "Confirmez votre email" },
 ];
 
 const VIDEO_DURATION = 5; // 5 seconds
 
 export default function ProviderRegisterPage() {
   const router = useRouter();
-  const { registerProvider, error, clearError, isLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const [showPassword, setShowPassword] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{
     cni?: File;
     registreCommerce?: File;
@@ -121,8 +115,13 @@ export default function ProviderRegisterPage() {
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [countdown, setCountdown] = useState<number | null>(null);
   const [cameraPermissionRequested, setCameraPermissionRequested] = useState(false);
+  
+  // OTP state
+  const [otp, setOtp] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
@@ -140,7 +139,6 @@ export default function ProviderRegisterPage() {
       fullName: "",
       phone: "",
       email: "",
-      password: "",
       businessName: "",
       description: "",
       categories: [],
@@ -153,6 +151,21 @@ export default function ProviderRegisterPage() {
   });
 
   const progress = (currentStep / STEPS.length) * 100;
+
+  // Countdown timer for resend
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  // Auto-verify when OTP is complete
+  useEffect(() => {
+    if (otp.length === 6 && currentStep === 5) {
+      verifyOTP();
+    }
+  }, [otp]);
 
   // Camera functions
   const startCamera = useCallback(async () => {
@@ -211,13 +224,12 @@ export default function ProviderRegisterPage() {
     }
   }, []);
 
-  // Start recording with countdown
+  // Start recording
   const startRecording = useCallback(() => {
     if (!streamRef.current || !videoRef.current) return;
     
     chunksRef.current = [];
     
-    // Determine supported MIME type
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
       ? 'video/webm;codecs=vp9,opus'
       : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
@@ -244,12 +256,10 @@ export default function ProviderRegisterPage() {
         stopCamera();
       };
       
-      // Start recording
-      mediaRecorder.start(100); // Collect data every 100ms
+      mediaRecorder.start(100);
       setIsRecording(true);
       setRecordingTime(0);
       
-      // Timer for recording duration
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
           if (prev >= VIDEO_DURATION) {
@@ -315,13 +325,12 @@ export default function ProviderRegisterPage() {
 
     switch (step) {
       case 1:
-        fieldsToValidate = ["fullName", "phone", "email", "password"];
+        fieldsToValidate = ["fullName", "phone", "email"];
         break;
       case 2:
         fieldsToValidate = ["businessName", "description", "categories", "hourlyRate", "city", "address"];
         break;
       case 3:
-        // Video is required for KYC
         if (!videoBlob) {
           setCameraError("Veuillez enregistrer une vidéo de vérification de 5 secondes");
           return false;
@@ -337,10 +346,18 @@ export default function ProviderRegisterPage() {
   };
 
   const handleNext = async () => {
-    clearError();
+    setError("");
     const isValid = await validateStep(currentStep);
     if (isValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+      if (currentStep === 4) {
+        // Send OTP before going to step 5
+        const sent = await sendOTP();
+        if (sent) {
+          setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+        }
+      } else {
+        setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+      }
     }
   };
 
@@ -363,42 +380,85 @@ export default function ProviderRegisterPage() {
     });
   };
 
-  const onSubmit = async (data: ProviderFormValues) => {
-    clearError();
-    
-    // Create File from video blob
-    const videoFile = videoBlob 
-      ? new File([videoBlob], `verification-video-${Date.now()}.webm`, { 
-          type: videoBlob.type || 'video/webm' 
-        })
-      : null;
-    
-    const result = await registerProvider({
-      fullName: data.fullName,
-      phone: data.phone,
-      email: data.email,
-      password: data.password,
-      businessName: data.businessName,
-      description: data.description,
-      categories: data.categories,
-      hourlyRate: data.hourlyRate,
-      city: data.city,
-      address: data.address,
-      cniFile: uploadedFiles.cni,
-      registreCommerceFile: uploadedFiles.registreCommerce,
-      profilePhotoFile: videoFile, // Video file for verification
-      subscriptionPlan: data.subscriptionPlan as SubscriptionPlanKey,
-    });
+  // Send OTP
+  const sendOTP = async () => {
+    const email = form.getValues("email");
+    setIsLoading(true);
+    setError("");
 
-    if (result.success) {
-      router.push("/verify-otp");
+    try {
+      const response = await fetch("/api/auth/email-otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Erreur lors de l'envoi du code");
+        return false;
+      }
+
+      setCountdown(60);
+      return true;
+    } catch (err) {
+      setError("Erreur de connexion. Veuillez réessayer.");
+      return false;
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Verify OTP
+  const verifyOTP = async () => {
+    if (otp.length !== 6) return;
+
+    const formData = form.getValues();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/auth/email-otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          otp,
+          fullName: formData.fullName,
+          role: "PROVIDER",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Code invalide");
+        setOtp("");
+        return;
+      }
+
+      // Success - redirect to provider dashboard
+      router.push("/provider");
+    } catch (err) {
+      setError("Erreur de vérification. Veuillez réessayer.");
+      setOtp("");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Resend OTP
+  const resendOTP = async () => {
+    if (countdown > 0) return;
+    setOtp("");
+    await sendOTP();
   };
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <PersonalInfoStep form={form} showPassword={showPassword} setShowPassword={setShowPassword} />;
+        return <PersonalInfoStep form={form} />;
       case 2:
         return <ProfessionalInfoStep form={form} />;
       case 3:
@@ -409,7 +469,6 @@ export default function ProviderRegisterPage() {
             onRemoveFile={removeFile}
             cniInputRef={cniInputRef}
             registreInputRef={registreInputRef}
-            // Video props
             videoRef={videoRef}
             previewVideoRef={previewVideoRef}
             videoUrl={videoUrl}
@@ -425,6 +484,18 @@ export default function ProviderRegisterPage() {
         );
       case 4:
         return <SubscriptionStep form={form} />;
+      case 5:
+        return (
+          <OTPStep
+            email={form.getValues("email")}
+            otp={otp}
+            setOtp={setOtp}
+            error={error}
+            isLoading={isLoading}
+            countdown={countdown}
+            onResend={resendOTP}
+          />
+        );
       default:
         return null;
     }
@@ -474,7 +545,7 @@ export default function ProviderRegisterPage() {
       </div>
 
       {/* Error Message */}
-      {error && (
+      {error && currentStep !== 5 && (
         <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg mb-4">
           {error}
         </div>
@@ -482,52 +553,43 @@ export default function ProviderRegisterPage() {
 
       {/* Form */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => e.preventDefault()}>
           {renderStepContent()}
 
           {/* Navigation Buttons */}
-          <div className="flex gap-3 mt-6">
-            {currentStep > 1 && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handlePrevious}
-                className="flex-1 border-gray-200"
-              >
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                Précédent
-              </Button>
-            )}
+          {currentStep !== 5 && (
+            <div className="flex gap-3 mt-6">
+              {currentStep > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handlePrevious}
+                  className="flex-1 border-gray-200"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  Précédent
+                </Button>
+              )}
 
-            {currentStep < STEPS.length ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Suivant
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                type="submit"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Inscription en cours...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Finaliser mon inscription
-                  </>
-                )}
-              </Button>
-            )}
-          </div>
+              {currentStep < STEPS.length ? (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      Suivant
+                      <ChevronRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              ) : null}
+            </div>
+          )}
         </form>
       </Form>
 
@@ -545,21 +607,9 @@ export default function ProviderRegisterPage() {
 // Step 1: Personal Information
 function PersonalInfoStep({
   form,
-  showPassword,
-  setShowPassword,
 }: {
   form: ReturnType<typeof useForm<ProviderFormValues>>;
-  showPassword: boolean;
-  setShowPassword: (v: boolean) => void;
 }) {
-  const password = form.watch("password");
-  const passwordRequirements = [
-    { label: "Au moins 8 caractères", test: (p: string) => p.length >= 8 },
-    { label: "Une majuscule", test: (p: string) => /[A-Z]/.test(p) },
-    { label: "Une minuscule", test: (p: string) => /[a-z]/.test(p) },
-    { label: "Un chiffre", test: (p: string) => /[0-9]/.test(p) },
-  ];
-
   return (
     <div className="space-y-4">
       <FormField
@@ -588,7 +638,6 @@ function PersonalInfoStep({
             <FormControl>
               <div className="relative">
                 <Input placeholder="+225 XX XX XX XX XX" className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500" {...field} />
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               </div>
             </FormControl>
             <FormMessage />
@@ -608,47 +657,9 @@ function PersonalInfoStep({
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               </div>
             </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="password"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-gray-900">Mot de passe *</FormLabel>
-            <FormControl>
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Créez un mot de passe"
-                  className="pr-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                  {...field}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </FormControl>
-            <div className="mt-2 space-y-1">
-              {passwordRequirements.map((req, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-center gap-2 text-xs ${
-                    req.test(password || "") ? "text-green-600" : "text-gray-400"
-                  }`}
-                >
-                  <Check className="h-3 w-3" />
-                  {req.label}
-                </div>
-              ))}
-            </div>
+            <FormDescription>
+              Un code de vérification sera envoyé à cet email
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -836,7 +847,6 @@ function KYCStep({
   onRemoveFile,
   cniInputRef,
   registreInputRef,
-  // Video props
   videoRef,
   previewVideoRef,
   videoUrl,
@@ -854,7 +864,6 @@ function KYCStep({
   onRemoveFile: (type: "cni" | "registreCommerce") => void;
   cniInputRef: React.RefObject<HTMLInputElement>;
   registreInputRef: React.RefObject<HTMLInputElement>;
-  // Video props
   videoRef: React.RefObject<HTMLVideoElement>;
   previewVideoRef: React.RefObject<HTMLVideoElement>;
   videoUrl: string | null;
@@ -875,11 +884,11 @@ function KYCStep({
       <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700">
         <p className="font-medium mb-1">Vérification d'identité requise</p>
         <p className="text-xs">
-          Enregistrez une vidéo de 5 secondes pour vérifier votre identité. Assurez-vous d'être bien éclairé et face caméra.
+          Enregistrez une vidéo de 5 secondes pour vérifier votre identité.
         </p>
       </div>
 
-      {/* Video Recording Section - REQUIRED */}
+      {/* Video Recording Section */}
       <div className="border border-gray-200 rounded-lg p-4 bg-white">
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -908,7 +917,6 @@ function KYCStep({
 
         <div className="relative aspect-[4/3] bg-gray-900 rounded-lg overflow-hidden">
           {videoUrl ? (
-            // Show recorded video preview
             <div className="relative w-full h-full">
               <video
                 ref={previewVideoRef}
@@ -929,7 +937,6 @@ function KYCStep({
               </div>
             </div>
           ) : (
-            // Show camera feed or start camera button
             <>
               <video
                 ref={videoRef}
@@ -939,46 +946,29 @@ function KYCStep({
                 className="w-full h-full object-cover transform scale-x-[-1]"
               />
               
-              {/* Recording overlay */}
               {isRecording && (
                 <div className="absolute inset-0 pointer-events-none">
-                  {/* Recording indicator */}
                   <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-full text-sm font-medium">
                     <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                     REC {remainingTime}s
                   </div>
-                  
-                  {/* Progress bar */}
                   <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-800">
                     <div 
                       className="h-full bg-red-600 transition-all duration-1000"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  
-                  {/* Face guide */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-48 h-48 border-2 border-white/30 rounded-full" />
-                  </div>
                 </div>
               )}
 
-              {/* Camera active but not recording */}
               {isCameraActive && !isRecording && (
                 <div className="absolute inset-0 pointer-events-none">
-                  {/* Face guide */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-48 h-48 border-2 border-white/50 rounded-full" />
                   </div>
-                  
-                  {/* Instructions */}
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
-                    Placez votre visage dans le cercle
-                  </div>
                 </div>
               )}
 
-              {/* Control buttons */}
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                 {isCameraActive && !isRecording && (
                   <Button
@@ -987,7 +977,7 @@ function KYCStep({
                     onClick={onStartRecording}
                   >
                     <Video className="h-5 w-5 mr-2" />
-                    Démarrer l'enregistrement
+                    Démarrer
                   </Button>
                 )}
                 
@@ -1003,7 +993,6 @@ function KYCStep({
                 )}
               </div>
 
-              {/* Start camera button */}
               {!isCameraActive && !cameraError && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 gap-3">
                   <Video className="h-12 w-12 text-gray-400" />
@@ -1020,42 +1009,16 @@ function KYCStep({
             </>
           )}
         </div>
-
-        <div className="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            Durée: 5 secondes
-          </div>
-          <div className="flex items-center gap-1">
-            <Video className="h-3 w-3" />
-            Face caméra
-          </div>
-        </div>
       </div>
 
-      {/* CNI Upload - Optional */}
+      {/* CNI Upload */}
       <div className="border border-gray-200 rounded-lg p-4 bg-white">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <p className="font-medium text-sm text-gray-900">Carte Nationale d'Identité (CNI)</p>
-            <p className="text-xs text-gray-500">Recto-verso de votre CNI (optionnel)</p>
-          </div>
-          {uploadedFiles.cni && (
-            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
-              Ajouté
-            </Badge>
-          )}
-        </div>
+        <p className="font-medium text-sm text-gray-900">CNI (optionnel)</p>
         {uploadedFiles.cni ? (
-          <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
+          <div className="flex items-center gap-2 bg-gray-50 rounded p-2 mt-2">
             <FileText className="h-4 w-4 text-gray-400" />
             <span className="text-sm truncate flex-1 text-gray-700">{uploadedFiles.cni.name}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onRemoveFile("cni")}
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={() => onRemoveFile("cni")}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -1063,13 +1026,11 @@ function KYCStep({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-16 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+            className="w-full h-12 mt-2 border-dashed"
             onClick={() => cniInputRef.current?.click()}
           >
-            <div className="text-center">
-              <Upload className="h-5 w-5 mx-auto mb-1 text-gray-400" />
-              <span className="text-xs text-gray-500">Cliquez pour télécharger</span>
-            </div>
+            <Upload className="h-4 w-4 mr-2" />
+            Ajouter
           </Button>
         )}
         <input
@@ -1080,57 +1041,6 @@ function KYCStep({
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onFileUpload("cni", file);
-          }}
-        />
-      </div>
-
-      {/* Registre de Commerce - Optional */}
-      <div className="border border-gray-200 rounded-lg p-4 bg-white">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <p className="font-medium text-sm text-gray-900">Registre de Commerce</p>
-            <p className="text-xs text-gray-500">Pour les entreprises formelles (optionnel)</p>
-          </div>
-          {uploadedFiles.registreCommerce && (
-            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
-              Ajouté
-            </Badge>
-          )}
-        </div>
-        {uploadedFiles.registreCommerce ? (
-          <div className="flex items-center gap-2 bg-gray-50 rounded p-2">
-            <FileText className="h-4 w-4 text-gray-400" />
-            <span className="text-sm truncate flex-1 text-gray-700">{uploadedFiles.registreCommerce.name}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => onRemoveFile("registreCommerce")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-16 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50"
-            onClick={() => registreInputRef.current?.click()}
-          >
-            <div className="text-center">
-              <Upload className="h-5 w-5 mx-auto mb-1 text-gray-400" />
-              <span className="text-xs text-gray-500">Cliquez pour télécharger</span>
-            </div>
-          </Button>
-        )}
-        <input
-          ref={registreInputRef}
-          type="file"
-          accept="image/*,.pdf"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) onFileUpload("registreCommerce", file);
           }}
         />
       </div>
@@ -1146,9 +1056,7 @@ function SubscriptionStep({ form }: { form: ReturnType<typeof useForm<ProviderFo
     <div className="space-y-4">
       <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 text-sm text-amber-700">
         <p className="font-medium">Choisissez votre formule d'abonnement</p>
-        <p className="text-xs mt-1">
-          Vous pouvez commencer gratuitement et upgrader plus tard.
-        </p>
+        <p className="text-xs mt-1">Vous pouvez commencer gratuitement et upgrader plus tard.</p>
       </div>
 
       <div className="grid gap-4">
@@ -1162,53 +1070,106 @@ function SubscriptionStep({ form }: { form: ReturnType<typeof useForm<ProviderFo
             }`}
             onClick={() => form.setValue("subscriptionPlan", key as SubscriptionPlanKey)}
           >
-            {plan.popular && (
-              <div className="absolute -top-3 left-4">
-                <Badge className="bg-blue-600 text-white text-xs">Populaire</Badge>
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h4 className="font-semibold text-gray-900">{plan.name}</h4>
+                <p className="text-2xl font-bold text-blue-600">{formatXOF(plan.price)}<span className="text-sm font-normal text-gray-500">/mois</span></p>
               </div>
-            )}
-
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selectedPlan === key ? "border-blue-600 bg-blue-600" : "border-gray-300"
-                  }`}
-                >
-                  {selectedPlan === key && <Check className="h-3 w-3 text-white" />}
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">{plan.name}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {plan.price === 0 ? "Gratuit" : formatXOF(plan.price)}
-                    {plan.price > 0 && (
-                      <span className="text-sm font-normal text-gray-500">/mois</span>
-                    )}
-                  </p>
-                </div>
+              <div className={`w-5 h-5 rounded-full border-2 ${selectedPlan === key ? "border-blue-600 bg-blue-600" : "border-gray-300"}`}>
+                {selectedPlan === key && <Check className="w-3 h-3 text-white m-auto" />}
               </div>
             </div>
-
-            <ul className="mt-3 space-y-1 ml-8">
-              {plan.features.slice(0, 4).map((feature, idx) => (
-                <li key={idx} className="flex items-center gap-2 text-sm text-gray-600">
-                  <Check className="h-3 w-3 text-green-500" />
-                  {feature}
-                </li>
-              ))}
-              {plan.features.length > 4 && (
-                <li className="text-xs text-gray-400">+{plan.features.length - 4} autres avantages</li>
-              )}
-            </ul>
+            <p className="text-xs text-gray-500">{plan.features?.slice(0, 3).join(" • ")}</p>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
 
-      <FormField
-        control={form.control}
-        name="subscriptionPlan"
-        render={() => <FormMessage />}
-      />
+// Step 5: OTP Verification
+function OTPStep({
+  email,
+  otp,
+  setOtp,
+  error,
+  isLoading,
+  countdown,
+  onResend,
+}: {
+  email: string;
+  otp: string;
+  setOtp: (v: string) => void;
+  error: string;
+  isLoading: boolean;
+  countdown: number;
+  onResend: () => void;
+}) {
+  return (
+    <div className="space-y-6">
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {/* Email Info */}
+      <div className="text-center">
+        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+          <Mail className="w-6 h-6 text-primary" />
+        </div>
+        <p className="text-sm text-gray-600">Code envoyé à</p>
+        <p className="font-medium text-gray-900">{email}</p>
+      </div>
+
+      {/* OTP Input */}
+      <div className="flex justify-center">
+        <InputOTP
+          maxLength={6}
+          value={otp}
+          onChange={(value) => setOtp(value)}
+          disabled={isLoading}
+        >
+          <InputOTPGroup>
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+            <InputOTPSlot index={3} />
+            <InputOTPSlot index={4} />
+            <InputOTPSlot index={5} />
+          </InputOTPGroup>
+        </InputOTP>
+      </div>
+
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="flex items-center justify-center text-sm text-gray-500">
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Vérification en cours...
+        </div>
+      )}
+
+      {/* Resend */}
+      <div className="text-center">
+        <p className="text-sm text-gray-600 mb-2">Vous n'avez pas reçu le code ?</p>
+        <Button
+          variant="ghost"
+          className="text-primary"
+          onClick={onResend}
+          disabled={countdown > 0 || isLoading}
+        >
+          {countdown > 0 ? `Renvoyer dans ${countdown}s` : "Renvoyer le code"}
+        </Button>
+      </div>
+
+      {/* Security note */}
+      <div className="flex items-start gap-2 p-3 bg-gray-50 rounded-lg">
+        <Shield className="w-4 h-4 text-gray-400 mt-0.5" />
+        <p className="text-xs text-gray-500">
+          Pour votre sécurité, le code expire dans 10 minutes. Ne partagez jamais ce code.
+        </p>
+      </div>
     </div>
   );
 }
