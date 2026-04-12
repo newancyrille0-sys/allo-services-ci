@@ -35,7 +35,10 @@ export function Footer() {
             <Link href="/" className="text-2xl font-black tracking-tight text-white">
               Allo Services CI
             </Link>
-            <p className="text-white/60 mt-4 max-w-sm">
+            <p className="text-primary font-semibold mt-2">
+              Le bon prestataire, au bon moment, près de chez vous.
+            </p>
+            <p className="text-white/60 mt-3 max-w-sm">
               Le premier réseau de professionnels vérifiés en Côte d&apos;Ivoire pour tous vos besoins du quotidien.
             </p>
             <div className="flex items-center gap-4 mt-6">

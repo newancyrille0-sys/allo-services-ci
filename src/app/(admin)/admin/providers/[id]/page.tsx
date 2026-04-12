@@ -21,6 +21,7 @@ import {
   MessageSquare,
   ShieldAlert,
   ExternalLink,
+  Crown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { KYCDocumentViewer, type KYCDocument } from "@/components/admin";
+import { KYCDocumentViewer, type KYCDocument, ProviderTierManager, PaymentControlManager } from "@/components/admin";
 import { SubscriptionBadge } from "@/components/providers/SubscriptionBadge";
 import { TrustScore } from "@/components/providers/TrustScore";
 import { ReviewCard } from "@/components/reviews/ReviewCard";
@@ -345,9 +346,17 @@ export default function AdminProviderDetailPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-gray-800 border-gray-700">
+        <TabsList className="bg-gray-800 border-gray-700 flex-wrap">
           <TabsTrigger value="overview" className="data-[state=active]:bg-primary">
             Vue d&apos;ensemble
+          </TabsTrigger>
+          <TabsTrigger value="tier" className="data-[state=active]:bg-primary">
+            <Crown className="w-4 h-4 mr-1" />
+            Niveau
+          </TabsTrigger>
+          <TabsTrigger value="payment" className="data-[state=active]:bg-primary">
+            <CreditCard className="w-4 h-4 mr-1" />
+            Paiements
           </TabsTrigger>
           <TabsTrigger value="kyc" className="data-[state=active]:bg-primary">
             Documents KYC
@@ -498,6 +507,76 @@ export default function AdminProviderDetailPage() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Tier Management Tab */}
+        <TabsContent value="tier">
+          <ProviderTierManager
+            provider={{
+              id: mockProvider.id,
+              businessName: mockProvider.businessName,
+              providerTier: "PREMIUM",
+              tierExpiresAt: null,
+              user: {
+                id: "user-1",
+                fullName: mockProvider.ownerName,
+                email: mockProvider.email,
+              },
+            }}
+            currentTierConfig={{
+              tier: "PREMIUM",
+              monthlyPrice: 25000,
+              yearlyPrice: 250000,
+              commissionRate: 0.12,
+              maxPublications: 25,
+              maxLives: 10,
+              maxServices: 10,
+              canViewPhone: true,
+              canPriority: true,
+              canAnalytics: true,
+              canPromo: true,
+              canInvoice: true,
+              canInsurance: true,
+              visibilityBoost: 2.0,
+              badgeColor: "#F59E0B",
+              badgeIcon: "premium",
+            }}
+            onTierChange={async (tier, expiresAt, reason) => {
+              console.log("Tier change:", { tier, expiresAt, reason });
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }}
+          />
+        </TabsContent>
+
+        {/* Payment Control Tab */}
+        <TabsContent value="payment">
+          <PaymentControlManager
+            provider={{
+              id: mockProvider.id,
+              businessName: mockProvider.businessName,
+              user: {
+                id: "user-1",
+                fullName: mockProvider.ownerName,
+              },
+            }}
+            paymentMethods={[
+              { id: "orange_money", label: "Orange Money", isEnabled: true, controlId: null, disabledAt: null, disabledReason: null, disabledById: null },
+              { id: "mtn_money", label: "MTN Money", isEnabled: true, controlId: null, disabledAt: null, disabledReason: null, disabledById: null },
+              { id: "wave", label: "Wave", isEnabled: true, controlId: null, disabledAt: null, disabledReason: null, disabledById: null },
+              { id: "moov", label: "Moov Money", isEnabled: false, controlId: "ctrl-1", disabledAt: new Date("2024-03-01"), disabledReason: "Problème technique", disabledById: "admin-1" },
+              { id: "card", label: "Carte bancaire", isEnabled: true, controlId: null, disabledAt: null, disabledReason: null, disabledById: null },
+              { id: "cash", label: "Espèces", isEnabled: true, controlId: null, disabledAt: null, disabledReason: null, disabledById: null },
+            ]}
+            stats={{ total: 6, enabled: 5, disabled: 1 }}
+            onToggleMethod={async (method, enabled, reason) => {
+              console.log("Toggle method:", { method, enabled, reason });
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }}
+            onBulkUpdate={async (methods, reason) => {
+              console.log("Bulk update:", { methods, reason });
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            }}
+          />
         </TabsContent>
 
         {/* KYC Documents Tab */}

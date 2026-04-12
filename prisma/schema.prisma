@@ -37,6 +37,14 @@ enum SubscriptionPlan {
   PREMIUM    // 25 000 FCFA/mois - Or
 }
 
+// Niveaux de prestataire (gratuit, basic, premium, elite)
+enum ProviderTier {
+  GRATUIT    // Tier gratuit - Accès limité
+  BASIC      // Tier Basic - 10 000 FCFA/mois
+  PREMIUM    // Tier Premium - 25 000 FCFA/mois
+  ELITE      // Tier Elite - 50 000 FCFA/mois - Accès complet
+}
+
 enum ReservationStatus {
   PENDING
   CONFIRMED
@@ -124,6 +132,13 @@ model Provider {
   averageRating Float @default(0)
   subscriptionStatus SubscriptionPlan @default(STARTER)
   subscriptionExpiresAt DateTime?
+  
+  // Niveau de prestataire (gratuit, basic, premium, elite)
+  providerTier   ProviderTier @default(GRATUIT)
+  tierExpiresAt  DateTime?    // Date d'expiration du tier
+  tierSetById    String?      // Admin qui a défini le tier
+  tierSetAt      DateTime?    // Date de définition du tier
+  
   isActive  Boolean @default(false)
   latitude  Float?
   longitude Float?
@@ -149,6 +164,9 @@ model Provider {
   availabilities    ProviderAvailability[]
   availabilityExceptions ProviderAvailabilityException[]
   stats             ProviderStats?
+  
+  // Payment control relations
+  paymentControls   ProviderPaymentControl[]
 }
 
 // ==================== SERVICE MODEL ====================
@@ -1200,4 +1218,96 @@ model ProviderStats {
   updatedAt                DateTime @updatedAt
 
   @@index([providerId])
+}
+
+// ==================== PROVIDER PAYMENT CONTROL ====================
+// Contrôle des méthodes de paiement par prestataire
+
+model ProviderPaymentControl {
+  id              String   @id @default(cuid())
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Méthode de paiement
+  paymentMethod   String   // orange_money, mtn_money, wave, moov, card, cash
+  
+  // Statut
+  isEnabled       Boolean  @default(true)  // true = activé, false = désactivé
+  disabledAt      DateTime?
+  disabledById    String?  // Admin ID
+  disabledReason  String?  // Raison de la désactivation
+  
+  // Réactivation
+  reactivatedAt   DateTime?
+  reactivatedById String?
+  
+  // Audit
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([providerId, paymentMethod])
+  @@index([providerId])
+  @@index([paymentMethod])
+  @@index([isEnabled])
+}
+
+// ==================== PROVIDER TIER CONFIGURATION ====================
+// Configuration des avantages par tier
+
+model ProviderTierConfig {
+  id              String   @id @default(cuid())
+  tier            ProviderTier @unique
+  
+  // Tarification
+  monthlyPrice    Float    @default(0)     // Prix mensuel en FCFA
+  yearlyPrice     Float    @default(0)     // Prix annuel en FCFA
+  commissionRate  Float    @default(0.15)  // Taux de commission
+  
+  // Limites
+  maxPublications Int      @default(5)     // Max publications/mois
+  maxLives        Int      @default(2)     // Max lives/mois
+  maxServices     Int      @default(3)     // Max services actifs
+  
+  // Fonctionnalités
+  canViewPhone    Boolean  @default(false) // Voir téléphone client
+  canPriority     Boolean  @default(false) // Affichage prioritaire
+  canAnalytics    Boolean  @default(false) // Statistiques avancées
+  canPromo        Boolean  @default(false) // Créer des promotions
+  canInvoice      Boolean  @default(false) // Générer factures
+  canInsurance    Boolean  @default(false) // Assurance prestation
+  
+  // Visibilité
+  visibilityBoost Float    @default(1.0)   // Multiplicateur de visibilité
+  
+  // Badge
+  badgeColor      String?  // Couleur du badge (hex)
+  badgeIcon       String?  // Icône du badge
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ==================== PROVIDER TIER HISTORY ====================
+// Historique des changements de tier
+
+model ProviderTierHistory {
+  id              String   @id @default(cuid())
+  providerId      String
+  
+  // Changement
+  previousTier    ProviderTier
+  newTier         ProviderTier
+  
+  // Raison
+  reason          String   // upgrade, downgrade, admin_change, payment, expiry
+  
+  // Dates
+  changedAt       DateTime @default(now())
+  changedById     String?  // Admin ID (si changement manuel)
+  
+  // Métadonnées
+  metadata        String?  // JSON
+
+  @@index([providerId])
+  @@index([changedAt])
 }
