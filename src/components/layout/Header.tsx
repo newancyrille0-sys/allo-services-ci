@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, Search, X, Play } from "lucide-react";
+import { Menu, Search, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -38,11 +38,11 @@ export function Header() {
             Prestataires
           </Link>
           <Link 
-            href="/publicite" 
-            className="text-slate-600 hover:text-orange-500 transition-colors font-semibold flex items-center gap-1"
+            href="/publications" 
+            className="text-slate-600 hover:text-teal-800 transition-colors font-semibold flex items-center gap-1"
           >
-            <Play className="h-4 w-4" />
-            Vidéos
+            <FileText className="h-4 w-4" />
+            Publications
           </Link>
           <Link 
             href="/login" 
@@ -84,12 +84,12 @@ export function Header() {
                 Prestataires
               </Link>
               <Link 
-                href="/publicite" 
-                className="text-[#181c1d] hover:text-orange-500 transition-colors font-semibold py-2 flex items-center gap-2"
+                href="/publications" 
+                className="text-[#181c1d] hover:text-[#004150] transition-colors font-semibold py-2 flex items-center gap-2"
                 onClick={() => setIsOpen(false)}
               >
-                <Play className="h-4 w-4" />
-                Vidéos
+                <FileText className="h-4 w-4" />
+                Publications
               </Link>
               <Link 
                 href="/login" 
