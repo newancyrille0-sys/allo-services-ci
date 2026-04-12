@@ -143,6 +143,12 @@ model Provider {
   inClientAddressBooks ProviderAddressBook[]
   commissionTiers   CommissionTier[]
   groupMemberships  ProviderGroupMember[]
+
+  // Provider tools relations
+  invoices          ProviderInvoice[]
+  availabilities    ProviderAvailability[]
+  availabilityExceptions ProviderAvailabilityException[]
+  stats             ProviderStats?
 }
 
 // ==================== SERVICE MODEL ====================
@@ -195,6 +201,9 @@ model Reservation {
   insuranceClaim   InsuranceClaim?
   phoneMasking     PhoneMasking?
   loyaltyTransactions LoyaltyTransaction[]
+
+  // Provider tools relations
+  providerInvoice  ProviderInvoice?
 }
 
 // ==================== REVIEW MODEL ====================
@@ -1052,5 +1061,142 @@ model ProviderGroupMember {
 
   @@unique([groupId, providerId])
   @@index([groupId])
+  @@index([providerId])
+}
+
+// ==================== PROVIDER MANAGEMENT TOOLS ====================
+
+// Factures prestataire
+model ProviderInvoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String   @unique
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  reservationId   String   @unique
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  clientId        String
+  
+  // Détails service
+  serviceName     String
+  serviceDate     DateTime
+  serviceAddress  String
+  serviceCity     String
+  
+  // Montants
+  amount          Float    // Montant total
+  commission      Float    // Commission prélevée
+  commissionRate  Float    // Taux appliqué
+  netAmount       Float    // Montant net à percevoir
+  currency        String   @default("XOF")
+  
+  // Statut
+  status          String   @default("draft") // draft, sent, paid, cancelled
+  
+  // Dates
+  dueDate         DateTime
+  paidAt          DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([clientId])
+  @@index([status])
+  @@index([serviceDate])
+  @@index([createdAt])
+}
+
+// Disponibilités prestataire
+model ProviderAvailability {
+  id              String   @id @default(cuid())
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Jour de la semaine (0 = Dimanche, 6 = Samedi)
+  dayOfWeek       Int
+  
+  // Horaires
+  startTime       String   // "08:00"
+  endTime         String   // "18:00"
+  
+  // Pause déjeuner
+  breakStart      String?  // "12:00"
+  breakEnd        String?  // "14:00"
+  
+  // Statut
+  isActive        Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([providerId, dayOfWeek])
+  @@index([providerId])
+}
+
+// Exceptions de disponibilité (vacances, absences)
+model ProviderAvailabilityException {
+  id              String   @id @default(cuid())
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Période
+  startDate       DateTime
+  endDate         DateTime
+  
+  // Type
+  type            String   // vacation, sick_leave, personal, other
+  reason          String?
+  
+  // Statut
+  isApproved      Boolean  @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+// Statistiques prestataire (cache)
+model ProviderStats {
+  id              String   @id @default(cuid())
+  providerId      String   @unique
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Période actuelle (mois en cours)
+  currentMonthRevenue      Float    @default(0)
+  currentMonthReservations Int      @default(0)
+  currentMonthReviews      Int      @default(0)
+  
+  // Période précédente (mois dernier)
+  lastMonthRevenue         Float    @default(0)
+  lastMonthReservations    Int      @default(0)
+  
+  // Totaux
+  totalRevenue             Float    @default(0)
+  totalCompletedReservations Int    @default(0)
+  totalCancelledReservations Int    @default(0)
+  
+  // Moyennes
+  averageResponseTime      Int      @default(0) // en minutes
+  averageRating            Float    @default(0)
+  
+  // Tendances
+  revenueGrowth            Float    @default(0) // pourcentage
+  reservationGrowth        Float    @default(0) // pourcentage
+  
+  // Meilleurs créneaux
+  peakHours                String?  // JSON: [{"hour": 9, "count": 15}, ...]
+  peakDays                 String?  // JSON: [{"day": "saturday", "count": 45}, ...]
+  
+  // Clients
+  repeatClientRate         Float    @default(0) // pourcentage
+  topClients               String?  // JSON: [{"id": "...", "count": 5, "spent": 50000}, ...]
+  
+  lastCalculated           DateTime @default(now())
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
   @@index([providerId])
 }
