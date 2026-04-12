@@ -92,6 +92,17 @@ model User {
   accounts     Account[]
   sessions     Session[]
   otpCodes     OTPCode[]
+
+  // Anti-leakage relations
+  loyaltyPoints    LoyaltyPoints?
+  cashbacks        Cashback[]
+  insuranceClaims  InsuranceClaim[] @relation("ClientInsuranceClaims")
+  contactDetections ContactDetectionLog[] @relation("ContactDetectionSender")
+  receivedDetections ContactDetectionLog[] @relation("ContactDetectionReceiver")
+  providerAddressBook ProviderAddressBook[]
+  referralsAsReferrer Referral[] @relation("ReferrerRelation")
+  referralsAsReferred Referral[] @relation("ReferredRelation")
+  warnings         UserWarning[]
 }
 
 // ==================== PROVIDER MODEL ====================
@@ -127,6 +138,11 @@ model Provider {
   subscriptions Subscription[]
   publications ProviderPublication[]
   lives        ProviderLive[]
+
+  // Anti-leakage relations
+  inClientAddressBooks ProviderAddressBook[]
+  commissionTiers   CommissionTier[]
+  groupMemberships  ProviderGroupMember[]
 }
 
 // ==================== SERVICE MODEL ====================
@@ -173,6 +189,12 @@ model Reservation {
   review    Review?
   messages  Message[]
   payments  Payment[] @relation("ReservationPayments")
+
+  // Anti-leakage relations
+  cashback         Cashback?
+  insuranceClaim   InsuranceClaim?
+  phoneMasking     PhoneMasking?
+  loyaltyTransactions LoyaltyTransaction[]
 }
 
 // ==================== REVIEW MODEL ====================
@@ -638,4 +660,397 @@ model SupportTicketResponse {
   createdAt DateTime @default(now())
 
   @@index([ticketId])
+}
+
+// ==================== ANTI-LEAKAGE MODELS ====================
+// Stratégie pour réduire la fuite de clients/prestataires hors plateforme
+
+// Programme de fidélité - Points clients
+model LoyaltyPoints {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Points accumulés
+  totalPoints     Int      @default(0)
+  availablePoints Int      @default(0) // Points utilisables
+  pendingPoints   Int      @default(0) // Points en attente (30 jours)
+  
+  // Statistiques
+  totalEarned     Int      @default(0) // Total historique gagné
+  totalSpent      Int      @default(0) // Total historique dépensé
+  
+  // Niveau de fidélité
+  tier            String   @default("bronze") // bronze, silver, gold, platinum
+  tierUpdatedAt   DateTime @default(now())
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  transactions    LoyaltyTransaction[]
+
+  @@index([userId])
+  @@index([tier])
+}
+
+// Transactions de points de fidélité
+model LoyaltyTransaction {
+  id              String   @id @default(cuid())
+  loyaltyPointsId String
+  loyaltyPoints   LoyaltyPoints @relation(fields: [loyaltyPointsId], references: [id], onDelete: Cascade)
+  
+  // Type de transaction
+  type            String   // earn, spend, expire, bonus
+  points          Int      // Positif pour earn, négatif pour spend
+  reason          String   // reservation, referral, bonus, redemption, expiry
+  
+  // Référence
+  reservationId   String?
+  referralId      String?
+  
+  // Métadonnées
+  description     String?
+  metadata        String?  // JSON
+  
+  // Expiration (pour les points en attente)
+  expiresAt       DateTime?
+  
+  createdAt       DateTime @default(now())
+
+  @@index([loyaltyPointsId])
+  @@index([type])
+  @@index([reservationId])
+  @@index([createdAt])
+}
+
+// Cashback différé (anti-fuite puissant)
+model Cashback {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservationId   String   @unique
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  
+  // Montant
+  amount          Float    // Montant du cashback (5% de la réservation)
+  currency        String   @default("XOF")
+  
+  // Statut
+  status          String   @default("pending") // pending, available, used, forfeited
+  
+  // Conditions anti-fuite
+  hasContactShare Boolean  @default(false) // Contact partagé détecté ?
+  hasDispute      Boolean  @default(false) // Litige en cours ?
+  hasCancellation Boolean  @default(false) // Annulation ?
+  
+  // Dates
+  eligibleAt      DateTime // Date à laquelle le cashback devient disponible (30 jours)
+  usedAt          DateTime?
+  forfeitedAt     DateTime?
+  forfeitReason   String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([eligibleAt])
+}
+
+// Assurance prestation (Killer Feature)
+model InsuranceClaim {
+  id              String   @id @default(cuid())
+  reservationId   String   @unique
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  clientId        String
+  client          User     @relation("ClientInsuranceClaims", fields: [clientId], references: [id])
+  providerId      String
+  
+  // Type de réclamation
+  claimType       String   // no_show, damage, incomplete, dispute
+  description     String
+  amount          Float    // Montant réclamé
+  currency        String   @default("XOF")
+  
+  // Preuves
+  evidence        String?  // JSON array of file URLs
+  
+  // Statut
+  status          String   @default("pending") // pending, under_review, approved, rejected, resolved
+  reviewedById    String?
+  reviewedAt      DateTime?
+  
+  // Résolution
+  resolutionType  String?  // refund, partial_refund, mediation, rejected
+  resolutionAmount Float?
+  resolutionNotes String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  resolvedAt      DateTime?
+
+  @@index([reservationId])
+  @@index([clientId])
+  @@index([status])
+  @@index([claimType])
+}
+
+// Détection de contacts (messagerie)
+model ContactDetectionLog {
+  id              String   @id @default(cuid())
+  messageId       String?
+  senderId        String
+  sender          User     @relation("ContactDetectionSender", fields: [senderId], references: [id])
+  receiverId      String
+  receiver        User     @relation("ContactDetectionReceiver", fields: [receiverId], references: [id])
+  reservationId   String?
+  
+  // Type de contact détecté
+  detectedType    String   // phone, whatsapp, email, telegram, other
+  detectedPattern String   // Pattern regex détecté
+  
+  // Contexte
+  rawContent      String   // Contenu original (pour analyse)
+  maskedContent   String?  // Contenu masqué (si applicable)
+  
+  // Gravité et action
+  severity        String   @default("low") // low, medium, high
+  action          String   @default("alert") // alert, warn, block
+  actionTaken     String?  // Description de l'action prise
+  
+  // Statut
+  isResolved      Boolean  @default(false)
+  resolvedAt      DateTime?
+  resolvedBy      String?  // Admin ID
+  
+  // Récidive
+  occurrenceCount Int      @default(1) // Nombre d'occurrences pour cet utilisateur
+  
+  createdAt       DateTime @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([detectedType])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// Carnet d'adresses sécurisé (clients)
+model ProviderAddressBook {
+  id              String   @id @default(cuid())
+  clientId        String
+  client          User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Dernière prestation
+  lastReservationId String?
+  lastServiceDate   DateTime?
+  
+  // Notes privées du client
+  privateNotes    String?
+  
+  // Statistiques
+  totalReservations Int  @default(0)
+  totalSpent      Float    @default(0)
+  
+  // Rappels automatiques
+  reminderEnabled Boolean  @default(true)
+  nextReminderDate DateTime?
+  
+  // Tags
+  tags            String?  // JSON array: ["plombier", "urgent", "favori"]
+  
+  // Favori
+  isFavorite      Boolean  @default(false)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([clientId, providerId])
+  @@index([clientId])
+  @@index([providerId])
+  @@index([isFavorite])
+}
+
+// Programme de parrainage
+model Referral {
+  id              String   @id @default(cuid())
+  referrerId      String   // Parrain (User)
+  referrer        User     @relation("ReferrerRelation", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredId      String   // Filleul (User)
+  referred        User     @relation("ReferredRelation", fields: [referredId], references: [id], onDelete: Cascade)
+  
+  // Code de parrainage
+  referralCode    String   @unique
+  
+  // Statut
+  status          String   @default("pending") // pending, completed, rewarded
+  
+  // Récompenses
+  referrerReward  Float    @default(5000) // 5000 FCFA pour le parrain
+  referredReward  Float    @default(5000) // 5000 FCFA pour le filleul
+  rewardCurrency  String   @default("XOF")
+  
+  // Condition de déblocage
+  firstReservationCompleted Boolean @default(false)
+  
+  // Dates
+  completedAt     DateTime?
+  rewardedAt      DateTime?
+  
+  createdAt       DateTime @default(now())
+
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([referralCode])
+  @@index([status])
+}
+
+// Commission dégressive
+model CommissionTier {
+  id              String   @id @default(cuid())
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Période
+  periodStart     DateTime
+  periodEnd       DateTime
+  
+  // Volume de réservations
+  reservationCount Int     @default(0)
+  totalRevenue    Float    @default(0)
+  
+  // Taux de commission
+  baseRate        Float    @default(0.15)  // 15% de base
+  appliedRate     Float    @default(0.15)  // Taux appliqué après réduction
+  discountSaved   Float    @default(0)     // Économies réalisées
+  
+  // Statut
+  isPaid          Boolean  @default(false)
+  paidAt          DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([providerId, periodStart])
+  @@index([providerId])
+  @@index([periodStart])
+}
+
+// Avertissements anti-fuite
+model UserWarning {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Type d'avertissement
+  warningType     String   // contact_share, platform_leak, terms_violation
+  severity        String   // soft, formal, suspension
+  
+  // Détails
+  title           String
+  message         String
+  relatedDetectionId String? // Lien vers ContactDetectionLog
+  
+  // Actions
+  acknowledged    Boolean  @default(false)
+  acknowledgedAt  DateTime?
+  
+  // Conséquences
+  pointsDeducted  Int      @default(0)
+  cashbackForfeited Float  @default(0)
+  
+  // Expiration
+  expiresAt       DateTime? // Les avertissements expirent après un certain temps
+  
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([warningType])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+// Masquage de téléphone temporaire
+model PhoneMasking {
+  id              String   @id @default(cuid())
+  reservationId   String   @unique
+  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  
+  // Téléphones masqués
+  clientPhone     String   // Téléphone réel du client
+  providerPhone   String   // Téléphone réel du prestataire
+  
+  // Numéro relais (si VoIP disponible)
+  relayNumber     String?  // Numéro temporaire affiché
+  
+  // Statut du masquage
+  isActive        Boolean  @default(true)
+  revealedAt      DateTime? // Quand les vrais numéros ont été révélés
+  revealReason    String?  // confirmation, completion, emergency
+  
+  // Expiration
+  expiresAt       DateTime // Le masquage expire après la prestation
+  
+  createdAt       DateTime @default(now())
+
+  @@index([reservationId])
+  @@index([isActive])
+  @@index([expiresAt])
+}
+
+// Tontine digitale (groupes de prestataires)
+model ProviderGroup {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  
+  // Paramètres
+  category        String   // Catégorie de services
+  city            String   // Ville
+  maxMembers      Int      @default(10)
+  
+  // Visibilité
+  visibilityBoost Float    @default(1.0) // Multiplicateur de visibilité
+  
+  // Statistiques
+  totalEarnings   Float    @default(0)
+  totalReservations Int    @default(0)
+  
+  // Fondateur
+  founderId       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  members         ProviderGroupMember[]
+
+  @@index([category])
+  @@index([city])
+}
+
+model ProviderGroupMember {
+  id              String   @id @default(cuid())
+  groupId         String
+  group           ProviderGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  providerId      String
+  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Rôle
+  role            String   @default("member") // founder, admin, member
+  
+  // Contribution à la tontine
+  contribution    Float    @default(0)
+  sharedEarnings  Float    @default(0)
+  
+  // Statut
+  status          String   @default("active") // active, suspended, left
+  
+  joinedAt        DateTime @default(now())
+
+  @@unique([groupId, providerId])
+  @@index([groupId])
+  @@index([providerId])
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { calculateCommission } from '@/lib/payments/cinetpay';
+import { maskPhoneNumber, createPhoneMasking } from '@/lib/utils/phoneMasking';
 import { z } from 'zod';
 
 // Validation schema for creating reservation
@@ -97,9 +98,57 @@ export async function POST(request: NextRequest) {
       },
       include: {
         service: true,
+        client: {
+          select: { id: true, fullName: true, phone: true, avatarUrl: true },
+        },
         provider: {
           include: { user: { select: { fullName: true, phone: true } } },
         },
+      },
+    });
+
+    // ========== ANTI-LEAKAGE: Phone Masking ==========
+    // Créer le masquage de téléphone pour cette réservation
+    if (client.phone && provider.user.phone) {
+      await createPhoneMasking(
+        reservation.id,
+        client.phone,
+        provider.user.phone
+      );
+    }
+
+    // ========== ANTI-LEAKAGE: Loyalty Points ==========
+    // Créer ou mettre à jour les points de fidélité
+    const existingLoyaltyPoints = await db.loyaltyPoints.findUnique({
+      where: { userId: data.clientId },
+    });
+
+    if (!existingLoyaltyPoints) {
+      // Créer le compte de fidélité
+      await db.loyaltyPoints.create({
+        data: {
+          userId: data.clientId,
+          totalPoints: 0,
+          availablePoints: 0,
+          pendingPoints: 0,
+          tier: 'bronze',
+        },
+      });
+    }
+
+    // ========== ANTI-LEAKAGE: Cashback ==========
+    // Créer le cashback différé (5% du montant)
+    const cashbackAmount = priceTotal * 0.05;
+    const eligibleAt = new Date();
+    eligibleAt.setDate(eligibleAt.getDate() + 30); // Disponible après 30 jours
+
+    await db.cashback.create({
+      data: {
+        userId: data.clientId,
+        reservationId: reservation.id,
+        amount: cashbackAmount,
+        status: 'pending',
+        eligibleAt,
       },
     });
 
@@ -113,6 +162,10 @@ export async function POST(request: NextRequest) {
         actionUrl: `/dashboard/reservations/${reservation.id}`,
       },
     });
+
+    // ========== ANTI-LEAKAGE: Masquer les numéros dans la réponse ==========
+    const maskedProviderPhone = maskPhoneNumber(provider.user.phone || '');
+    const maskedClientPhone = maskPhoneNumber(client.phone || '');
 
     return NextResponse.json({
       success: true,
@@ -132,9 +185,29 @@ export async function POST(request: NextRequest) {
         provider: {
           id: provider.id,
           businessName: provider.businessName,
-          user: reservation.provider.user,
+          user: {
+            fullName: reservation.provider.user.fullName,
+            // Numéro masqué avant confirmation
+            phone: maskedProviderPhone,
+            phoneIsMasked: true,
+          },
+        },
+        client: {
+          id: client.id,
+          fullName: client.fullName,
+          // Numéro masqué pour le prestataire
+          phone: maskedClientPhone,
+          phoneIsMasked: true,
         },
         createdAt: reservation.createdAt.toISOString(),
+      },
+      // Anti-leakage info
+      antiLeakage: {
+        phoneMaskingActive: true,
+        cashbackEligible: true,
+        cashbackAmount,
+        cashbackAvailableAt: eligibleAt.toISOString(),
+        message: 'Les numéros de téléphone seront révélés après confirmation de la réservation.',
       },
     });
   } catch (error) {
@@ -199,6 +272,8 @@ export async function GET(request: NextRequest) {
             user: { select: { id: true, fullName: true, phone: true, avatarUrl: true } },
           },
         },
+        phoneMasking: true,
+        cashback: true,
       },
       orderBy: { scheduledDate: 'desc' },
       skip,
@@ -208,8 +283,12 @@ export async function GET(request: NextRequest) {
     // Get total count
     const total = await db.reservation.count({ where: whereClause });
 
-    return NextResponse.json({
-      reservations: reservations.map((r) => ({
+    // ========== ANTI-LEAKAGE: Mask phones based on status ==========
+    const processedReservations = reservations.map((r) => {
+      const canRevealPhone = ['CONFIRMED', 'IN_PROGRESS', 'COMPLETED'].includes(r.status);
+      const isClient = role !== 'provider';
+      
+      return {
         id: r.id,
         status: r.status,
         scheduledDate: r.scheduledDate.toISOString(),
@@ -220,15 +299,37 @@ export async function GET(request: NextRequest) {
         priceTotal: r.priceTotal,
         paymentStatus: r.paymentStatus,
         service: r.service,
-        client: r.client,
+        client: {
+          ...r.client,
+          phone: canRevealPhone || !isClient 
+            ? r.client.phone 
+            : maskPhoneNumber(r.client.phone || ''),
+          phoneIsMasked: !canRevealPhone && isClient,
+        },
         provider: {
           id: r.provider.id,
           businessName: r.provider.businessName,
-          user: r.provider.user,
+          user: {
+            ...r.provider.user,
+            phone: canRevealPhone || isClient
+              ? r.provider.user.phone
+              : maskPhoneNumber(r.provider.user.phone || ''),
+            phoneIsMasked: !canRevealPhone && !isClient,
+          },
         },
+        // Anti-leakage info
+        cashback: r.cashback ? {
+          amount: r.cashback.amount,
+          status: r.cashback.status,
+          eligibleAt: r.cashback.eligibleAt.toISOString(),
+        } : null,
         createdAt: r.createdAt.toISOString(),
         updatedAt: r.updatedAt.toISOString(),
-      })),
+      };
+    });
+
+    return NextResponse.json({
+      reservations: processedReservations,
       pagination: {
         page,
         limit,
