@@ -716,6 +716,7 @@ model LoyaltyTransaction {
   
   // Référence
   reservationId   String?
+  reservation     Reservation? @relation(fields: [reservationId], references: [id])
   referralId      String?
   
   // Métadonnées
