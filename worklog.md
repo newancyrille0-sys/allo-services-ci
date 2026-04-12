@@ -885,3 +885,74 @@ Stage Summary:
 - All routes use Prisma for database operations
 - Input validation with zod schemas
 - Development mode with simulated payment responses
+
+---
+Task ID: 13
+Agent: full-stack-developer
+Task: Implementer les nouveaux dashboards basés sur les maquettes HTML
+
+Work Log:
+- Créé Dashboard Client complet (`/src/app/(dashboard)/client/page.tsx`)
+  - Header fixe avec recherche, notifications, solde disponible
+  - Section bienvenue avec badge "Compte vérifié"
+  - Barre de recherche héro avec filtres avancés
+  - Quick dashboard: 3 cartes (Réservations, Messages, Note Moyenne)
+  - Section "Vos prochaines prestations" avec liste des réservations
+  - Section "Sélectionnés pour vous" avec cartes de prestataires
+  - Sidebar avec offres du moment, discussions récentes, programme de fidélité, support
+  - Navigation mobile en bas
+
+- Créé Dashboard Prestataire FREE (`/src/app/(dashboard)/provider/free/page.tsx`)
+  - Badge "NIVEAU FREE" (gris/slate)
+  - Statistiques de base (réservations, note, gains)
+  - Planning de la semaine simplifié
+  - Section Solde & Retraits
+  - Marketing verrouillé "Premium Only"
+  - Upsell vers Premium
+
+- Créé Dashboard Prestataire BASIC (`/src/app/(dashboard)/provider/basic/page.tsx`)
+  - Badge "NIVEAU BASIC" (emeraude/vert)
+  - Commission: 12%
+  - Statistiques avancées (taux d'acceptation, temps de réponse, sources clients)
+  - Planning de la semaine avec indicateurs Live
+  - Section Marketing & Visibilité
+  - Quota marketing (3 posts/semaine)
+  - Upsell vers Premium/Elite
+
+- Créé Dashboard Prestataire PREMIUM (`/src/app/(dashboard)/provider/premium/page.tsx`)
+  - Badge "NIVEAU PREMIUM" (or/ambre)
+  - Commission: 10%
+  - Live Streaming Studio complet
+  - Outils Premium (Codes promo, Stats post-live, Replay auto)
+  - Stats Live (Vues, Conversion, Revenus, Meilleur créneau)
+  - Solde widget (450.000 FCFA)
+  - Avantages Premium actifs
+
+- Créé Dashboard Prestataire ELITE (`/src/app/(dashboard)/provider/elite/page.tsx`)
+  - Badge "ELITE TIER" avec fond dégradé premium
+  - Commission: 5%
+  - Core Metrics (Revenue MTD, Conversion Rate, Avg. Rating)
+  - Visibility Spotlight (Top 3 Search Placement)
+  - Elite Support avec Account Manager dédié
+  - Live Streaming Studio Elite (Multi-Cam 4 sources, Overlays, Cross-Platform)
+  - Predictive Analytics (Demand Forecasting, Competitor Benchmarking)
+  - Expansion & Certifications (Elite Shop, Sovereign Certification)
+
+- Modifié routeur provider (`/src/app/(dashboard)/provider/page.tsx`)
+  - Redirection automatique selon le niveau d'abonnement:
+    - STARTER → /provider/free
+    - BASIC → /provider/basic
+    - STANDARD → /provider/premium
+    - PREMIUM → /provider/elite
+    - ELITE → /provider/elite
+
+- Mis à jour globals.css avec classes personnalisées
+  - .glass-panel pour effet glassmorphism
+  - .premium-gradient pour dégradés premium
+
+Stage Summary:
+- 5 nouveaux dashboards implémentés selon les maquettes
+- Système de routage intelligent basé sur l'abonnement
+- Design system cohérent avec les couleurs de la marque
+- Tous les dashboards sont responsive avec navigation mobile
+- Données mockées pour démonstration

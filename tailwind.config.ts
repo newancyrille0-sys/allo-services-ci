@@ -55,6 +55,14 @@ const config: Config = {
       },
       backgroundImage: {
         "hero-gradient": "linear-gradient(135deg, #004150 0%, #005a6e 100%)",
+        "premium-gradient": "linear-gradient(135deg, #001e40 0%, #003366 100%)",
+      },
+      boxShadow: {
+        "ambient": "0 8px 24px rgba(17, 29, 35, 0.06)",
+        "ambient-lg": "0 12px 32px rgba(17, 29, 35, 0.08)",
+      },
+      backdropBlur: {
+        "glass": "20px",
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-out forwards",
