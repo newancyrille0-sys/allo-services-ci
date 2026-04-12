@@ -48,11 +48,16 @@ export default function PublicationsPage() {
       try {
         const response = await fetch("/api/publications");
         if (response.ok) {
-          const data = await response.json();
-          setPublications(data);
+          const result = await response.json();
+          if (result.success && Array.isArray(result.data)) {
+            setPublications(result.data);
+          } else {
+            setPublications([]);
+          }
         }
       } catch (error) {
         console.error("Error fetching publications:", error);
+        setPublications([]);
       } finally {
         setIsLoadingPubs(false);
       }
@@ -67,11 +72,19 @@ export default function PublicationsPage() {
       try {
         const response = await fetch("/api/lives/active");
         if (response.ok) {
-          const data = await response.json();
-          setActiveLives(data);
+          const result = await response.json();
+          // L'API lives/active retourne directement un tableau
+          if (Array.isArray(result)) {
+            setActiveLives(result);
+          } else if (result.success && Array.isArray(result.data)) {
+            setActiveLives(result.data);
+          } else {
+            setActiveLives([]);
+          }
         }
       } catch (error) {
         console.error("Error fetching active lives:", error);
+        setActiveLives([]);
       } finally {
         setIsLoadingLives(false);
       }
