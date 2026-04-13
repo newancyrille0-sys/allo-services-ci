@@ -41,11 +41,6 @@ export function Hero() {
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-4xl text-center space-y-10 pt-20">
-        {/* Logo Brand */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full">
-          <span className="text-primary font-bold text-lg">Allo Services CI</span>
-        </div>
-
         {/* Title */}
         <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-extrabold text-white text-editorial leading-[1.1]">
           L&apos;excellence à votre{" "}
@@ -54,13 +49,8 @@ export function Hero() {
         </h1>
 
         {/* Slogan */}
-        <p className="text-primary font-semibold text-xl md:text-2xl max-w-2xl mx-auto">
+        <p className="text-white font-semibold text-xl md:text-2xl max-w-2xl mx-auto">
           Le bon prestataire, au bon moment, près de chez vous.
-        </p>
-
-        {/* Description */}
-        <p className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto font-light">
-          Le premier réseau de professionnels vérifiés en Côte d&apos;Ivoire pour tous vos besoins du quotidien.
         </p>
 
         {/* Search Bento */}
