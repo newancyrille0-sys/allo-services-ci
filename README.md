@@ -19,6 +19,7 @@ Marketplace de mise en relation clients/prestataires de services en Côte d'Ivoi
 - ⭐ Système d'avis et notations
 - ❤️ Favoris et carnet d'adresses
 - 🎁 Programme de fidélité et cashback
+- 🛡️ Assurance intégrée sur les prestations
 
 ### Pour les Prestataires
 - 👤 Profil professionnel personnalisable
@@ -27,15 +28,30 @@ Marketplace de mise en relation clients/prestataires de services en Côte d'Ivoi
 - 📸 Publications photos/vidéos
 - 🎥 Lives en direct
 - 💰 Facturation automatique
-- 🏆 Abonnements (Starter, Standard, Premium)
+- 🏆 Système de tiers (Gratuit, Basic, Premium, Elite)
+- 💳 Gestion des moyens de paiement
 
 ### Pour les Administrateurs
 - 👥 Gestion des utilisateurs et prestataires
 - ✅ Vérification KYC
 - 💳 Suivi des paiements
-- 🛡️ Détection de fraude
+- 🛡️ Détection de fraude et anti-leakage
 - 📊 Analytics et rapports
 - 🎯 Modération de contenu
+- 🏷️ Attribution des tiers prestataires
+- 🔒 Activation/désactivation des moyens de paiement
+
+### 🛡️ Stratégie Anti-Leakage
+
+Système complet pour éviter les transactions hors plateforme :
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| 🔢 Masquage téléphonique | Numéros masqués via VoIP |
+| 🔍 Détection de contacts | Analyse des messages (WhatsApp, email, téléphone) |
+| 🎁 Fidélité & Cashback | Récompenses pour les clients fidèles |
+| 🏥 Assurance | Protection sur les prestations |
+| 🤝 Programme de parrainage | Bonus pour chaque nouvelle inscription |
 
 ## 🛠️ Stack Technique
 
@@ -56,8 +72,17 @@ Marketplace de mise en relation clients/prestataires de services en Côte d'Ivoi
 │   └── seed-services.ts       # Création des services
 ├── src/
 │   ├── app/                   # Pages Next.js App Router
+│   │   ├── api/               # Routes API
+│   │   ├── admin/             # Panel administrateur
+│   │   └── services/          # Pages services
 │   ├── components/            # Composants React
+│   │   ├── home/              # Composants page d'accueil
+│   │   ├── layout/            # Header, Footer
+│   │   ├── ui/                # Composants UI (shadcn)
+│   │   └── anti-leakage/      # Composants anti-leakage
 │   ├── lib/                   # Utilitaires et configuration
+│   │   ├── constants/         # Services, villes, constantes
+│   │   └── utils/             # Utilitaires (détection, masquage)
 │   └── hooks/                 # Hooks React personnalisés
 └── public/                    # Fichiers statiques
 ```
@@ -106,21 +131,24 @@ bun run dev
 ### Identifiants Admin par défaut
 
 - **Email**: `admin@alloservices.ci`
-- **Mot de passe**: `Admin123!`
+- **Mot de passe**: `AlloServices2026!`
 
 ⚠️ Changez ce mot de passe après la première connexion !
 
 ## 🔧 Variables d'Environnement
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | URL de connexion à la base de données |
-| `NEXTAUTH_SECRET` | Clé secrète pour NextAuth |
-| `NEXTAUTH_URL` | URL de l'application |
-| `GOOGLE_CLIENT_ID` | ID client Google OAuth |
-| `GOOGLE_CLIENT_SECRET` | Secret client Google OAuth |
-| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clé de service Supabase |
+| Variable | Description | Requis |
+|----------|-------------|--------|
+| `DATABASE_URL` | URL de connexion à la base de données | ✅ |
+| `NEXTAUTH_SECRET` | Clé secrète pour NextAuth | ✅ |
+| `NEXTAUTH_URL` | URL de l'application | ✅ |
+| `GOOGLE_CLIENT_ID` | ID client Google OAuth | Optionnel |
+| `GOOGLE_CLIENT_SECRET` | Secret client Google OAuth | Optionnel |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase | Prod |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé de service Supabase | Prod |
+| `ORANGE_MONEY_API_KEY` | Clé API Orange Money | Prod |
+| `WAVE_API_KEY` | Clé API Wave | Prod |
+| `MTN_MONEY_API_KEY` | Clé API MTN | Prod |
 
 ## 🗄️ Déploiement sur Supabase
 
@@ -132,7 +160,7 @@ bun run dev
 
 ## 📊 Services Disponibles
 
-10 catégories avec 67 services:
+10 catégories avec 67+ services:
 
 - 🏗️ Bâtiment & Travaux (maçonnerie, plomberie, électricité...)
 - 🏠 Services à domicile (ménage, jardinage, garde d'enfants...)
@@ -145,6 +173,15 @@ bun run dev
 - 💼 Business & Services Pro (comptabilité, juridique...)
 - 🐾 Animaux (vétérinaire, toilettage, garde...)
 
+## 🏷️ Tiers Prestataires
+
+| Tiers | Visibilité | Commission | Fonctionnalités |
+|-------|------------|------------|-----------------|
+| **Gratuit** | Basique | 15% | Profil simple, 5 services |
+| **Basic** | Standard | 12% | Profil complet, 10 services, stats |
+| **Premium** | Prioritaire | 8% | Tout + badge, promotion, support prioritaire |
+| **Elite** | Maximum | 5% | Tout + mise en avant, accès VIP, manager dédié |
+
 ## 🔐 Sécurité
 
 - Authentification avec NextAuth.js
@@ -152,6 +189,7 @@ bun run dev
 - Protection CSRF
 - Validation des données côté serveur
 - Détection de fraude et anti-leakage
+- Masquage des numéros de téléphone
 
 ## 📱 Mobile Money
 
@@ -160,6 +198,15 @@ Paiements via:
 - 🟡 MTN Mobile Money
 - 🔵 Wave
 - 🟣 Moov Money
+
+## 🎯 KPIs Objectifs
+
+| Indicateur | Objectif |
+|------------|----------|
+| Taux de complétion sur plateforme | > 90% |
+| Détection de tentatives de court-circuit | > 95% |
+| Taux de rétention clients | > 70% |
+| Satisfaction client | > 4.5/5 |
 
 ## 📄 Licence
 
