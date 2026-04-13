@@ -4,160 +4,192 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Allo Services CI Design System - Green Theme */
+  /* ============================================
+     ALLO SERVICES CI - DESIGN SYSTEM
+     ============================================ */
 
-  /* Background and foreground */
-  --background: 247 249 251;
-  --foreground: 25 28 30;
-
-  /* Primary colors - Ivorian Green */
-  --primary: 0 105 62;
+  /* === COULEURS PRINCIPALES === */
+  
+  /* Primaire (Sarcelle) - HSL(191, 100%, 16%) → #004150 */
+  --primary: 0 65 80;
   --primary-foreground: 255 255 255;
-  --primary-container: 0 140 83;
-  --primary-fixed: 144 238 180;
-  --primary-fixed-dim: 80 200 120;
+  --primary-container: 0 90 110;
+  --primary-fixed: 180 235 255;
+  --primary-fixed-dim: 142 208 231;
   
-  /* Secondary colors - Slate */
-  --secondary: 80 95 118;
+  /* Secondaire (Orange) - HSL(25, 100%, 31%) → #9C4400 */
+  --secondary: 156 68 0;
   --secondary-foreground: 255 255 255;
-  --secondary-container: 208 225 251;
-  --secondary-fixed: 211 228 254;
-  --secondary-fixed-dim: 183 200 225;
+  --secondary-container: 253 118 19;
+  --secondary-fixed: 253 118 19;
+  --secondary-fixed-dim: 255 149 76;
   
-  /* Tertiary colors - Success Green */
-  --tertiary: 0 36 22;
+  /* Succès (Vert foncé) - HSL(140, 60%, 15%) → #0a4f1a */
+  --tertiary: 10 79 26;
   --tertiary-foreground: 255 255 255;
-  --tertiary-container: 0 60 39;
-  --tertiary-fixed: 111 251 190;
-  --tertiary-fixed-dim: 78 222 163;
-  --on-tertiary-container: 0 178 123;
+  --tertiary-container: 7 96 24;
+  --tertiary-fixed: 16 185 129;
+  --tertiary-fixed-dim: 52 211 153;
   
-  /* Muted colors */
-  --muted: 224 227 229;
-  --muted-foreground: 67 71 79;
+  /* Avertissement (Orange vibrant) - HSL(25, 98%, 53%) → #FD7613 */
+  --warning: 253 118 19;
+  --warning-foreground: 255 255 255;
+  
+  /* === ARRIÈRE-PLAN ET PREMIER PLAN === */
+  
+  /* Contexte - HSL(195, 14%, 97%) → #f7fafb */
+  --background: 247 250 251;
+  --foreground: 24 28 29;  /* HSL(192, 9%, 10%) → #181c1d */
+  
+  /* === SURFACES === */
+  --surface: 247 250 251;
+  --surface-bright: 247 250 251;
+  --surface-dim: 215 218 219;
+  --surface-tint: 0 65 80;
+  --surface-variant: 224 227 228;
+  --surface-container: 235 238 239;
+  --surface-container-low: 241 244 245;
+  --surface-container-lowest: 255 255 255;
+  --surface-container-high: 229 232 234;
+  --surface-container-highest: 224 227 228;
+  
+  /* === COMPOSANTS === */
+  
+  /* Muted */
+  --muted: 224 227 228;
+  --muted-foreground: 63 72 76;
   
   /* Accent */
-  --accent: 224 227 229;
-  --accent-foreground: 25 28 30;
+  --accent: 224 227 228;
+  --accent-foreground: 24 28 29;
   
   /* Destructive/Error */
   --destructive: 186 26 26;
   --destructive-foreground: 255 255 255;
-  --error-container: 255 218 214;
+  --error-container: 254 202 202;
   --on-error-container: 147 0 10;
-  
-  /* Border and input */
-  --border: 195 198 209;
-  --input: 195 198 209;
-  --ring: 58 95 148;
   
   /* Card */
   --card: 255 255 255;
-  --card-foreground: 25 28 30;
+  --card-foreground: 24 28 29;
   
   /* Popover */
   --popover: 255 255 255;
-  --popover-foreground: 25 28 30;
+  --popover-foreground: 24 28 29;
+  
+  /* Border and input */
+  --border: 195 200 204;
+  --input: 195 200 204;
+  --ring: 0 65 80;
+  
+  /* Outline */
+  --outline: 112 120 124;
+  --outline-variant: 191 200 204;
+  
+  /* Inverse colors */
+  --inverse-surface: 45 49 50;
+  --inverse-primary: 142 208 231;
+  --inverse-on-surface: 239 241 243;
+  
+  /* Success */
+  --success: 10 79 26;
+  --success-foreground: 255 255 255;
   
   /* Radius */
   --radius: 0.75rem;
+}
+
+.dark {
+  /* ============================================
+     ALLO SERVICES CI - MODE SOMBRE
+     ============================================ */
+
+  /* === COULEURS PRINCIPALES === */
   
-  /* Surface colors - Tonal Depth System */
-  --surface: 247 249 251;
-  --surface-bright: 247 249 251;
-  --surface-dim: 216 218 220;
-  --surface-tint: 58 95 148;
-  --surface-variant: 224 227 229;
-  --surface-container: 236 238 240;
-  --surface-container-low: 242 244 246;
-  --surface-container-lowest: 255 255 255;
-  --surface-container-high: 230 232 234;
-  --surface-container-highest: 224 227 229;
+  /* Primaire - HSL(193, 60%, 73%) → #8ed0e7 */
+  --primary: 142 208 231;
+  --primary-foreground: 0 65 80;
+  --primary-container: 0 90 110;
+  --primary-fixed: 180 235 255;
+  --primary-fixed-dim: 142 208 231;
   
-  /* Outline */
-  --outline: 115 119 128;
-  --outline-variant: 195 198 209;
+  /* Secondaire - HSL(25, 98%, 53%) → #FD7613 */
+  --secondary: 253 118 19;
+  --secondary-foreground: 255 255 255;
+  --secondary-container: 156 68 0;
+  --secondary-fixed: 253 118 19;
+  --secondary-fixed-dim: 255 149 76;
   
-  /* Inverse colors */
-  --inverse-surface: 45 49 51;
-  --inverse-primary: 167 200 255;
-  --inverse-on-surface: 239 241 243;
-  
-  /* Trust/Success colors */
-  --success: 0 178 123;
-  --success-foreground: 255 255 255;
+  /* Tertiaire/Succès */
+  --tertiary: 52 211 153;
+  --tertiary-foreground: 10 79 26;
+  --tertiary-container: 7 96 24;
+  --tertiary-fixed: 16 185 129;
+  --tertiary-fixed-dim: 52 211 153;
   
   /* Warning */
   --warning: 253 118 19;
   --warning-foreground: 255 255 255;
-}
-
-.dark {
+  
+  /* === ARRIÈRE-PLAN ET PREMIER PLAN === */
+  
+  /* Contexte - HSL(210, 29%, 7%) → #0d1117 */
   --background: 13 17 23;
   --foreground: 230 237 243;
-
-  --primary: 80 200 120;
-  --primary-foreground: 0 105 62;
-  --primary-container: 0 140 83;
-  --primary-fixed: 144 238 180;
-  --primary-fixed-dim: 80 200 120;
   
-  --secondary: 183 200 225;
-  --secondary-foreground: 0 30 64;
-  --secondary-container: 80 95 118;
-  --secondary-fixed: 211 228 254;
-  --secondary-fixed-dim: 183 200 225;
+  /* === SURFACES === */
+  --surface: 13 17 23;
+  --surface-bright: 22 27 34;
+  --surface-dim: 13 17 23;
+  --surface-tint: 142 208 231;
+  --surface-variant: 48 54 61;
+  --surface-container: 22 27 34;
+  --surface-container-low: 17 22 28;
+  --surface-container-lowest: 8 11 15;
+  --surface-container-high: 28 34 42;
+  --surface-container-highest: 35 42 51;
   
-  --tertiary: 78 222 163;
-  --tertiary-foreground: 0 36 22;
-  --tertiary-container: 0 60 39;
-  --tertiary-fixed: 111 251 190;
-  --tertiary-fixed-dim: 78 222 163;
-  --on-tertiary-container: 0 178 123;
+  /* === COMPOSANTS === */
   
-  --muted: 45 49 51;
+  /* Muted */
+  --muted: 45 49 50;
   --muted-foreground: 191 198 209;
   
-  --accent: 45 49 51;
+  /* Accent */
+  --accent: 45 49 50;
   --accent-foreground: 230 237 243;
   
+  /* Destructive/Error */
   --destructive: 249 113 113;
   --destructive-foreground: 255 255 255;
   --error-container: 186 26 26;
-  --on-error-container: 255 218 214;
+  --on-error-container: 254 202 202;
   
-  --border: 48 54 61;
-  --input: 48 54 61;
-  --ring: 167 200 255;
-  
+  /* Card */
   --card: 22 27 34;
   --card-foreground: 230 237 243;
   
+  /* Popover */
   --popover: 22 27 34;
   --popover-foreground: 230 237 243;
   
-  --surface: 22 27 34;
-  --surface-bright: 247 249 251;
-  --surface-dim: 13 17 23;
-  --surface-tint: 167 200 255;
-  --surface-variant: 48 54 61;
-  --surface-container: 236 238 240;
-  --surface-container-low: 242 244 246;
-  --surface-container-lowest: 255 255 255;
-  --surface-container-high: 230 232 234;
-  --surface-container-highest: 224 227 229;
+  /* Border and input */
+  --border: 48 54 61;
+  --input: 48 54 61;
+  --ring: 142 208 231;
   
-  --outline: 115 119 128;
+  /* Outline */
+  --outline: 112 120 124;
   --outline-variant: 48 54 61;
-  --inverse-surface: 224 227 229;
-  --inverse-primary: 0 30 64;
+  
+  /* Inverse colors */
+  --inverse-surface: 224 227 228;
+  --inverse-primary: 0 65 80;
   --inverse-on-surface: 239 241 243;
   
-  --success: 78 222 163;
-  --success-foreground: 0 36 22;
-  
-  --warning: 253 118 19;
-  --warning-foreground: 255 255 255;
+  /* Success */
+  --success: 52 211 153;
+  --success-foreground: 10 79 26;
 }
 
 @layer base {
@@ -226,9 +258,9 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Hero Gradient - Green Theme */
+/* Hero Gradient - Teal Theme */
 .hero-gradient {
-  background: linear-gradient(135deg, primary 0%, #008C53 100%);
+  background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-container)) 100%);
 }
 
 /* Text Editorial */
@@ -290,7 +322,7 @@ html {
 
 /* Badge styles */
 .badge-verified {
-  background: #00460e;
+  background: rgb(var(--tertiary));
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -301,7 +333,7 @@ html {
 }
 
 .badge-premium {
-  background: linear-gradient(135deg, #fd7613, #ffb68f);
+  background: linear-gradient(135deg, rgb(var(--secondary-container)), rgb(var(--secondary-fixed-dim)));
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -312,7 +344,7 @@ html {
 }
 
 .badge-urgent {
-  background: #9c4400;
+  background: rgb(var(--secondary));
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -350,9 +382,9 @@ html {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Button styles - Green Theme */
+/* Button styles - Primary Theme */
 .btn-primary {
-  background: primary;
+  background: rgb(var(--primary));
   color: white;
   font-weight: 600;
   padding: 0.625rem 1.5rem;
@@ -362,23 +394,23 @@ html {
 
 .btn-primary:hover {
   transform: scale(0.95);
-  background: #008C53;
+  background: rgb(var(--primary-container));
 }
 
-/* FAB - Green Theme */
+/* FAB - Primary Theme */
 .fab {
   position: fixed;
   right: 1.5rem;
   bottom: 6rem;
   width: 3.5rem;
   height: 3.5rem;
-  background: primary;
+  background: rgb(var(--primary));
   color: white;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px -5px rgba(0, 105, 62, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(0, 65, 80, 0.4);
   transition: transform 0.2s ease;
   z-index: 40;
 }
@@ -433,25 +465,25 @@ html {
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 
-/* Focus styles - Green Theme */
+/* Focus styles - Primary Theme */
 :focus-visible {
-  outline: 2px solid #50C878;
+  outline: 2px solid rgb(var(--primary));
   outline-offset: 2px;
 }
 
-/* Selection - Green Theme */
+/* Selection - Primary Theme */
 ::selection {
-  background: #50C878;
-  color: #003322;
+  background: rgb(var(--primary) / 0.3);
+  color: rgb(var(--foreground));
 }
 
 /* ============================================
-   SOVEREIGN LEDGER DESIGN SYSTEM
+   ALLO SERVICES CI DESIGN SYSTEM
    ============================================ */
 
-/* Primary Gradient - Green Theme */
+/* Primary Gradient */
 .bg-primary-gradient {
-  background: linear-gradient(135deg, primary 0%, #008C53 100%);
+  background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-container)) 100%);
 }
 
 /* Ambient Shadow */
@@ -465,7 +497,7 @@ html {
 
 /* Status Glow Effect */
 .status-glow {
-  box-shadow: 0 0 8px rgba(0, 178, 123, 0.6);
+  box-shadow: 0 0 8px rgba(0, 65, 80, 0.6);
 }
 
 .status-glow-active {
@@ -473,8 +505,8 @@ html {
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(0, 178, 123, 0.6); }
-  50% { box-shadow: 0 0 16px rgba(0, 178, 123, 0.8); }
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 65, 80, 0.6); }
+  50% { box-shadow: 0 0 16px rgba(0, 65, 80, 0.8); }
 }
 
 /* Glass Header */
