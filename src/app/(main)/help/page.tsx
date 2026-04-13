@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { APP_CONFIG } from "@/lib/constants/config";
 
 // Catégories d'aide
 const HELP_CATEGORIES = [
@@ -161,18 +162,18 @@ const CONTACT_INFO = [
   {
     icon: Phone,
     title: "Téléphone",
-    value: "+225 07 00 00 00 00",
-    description: "Du lundi au samedi, 8h - 20h",
+    value: APP_CONFIG.contact.phoneFormatted,
+    description: "Du lundi au samedi, 8h - 18h",
   },
   {
     icon: Mail,
     title: "Email",
-    value: "support@alloservices.ci",
+    value: APP_CONFIG.contact.email,
     description: "Réponse sous 24h",
   },
   {
     icon: MessageCircle,
-    title: "Chat en direct",
+    title: "WhatsApp",
     value: "Discuter maintenant",
     description: "Assistance immédiate",
   },

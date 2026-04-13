@@ -43,6 +43,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { APP_CONFIG } from "@/lib/constants/config";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -72,24 +73,24 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Téléphone",
-    content: "+225 07 00 00 00 00\n+225 01 00 00 00 00",
+    content: APP_CONFIG.contact.phoneFormatted,
   },
   {
     icon: Mail,
     title: "Email",
-    content: "contact@alloservices.ci\nsupport@alloservices.ci",
+    content: APP_CONFIG.contact.email,
   },
   {
     icon: Clock,
     title: "Horaires",
-    content: "Lun - Ven: 8h - 18h\nSam: 9h - 14h",
+    content: "Lun - Sam: 8h - 18h",
   },
 ];
 
 const socialLinks = [
-  { name: "Facebook", icon: Facebook, href: "https://facebook.com/alloservicesci" },
-  { name: "Instagram", icon: Instagram, href: "https://instagram.com/alloservicesci" },
-  { name: "WhatsApp", icon: MessageCircle, href: "https://wa.me/2250700000000" },
+  { name: "Facebook", icon: Facebook, href: APP_CONFIG.social.facebook },
+  { name: "Instagram", icon: Instagram, href: APP_CONFIG.social.instagram },
+  { name: "WhatsApp", icon: MessageCircle, href: `https://wa.me/${APP_CONFIG.contact.phoneInternational.replace("+", "")}` },
 ];
 
 export default function ContactPage() {

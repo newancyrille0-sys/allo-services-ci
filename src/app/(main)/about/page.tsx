@@ -26,6 +26,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { PLATFORM_STATS } from "@/lib/constants/mockData";
+import { APP_CONFIG } from "@/lib/constants/config";
 
 const values = [
   {
@@ -293,11 +294,11 @@ export default function AboutPage() {
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Phone className="h-4 w-4 text-blue-600" />
-                <span className="text-gray-700">+225 07 00 00 00 00</span>
+                <span className="text-gray-700">{APP_CONFIG.contact.phoneFormatted}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4 text-blue-600" />
-                <span className="text-gray-700">contact@alloservices.ci</span>
+                <span className="text-gray-700">{APP_CONFIG.contact.email}</span>
               </div>
             </div>
             <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
