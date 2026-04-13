@@ -41,7 +41,7 @@ export function FAQSection() {
       <div className="max-w-screen-2xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <span className="text-[#00693E] font-bold tracking-widest text-sm uppercase">
+          <span className="text-primary font-bold tracking-widest text-sm uppercase">
             Foire aux questions
           </span>
           <h2 className="font-headline text-4xl font-extrabold text-editorial text-[#181c1d] mt-2">
@@ -76,7 +76,7 @@ export function FAQSection() {
             <Link href="/faq">
               <Button
                 variant="outline"
-                className="border-[#00693E] text-[#00693E] hover:bg-[#00693E] hover:text-white"
+                className="border-primary text-primary hover:bg-primary hover:text-white"
               >
                 Voir toutes les questions
                 <ChevronRight className="h-4 w-4 ml-2" />

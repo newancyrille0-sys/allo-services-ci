@@ -26,7 +26,7 @@ export function AuthLayout({
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Decorative Background */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-[#00693E] via-[#008C53] to-[#00693E]">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary via-primary to-primary">
         {/* Pattern Overlay */}
         <div
           className="absolute inset-0 opacity-10"
@@ -100,11 +100,11 @@ export function AuthLayout({
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
               <Link href="/" className="inline-flex items-center gap-2">
-                <div className="w-10 h-10 rounded-lg bg-[#00693E] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                   <span className="text-white font-bold">AS</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900">
-                  Allo Services <span className="text-[#00693E]">CI</span>
+                  Allo Services <span className="text-primary">CI</span>
                 </span>
               </Link>
             </div>
@@ -126,11 +126,11 @@ export function AuthLayout({
             <div className="mt-6 text-center text-sm text-gray-500">
               <p>
                 En continuant, vous acceptez nos{" "}
-                <Link href="/terms" className="text-[#00693E] hover:underline">
+                <Link href="/terms" className="text-primary hover:underline">
                   Conditions d&apos;utilisation
                 </Link>{" "}
                 et notre{" "}
-                <Link href="/privacy" className="text-[#00693E] hover:underline">
+                <Link href="/privacy" className="text-primary hover:underline">
                   Politique de confidentialité
                 </Link>
               </p>

@@ -83,7 +83,7 @@ export function Testimonials() {
 
               {/* Service Badge */}
               <div className="mt-4 pt-4 border-t border-[#bfc8cc]/20">
-                <span className="text-xs font-medium text-[#00693E] bg-[#90EE90]/30 px-3 py-1 rounded-full">
+                <span className="text-xs font-medium text-primary bg-[#90EE90]/30 px-3 py-1 rounded-full">
                   {testimonial.service}
                 </span>
               </div>

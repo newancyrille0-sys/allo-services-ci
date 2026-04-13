@@ -23,7 +23,7 @@ const features = [
 export function TrustSection() {
   return (
     <section className="max-w-screen-2xl mx-auto px-6 mt-32">
-      <div className="bg-[#00693E] rounded-[3rem] p-10 md:p-20 overflow-hidden relative">
+      <div className="bg-primary rounded-[3rem] p-10 md:p-20 overflow-hidden relative">
         {/* Background Icon */}
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10">
           <Shield className="w-[30rem] h-[30rem] rotate-12 text-white" />
@@ -59,11 +59,11 @@ export function TrustSection() {
             <div className="glass-card p-8 rounded-[2.5rem] relative z-20">
               {/* Header */}
               <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-[#00693E] rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold">
                   AS
                 </div>
                 <div>
-                  <div className="text-[#00693E] font-bold">Allo Services Support</div>
+                  <div className="text-primary font-bold">Allo Services Support</div>
                   <div className="text-[#3f484c] text-xs">En ligne actuellement</div>
                 </div>
               </div>
@@ -73,7 +73,7 @@ export function TrustSection() {
                 <div className="bg-[#f1f4f5] p-4 rounded-2xl rounded-tl-none mr-12 text-sm text-[#181c1d]">
                   Bonjour ! Comment puis-je vous aider à trouver le meilleur expert aujourd&apos;hui ?
                 </div>
-                <div className="bg-[#00693E] text-white p-4 rounded-2xl rounded-tr-none ml-12 text-sm">
+                <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none ml-12 text-sm">
                   Je cherche un électricien certifié sur Cocody pour demain 10h.
                 </div>
                 <div className="bg-[#f1f4f5] p-4 rounded-2xl rounded-tl-none mr-12 text-sm text-[#181c1d]">

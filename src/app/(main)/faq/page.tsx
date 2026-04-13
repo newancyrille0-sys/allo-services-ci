@@ -38,7 +38,7 @@ const FAQ_CATEGORIES = [
     title: "Général",
     icon: HelpCircle,
     description: "Questions générales sur Allo Services CI",
-    color: "bg-[#00693E]/10 text-[#00693E]",
+    color: "bg-primary/10 text-primary",
   },
   {
     id: "reservations",
@@ -269,13 +269,13 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#00693E]/5 to-background">
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background">
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 pt-6">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="text-[#00693E] hover:text-[#00693E]/80">
+              <BreadcrumbLink href="/" className="text-primary hover:text-primary/80">
                 Accueil
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -288,7 +288,7 @@ export default function FAQPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-[#00693E] to-[#00693E]/80 text-white py-16 px-4 mt-4">
+      <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-16 px-4 mt-4">
         <div className="container mx-auto max-w-4xl text-center">
           <Badge className="bg-white/20 text-white mb-4">Foire Aux Questions</Badge>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
@@ -319,7 +319,7 @@ export default function FAQPage() {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
-              className={selectedCategory === null ? "bg-[#00693E] hover:bg-[#00693E]/90" : "border-gray-200"}
+              className={selectedCategory === null ? "bg-primary hover:bg-primary/90" : "border-gray-200"}
             >
               Toutes les questions ({ALL_FAQ_ITEMS.length})
             </Button>
@@ -328,7 +328,7 @@ export default function FAQPage() {
                 key={category.id}
                 variant={selectedCategory === category.id ? "default" : "outline"}
                 onClick={() => setSelectedCategory(category.id)}
-                className={selectedCategory === category.id ? "bg-[#00693E] hover:bg-[#00693E]/90" : "border-gray-200"}
+                className={selectedCategory === category.id ? "bg-primary hover:bg-primary/90" : "border-gray-200"}
               >
                 <category.icon className="h-4 w-4 mr-2" />
                 {category.title}
@@ -353,7 +353,7 @@ export default function FAQPage() {
                   setSearchQuery("");
                   setSelectedCategory(null);
                 }}
-                className="text-[#00693E]"
+                className="text-primary"
               >
                 Réinitialiser les filtres
               </Button>
@@ -372,7 +372,7 @@ export default function FAQPage() {
                   setSearchQuery("");
                   setSelectedCategory(null);
                 }}
-                className="bg-[#00693E] hover:bg-[#00693E]/90"
+                className="bg-primary hover:bg-primary/90"
               >
                 Voir toutes les questions
               </Button>
@@ -419,35 +419,35 @@ export default function FAQPage() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-3 mb-6">
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-full bg-[#00693E]/10 flex items-center justify-center mx-auto mb-3">
-                    <Phone className="h-6 w-6 text-[#00693E]" />
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <Phone className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-1">Téléphone</h3>
-                  <p className="text-[#00693E] font-medium">{APP_CONFIG.contact.phoneFormatted}</p>
+                  <p className="text-primary font-medium">{APP_CONFIG.contact.phoneFormatted}</p>
                   <p className="text-sm text-gray-500">Lun - Sam: 8h - 18h</p>
                 </div>
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-full bg-[#00693E]/10 flex items-center justify-center mx-auto mb-3">
-                    <Mail className="h-6 w-6 text-[#00693E]" />
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <Mail className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-1">Email</h3>
-                  <p className="text-[#00693E] font-medium">{APP_CONFIG.contact.email}</p>
+                  <p className="text-primary font-medium">{APP_CONFIG.contact.email}</p>
                   <p className="text-sm text-gray-500">Réponse sous 24h</p>
                 </div>
                 <div className="text-center">
-                  <div className="h-12 w-12 rounded-full bg-[#00693E]/10 flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle className="h-6 w-6 text-[#00693E]" />
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <MessageCircle className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-semibold mb-1">Centre d&apos;aide</h3>
                   <p className="text-sm text-gray-500">Articles et guides</p>
-                  <Link href="/help" className="text-[#00693E] text-sm font-medium hover:underline">
+                  <Link href="/help" className="text-primary text-sm font-medium hover:underline">
                     Consulter
                   </Link>
                 </div>
               </div>
               <div className="text-center">
                 <Link href="/contact">
-                  <Button className="bg-[#00693E] hover:bg-[#00693E]/90">
+                  <Button className="bg-primary hover:bg-primary/90">
                     Contacter le support
                   </Button>
                 </Link>

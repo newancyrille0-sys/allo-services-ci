@@ -25,7 +25,7 @@ export function CTASection() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/services">
-                <Button className="bg-white text-[#00693E] px-8 py-4 rounded-2xl font-bold text-lg hover:scale-95 transition-transform flex items-center gap-2">
+                <Button className="bg-white text-primary px-8 py-4 rounded-2xl font-bold text-lg hover:scale-95 transition-transform flex items-center gap-2">
                   Trouver un prestataire
                   <ArrowRight className="h-5 w-5" />
                 </Button>

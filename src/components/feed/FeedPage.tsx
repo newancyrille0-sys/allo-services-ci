@@ -340,7 +340,7 @@ function FeedPostCard({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900 group-hover:text-[#00693E] transition-colors">
+              <span className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
                 {post.provider.businessName || post.provider.name}
               </span>
               {post.provider.isVerified && (
@@ -503,7 +503,7 @@ function FeedPostCard({
           <div className="bg-gray-50 rounded-lg p-3 mb-3">
             <p className="text-sm font-medium text-gray-700">{post.serviceDescription}</p>
             <Link href={`/providers/${post.provider.id}`}>
-              <Button size="sm" className="mt-2 bg-[#00693E] hover:bg-[#008C53]">
+              <Button size="sm" className="mt-2 bg-primary hover:bg-[#008C53]">
                 Réserver ce service
               </Button>
             </Link>
@@ -540,7 +540,7 @@ function FeedPostCard({
             {/* Comment Input */}
             <div className="flex gap-2 items-center">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs bg-[#00693E] text-white">U</AvatarFallback>
+                <AvatarFallback className="text-xs bg-primary text-white">U</AvatarFallback>
               </Avatar>
               <div className="flex-1 relative">
                 <Input
@@ -834,7 +834,7 @@ export function FeedPage({
   return (
     <div className="min-h-screen bg-[#f0f2f5]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#00693E] via-[#008C53] to-[#00693E] py-6 px-4 sticky top-0 z-40 shadow-lg">
+      <div className="bg-gradient-to-r from-primary via-primary to-primary py-6 px-4 sticky top-0 z-40 shadow-lg">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-white">
@@ -845,7 +845,7 @@ export function FeedPage({
                 variant={filter === "all" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setFilter("all")}
-                className={cn("text-xs", filter === "all" && "bg-white text-[#00693E]")}}
+                className={cn("text-xs", filter === "all" && "bg-white text-primary")}}
               >
                 Pour vous
               </Button>
@@ -853,7 +853,7 @@ export function FeedPage({
                 variant={filter === "following" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setFilter("following")}
-                className={cn("text-xs", filter === "following" && "bg-white text-[#00693E]")}}
+                className={cn("text-xs", filter === "following" && "bg-white text-primary")}}
               >
                 Abonnements
               </Button>
@@ -861,7 +861,7 @@ export function FeedPage({
                 variant={filter === "trending" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setFilter("trending")}
-                className={cn("text-xs", filter === "trending" && "bg-white text-[#00693E]")}
+                className={cn("text-xs", filter === "trending" && "bg-white text-primary")}
               >
                 Tendances
               </Button>
@@ -881,7 +881,7 @@ export function FeedPage({
         <div className="space-y-6">
           {loading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-[#00693E]" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : posts.length === 0 ? (
             <Card className="border-0 shadow-lg">

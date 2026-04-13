@@ -228,7 +228,7 @@
 
 /* Hero Gradient - Green Theme */
 .hero-gradient {
-  background: linear-gradient(135deg, #00693E 0%, #008C53 100%);
+  background: linear-gradient(135deg, primary 0%, #008C53 100%);
 }
 
 /* Text Editorial */
@@ -352,7 +352,7 @@ html {
 
 /* Button styles - Green Theme */
 .btn-primary {
-  background: #00693E;
+  background: primary;
   color: white;
   font-weight: 600;
   padding: 0.625rem 1.5rem;
@@ -372,7 +372,7 @@ html {
   bottom: 6rem;
   width: 3.5rem;
   height: 3.5rem;
-  background: #00693E;
+  background: primary;
   color: white;
   border-radius: 9999px;
   display: flex;
@@ -451,7 +451,7 @@ html {
 
 /* Primary Gradient - Green Theme */
 .bg-primary-gradient {
-  background: linear-gradient(135deg, #00693E 0%, #008C53 100%);
+  background: linear-gradient(135deg, primary 0%, #008C53 100%);
 }
 
 /* Ambient Shadow */
