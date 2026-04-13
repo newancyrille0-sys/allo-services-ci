@@ -56,7 +56,8 @@ export const smsTemplates: SMSTemplate = {
 };
 
 /**
- * Envoie un SMS via l'API Yelika
+ * Envoie un SMS via l'API Yellika SMS (OAuth2.0)
+ * Documentation: https://panel.yellikasms.com/api/v3/sms/send
  */
 export async function sendYelikaSMS(
   phoneNumber: string,
@@ -64,7 +65,7 @@ export async function sendYelikaSMS(
 ): Promise<YelikaSMSResponse> {
   const apiKey = process.env.YELIKA_API_KEY;
   const senderId = process.env.YELIKA_SENDER_ID || "ALLOSERVICES";
-  const apiUrl = process.env.YELIKA_API_URL || "https://api.yelika.net/v1/sms/send";
+  const apiUrl = process.env.YELIKA_API_URL || "https://panel.yellikasms.com/api/v3/sms/send";
 
   if (!apiKey) {
     console.error("YELIKA_API_KEY non configurée");
@@ -85,36 +86,39 @@ export async function sendYelikaSMS(
   }
 
   try {
+    // Format API Yellika SMS (OAuth2.0)
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
+        "Accept": "application/json",
       },
       body: JSON.stringify({
-        from: senderId,
-        to: normalizedPhone,
+        sender_id: senderId,
+        recipient: normalizedPhone.replace("+", ""),
         message: message,
       }),
     });
 
     const data = await response.json();
 
-    if (response.ok && data.success) {
+    // Réponse API Yellika
+    if (response.ok || data.status === "success" || data.success) {
       return {
         success: true,
-        messageId: data.messageId || data.id,
-        credits: data.credits,
+        messageId: data.data?.id || data.messageId || data.id,
+        credits: data.data?.credits || data.credits,
       };
     } else {
-      console.error("Yelika SMS error:", data);
+      console.error("Yellika SMS error:", data);
       return {
         success: false,
-        error: data.error || data.message || "Failed to send SMS",
+        error: data.message || data.error || "Failed to send SMS",
       };
     }
   } catch (error) {
-    console.error("Yelika SMS exception:", error);
+    console.error("Yellika SMS exception:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Network error",
