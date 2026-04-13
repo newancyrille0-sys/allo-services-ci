@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Instagram, MessageCircle } from "lucide-react";
+import { Facebook, Instagram, MessageCircle, Phone, Mail } from "lucide-react";
+import { APP_CONFIG } from "@/lib/constants/config";
 
 const footerLinks = {
   services: [
@@ -41,6 +42,24 @@ export function Footer() {
             <p className="text-white/60 mt-3 max-w-sm">
               Le premier réseau de professionnels vérifiés en Côte d&apos;Ivoire pour tous vos besoins du quotidien.
             </p>
+            
+            {/* Contact */}
+            <div className="mt-4 space-y-2">
+              <a 
+                href={`tel:${APP_CONFIG.contact.phoneInternational}`}
+                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+              >
+                <Phone className="h-4 w-4 text-primary" />
+                <span className="font-medium">{APP_CONFIG.contact.phoneFormatted}</span>
+              </a>
+              <a 
+                href={`mailto:${APP_CONFIG.contact.email}`}
+                className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+              >
+                <Mail className="h-4 w-4 text-primary" />
+                <span>{APP_CONFIG.contact.email}</span>
+              </a>
+            </div>
             <div className="flex items-center gap-4 mt-6">
               <a
                 href="https://facebook.com/alloservicesci"
@@ -59,7 +78,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://wa.me/2250700000000"
+                href={`https://wa.me/${APP_CONFIG.contact.phoneInternational.replace("+", "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#004150] transition-colors"
