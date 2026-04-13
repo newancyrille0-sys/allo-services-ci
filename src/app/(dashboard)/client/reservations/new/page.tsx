@@ -10,10 +10,13 @@ import {
   Clock,
   MapPin,
   FileText,
-  CreditCard,
+  CheckCircle,
   Search,
   Star,
   Loader2,
+  AlertTriangle,
+  ShieldCheck,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +25,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -32,21 +34,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Progress } from "@/components/ui/progress";
-import { PaymentModal } from "@/components/payment/PaymentModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { SERVICE_CATEGORIES } from "@/lib/constants/services";
 import { POPULAR_CITIES } from "@/lib/constants/cities";
 
@@ -55,7 +55,7 @@ const STEPS = [
   { id: 2, title: "Prestataire", icon: Star },
   { id: 3, title: "Date & Heure", icon: Calendar },
   { id: 4, title: "Adresse", icon: MapPin },
-  { id: 5, title: "Paiement", icon: CreditCard },
+  { id: 5, title: "Confirmation", icon: CheckCircle },
 ];
 
 // Mock providers
@@ -104,11 +104,137 @@ function formatPrice(amount: number): string {
   }).format(amount);
 }
 
+// Composant Modal de Confirmation
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isLoading: boolean;
+  reservationDetails: {
+    service: string;
+    date: string;
+    time: string;
+    address: string;
+    city: string;
+    price: number;
+  };
+}
+
+function ConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+  reservationDetails,
+}: ConfirmationModalProps) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-amber-600">
+            <AlertTriangle className="h-5 w-5" />
+            Confirmation de réservation
+          </DialogTitle>
+          <DialogDescription className="text-left pt-2">
+            Veuillez lire attentivement les informations ci-dessous avant de confirmer.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          {/* Message d'avertissement principal */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-amber-800 space-y-2">
+                <p className="font-medium">Informations importantes :</p>
+                <ul className="list-disc list-inside space-y-1 text-amber-700">
+                  <li>Le paiement se fait <strong>directement au prestataire</strong> après l'exécution du service.</li>
+                  <li>Allo Services CI ne perçoit aucun fonds et n'est pas propriétaire des prestataires.</li>
+                  <li>En cas de litige, notre équipe support est disponible pour vous accompagner.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Détails de la réservation */}
+          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <h4 className="font-semibold text-sm">Récapitulatif de votre réservation :</h4>
+            <div className="text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Service :</span>
+                <span className="font-medium">{reservationDetails.service}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Date :</span>
+                <span className="font-medium">{reservationDetails.date}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Heure :</span>
+                <span className="font-medium">{reservationDetails.time}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Adresse :</span>
+                <span className="font-medium text-right max-w-[200px] truncate">{reservationDetails.address}, {reservationDetails.city}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t">
+                <span className="text-muted-foreground">Prix estimé :</span>
+                <span className="font-bold text-primary">{formatPrice(reservationDetails.price)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Avertissement légal */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <ShieldCheck className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-blue-700">
+                En confirmant cette réservation, vous acceptez que la transaction financière 
+                s'effectue directement entre vous et le prestataire. Allo Services CI agit 
+                uniquement en tant qu'intermédiaire de mise en relation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Boutons d'action */}
+        <div className="flex gap-3 pt-2">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isLoading}
+            className="flex-1"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Annuler
+          </Button>
+          <Button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="flex-1 bg-primary hover:bg-primary/90"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Confirmation...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Confirmer la réservation
+              </>
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function NewReservationPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [showPaymentModal, setShowPaymentModal] = React.useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = React.useState(false);
 
   // Form state
   const [selectedService, setSelectedService] = React.useState("");
@@ -160,7 +286,8 @@ export default function NewReservationPage() {
     if (currentStep < STEPS.length) {
       setCurrentStep(currentStep + 1);
     } else {
-      setShowPaymentModal(true);
+      // Ouvrir la modal de confirmation au lieu du paiement
+      setShowConfirmationModal(true);
     }
   };
 
@@ -172,10 +299,16 @@ export default function NewReservationPage() {
     }
   };
 
-  const handlePaymentSuccess = (transactionId: string) => {
-    console.log("Payment successful:", transactionId);
-    setShowPaymentModal(false);
-    // Redirect to reservations
+  const handleConfirmReservation = async () => {
+    setIsLoading(true);
+    
+    // Simuler la création de la réservation
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    setIsLoading(false);
+    setShowConfirmationModal(false);
+    
+    // Rediriger vers la liste des réservations
     router.push("/client/reservations");
   };
 
@@ -465,11 +598,11 @@ export default function NewReservationPage() {
             </div>
           )}
 
-          {/* Step 5: Payment Summary */}
+          {/* Step 5: Confirmation Summary */}
           {currentStep === 5 && (
             <div className="space-y-6">
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                <h3 className="font-semibold">Récapitulatif</h3>
+                <h3 className="font-semibold">Récapitulatif de votre réservation</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Service</span>
@@ -486,28 +619,36 @@ export default function NewReservationPage() {
                     <span className="font-medium">{selectedTime}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Durée</span>
+                    <span className="text-muted-foreground">Durée estimée</span>
                     <span className="font-medium">{estimatedDuration}h</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Adresse</span>
-                    <span className="font-medium">{address}, {city}</span>
+                    <span className="font-medium text-right max-w-[200px]">{address}, {city}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t pt-4 space-y-2">
+              {/* Prix estimé avec note sur le paiement */}
+              <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Sous-total</span>
+                  <span className="text-muted-foreground">Prix estimé</span>
                   <span>{formatPrice(estimatedPrice)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Frais de service</span>
-                  <span>{formatPrice(2000)}</span>
-                </div>
                 <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span className="text-primary">{formatPrice(estimatedPrice + 2000)}</span>
+                  <span>Total estimé</span>
+                  <span className="text-primary">{formatPrice(estimatedPrice)}</span>
+                </div>
+                
+                {/* Note importante sur le paiement */}
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="text-xs text-amber-700">
+                      <p className="font-medium">Mode de paiement</p>
+                      <p>Le paiement s'effectue directement au prestataire après l'exécution du service. Allo Services CI ne collecte aucun fonds.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -527,9 +668,9 @@ export default function NewReservationPage() {
               {isLoading ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <CreditCard className="h-4 w-4 mr-2" />
+                <CheckCircle className="h-4 w-4 mr-2" />
               )}
-              Payer {formatPrice(estimatedPrice + 2000)}
+              Réserver
             </>
           ) : (
             <>
@@ -540,13 +681,20 @@ export default function NewReservationPage() {
         </Button>
       </div>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        amount={estimatedPrice + 2000}
-        paymentType="reservation"
-        onSuccess={handlePaymentSuccess}
+      {/* Modal de Confirmation */}
+      <ConfirmationModal
+        isOpen={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+        onConfirm={handleConfirmReservation}
+        isLoading={isLoading}
+        reservationDetails={{
+          service: selectedSubService,
+          date: selectedDate?.toLocaleDateString("fr-FR") || "",
+          time: selectedTime,
+          address: address,
+          city: city,
+          price: estimatedPrice,
+        }}
       />
     </div>
   );

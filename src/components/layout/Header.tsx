@@ -16,10 +16,10 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
+    <nav className="fixed top-0 w-full z-50 bg-[#0a1a14]/90 backdrop-blur-xl border-b border-[#00693E]/20">
       <div className="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-black tracking-tight text-[#00693E]">
+        <Link href="/" className="text-2xl font-black tracking-tight text-[#50C878]">
           Allo Services CI
         </Link>
 
@@ -27,26 +27,26 @@ export function Header() {
         <div className="hidden md:flex items-center gap-8">
           <Link 
             href="/services" 
-            className="text-slate-600 hover:text-[#00693E] transition-colors font-semibold"
+            className="text-gray-300 hover:text-[#50C878] transition-colors font-semibold"
           >
             Services
           </Link>
           <Link 
             href="/providers" 
-            className="text-slate-600 hover:text-[#00693E] transition-colors font-semibold"
+            className="text-gray-300 hover:text-[#50C878] transition-colors font-semibold"
           >
             Prestataires
           </Link>
           <Link 
             href="/publications" 
-            className="text-slate-600 hover:text-[#00693E] transition-colors font-semibold flex items-center gap-1"
+            className="text-gray-300 hover:text-[#50C878] transition-colors font-semibold flex items-center gap-1"
           >
             <FileText className="h-4 w-4" />
             Publications
           </Link>
           <Link 
             href="/login" 
-            className="text-slate-600 hover:text-[#00693E] transition-colors font-semibold"
+            className="text-gray-300 hover:text-[#50C878] transition-colors font-semibold"
           >
             Connexion
           </Link>
@@ -60,13 +60,13 @@ export function Header() {
         {/* Mobile Menu Button */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <button className="md:hidden text-[#00693E]">
+            <button className="md:hidden text-[#50C878]">
               <Menu className="h-6 w-6" />
             </button>
           </SheetTrigger>
           <SheetContent side="right" className="w-[300px]">
             <SheetHeader>
-              <SheetTitle className="text-[#00693E]">Menu</SheetTitle>
+              <SheetTitle className="text-[#50C878]">Menu</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-4 mt-6">
               <Link 

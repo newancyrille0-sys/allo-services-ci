@@ -12,9 +12,9 @@ import { CTASection } from "@/components/home/CTASection";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#f7fafb]">
+    <div className="min-h-screen flex flex-col bg-[#0a1a14]">
       <Header />
-      
+
       <main className="flex-grow">
         <Hero />
         <CategoriesGrid />
@@ -24,7 +24,7 @@ export default function Home() {
         <Testimonials />
         <CTASection />
       </main>
-      
+
       <Footer />
     </div>
   );
