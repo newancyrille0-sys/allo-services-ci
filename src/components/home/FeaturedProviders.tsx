@@ -46,7 +46,7 @@ export function FeaturedProviders() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="space-y-2">
-          <span className="text-[#004150] font-bold tracking-widest text-sm uppercase">
+          <span className="text-[#00693E] font-bold tracking-widest text-sm uppercase">
             Nos Élites
           </span>
           <h2 className="font-headline text-4xl font-extrabold text-editorial text-[#181c1d]">
@@ -55,7 +55,7 @@ export function FeaturedProviders() {
         </div>
         <Link 
           href="/providers"
-          className="text-[#004150] font-bold flex items-center gap-2 hover:translate-x-2 transition-transform"
+          className="text-[#00693E] font-bold flex items-center gap-2 hover:translate-x-2 transition-transform"
         >
           Voir tout l&apos;annuaire
           <span>→</span>
@@ -110,10 +110,10 @@ export function FeaturedProviders() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs text-[#70787c]">À partir de</span>
-                  <p className="font-bold text-lg text-[#004150]">{provider.price} FCFA</p>
+                  <p className="font-bold text-lg text-[#00693E]">{provider.price} FCFA</p>
                 </div>
                 <Link href={`/providers/${provider.id}`}>
-                  <Button className="bg-[#e5e9ea] text-[#181c1d] hover:bg-[#004150] hover:text-white transition-all duration-300 rounded-2xl p-3">
+                  <Button className="bg-[#e5e9ea] text-[#181c1d] hover:bg-[#00693E] hover:text-white transition-all duration-300 rounded-2xl p-3">
                     <Calendar className="h-5 w-5" />
                   </Button>
                 </Link>

@@ -54,7 +54,7 @@ export function Testimonials() {
               className="bg-white border border-[#bfc8cc]/20 rounded-3xl p-6 hover:shadow-xl transition-all duration-300"
             >
               {/* Quote Icon */}
-              <Quote className="w-8 h-8 text-[#8ed0e7] mb-4" />
+              <Quote className="w-8 h-8 text-[#50C878] mb-4" />
 
               {/* Content */}
               <p className="text-[#3f484c] mb-6 leading-relaxed">
@@ -83,7 +83,7 @@ export function Testimonials() {
 
               {/* Service Badge */}
               <div className="mt-4 pt-4 border-t border-[#bfc8cc]/20">
-                <span className="text-xs font-medium text-[#004150] bg-[#b4ebff]/30 px-3 py-1 rounded-full">
+                <span className="text-xs font-medium text-[#00693E] bg-[#90EE90]/30 px-3 py-1 rounded-full">
                   {testimonial.service}
                 </span>
               </div>

@@ -57,7 +57,7 @@ export function Hero() {
         <div className="glass-card p-2 rounded-[2rem] shadow-2xl flex flex-col md:flex-row items-stretch gap-2">
           {/* Service Input */}
           <div className="flex-1 flex items-center gap-3 px-6 py-4 bg-white rounded-2xl md:rounded-l-[1.8rem]">
-            <Search className="text-[#004150] h-5 w-5" />
+            <Search className="text-[#00693E] h-5 w-5" />
             <Select value={selectedService} onValueChange={setSelectedService}>
               <SelectTrigger className="w-full border-none focus:ring-0 bg-transparent text-[#181c1d]">
                 <SelectValue placeholder="Quel service recherchez-vous ?" />
@@ -74,7 +74,7 @@ export function Hero() {
 
           {/* City Input */}
           <div className="flex-1 flex items-center gap-3 px-6 py-4 bg-white md:border-l border-gray-200 rounded-2xl md:rounded-none">
-            <MapPin className="text-[#004150] h-5 w-5" />
+            <MapPin className="text-[#00693E] h-5 w-5" />
             <Select value={selectedCity} onValueChange={setSelectedCity}>
               <SelectTrigger className="w-full border-none focus:ring-0 bg-transparent text-[#181c1d]">
                 <SelectValue placeholder="Ville ou quartier (Abidjan...)" />

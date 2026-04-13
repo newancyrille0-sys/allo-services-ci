@@ -4,18 +4,18 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Sovereign Ledger Design System */
-  
+  /* Allo Services CI Design System - Green Theme */
+
   /* Background and foreground */
   --background: 247 249 251;
   --foreground: 25 28 30;
-  
-  /* Primary colors - Deep Ocean Blue */
-  --primary: 0 30 64;
+
+  /* Primary colors - Ivorian Green */
+  --primary: 0 105 62;
   --primary-foreground: 255 255 255;
-  --primary-container: 0 51 102;
-  --primary-fixed: 213 227 255;
-  --primary-fixed-dim: 167 200 255;
+  --primary-container: 0 140 83;
+  --primary-fixed: 144 238 180;
+  --primary-fixed-dim: 80 200 120;
   
   /* Secondary colors - Slate */
   --secondary: 80 95 118;
@@ -95,12 +95,12 @@
 .dark {
   --background: 13 17 23;
   --foreground: 230 237 243;
-  
-  --primary: 167 200 255;
-  --primary-foreground: 0 30 64;
-  --primary-container: 0 51 102;
-  --primary-fixed: 213 227 255;
-  --primary-fixed-dim: 167 200 255;
+
+  --primary: 80 200 120;
+  --primary-foreground: 0 105 62;
+  --primary-container: 0 140 83;
+  --primary-fixed: 144 238 180;
+  --primary-fixed-dim: 80 200 120;
   
   --secondary: 183 200 225;
   --secondary-foreground: 0 30 64;
@@ -226,9 +226,9 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Hero Gradient */
+/* Hero Gradient - Green Theme */
 .hero-gradient {
-  background: linear-gradient(135deg, #004150 0%, #005a6e 100%);
+  background: linear-gradient(135deg, #00693E 0%, #008C53 100%);
 }
 
 /* Text Editorial */
@@ -350,9 +350,9 @@ html {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Button styles */
+/* Button styles - Green Theme */
 .btn-primary {
-  background: #004150;
+  background: #00693E;
   color: white;
   font-weight: 600;
   padding: 0.625rem 1.5rem;
@@ -362,23 +362,23 @@ html {
 
 .btn-primary:hover {
   transform: scale(0.95);
-  background: #005a6e;
+  background: #008C53;
 }
 
-/* FAB */
+/* FAB - Green Theme */
 .fab {
   position: fixed;
   right: 1.5rem;
   bottom: 6rem;
   width: 3.5rem;
   height: 3.5rem;
-  background: #004150;
+  background: #00693E;
   color: white;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px -5px rgba(0, 65, 80, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(0, 105, 62, 0.4);
   transition: transform 0.2s ease;
   z-index: 40;
 }
@@ -433,25 +433,25 @@ html {
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
 
-/* Focus styles */
+/* Focus styles - Green Theme */
 :focus-visible {
-  outline: 2px solid #8ed0e7;
+  outline: 2px solid #50C878;
   outline-offset: 2px;
 }
 
-/* Selection */
+/* Selection - Green Theme */
 ::selection {
-  background: #8ed0e7;
-  color: #001f28;
+  background: #50C878;
+  color: #003322;
 }
 
 /* ============================================
    SOVEREIGN LEDGER DESIGN SYSTEM
    ============================================ */
 
-/* Primary Gradient */
+/* Primary Gradient - Green Theme */
 .bg-primary-gradient {
-  background: linear-gradient(135deg, #001e40 0%, #003366 100%);
+  background: linear-gradient(135deg, #00693E 0%, #008C53 100%);
 }
 
 /* Ambient Shadow */

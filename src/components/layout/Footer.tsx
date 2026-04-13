@@ -65,7 +65,7 @@ export function Footer() {
                 href="https://facebook.com/alloservicesci"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#004150] transition-colors"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#00693E] transition-colors"
               >
                 <Facebook className="h-5 w-5" />
               </a>
@@ -73,7 +73,7 @@ export function Footer() {
                 href="https://instagram.com/alloservicesci"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#004150] transition-colors"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#00693E] transition-colors"
               >
                 <Instagram className="h-5 w-5" />
               </a>
@@ -81,7 +81,7 @@ export function Footer() {
                 href={`https://wa.me/${APP_CONFIG.contact.phoneInternational.replace("+", "")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#004150] transition-colors"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#00693E] transition-colors"
               >
                 <MessageCircle className="h-5 w-5" />
               </a>

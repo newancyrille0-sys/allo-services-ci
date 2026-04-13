@@ -43,7 +43,7 @@ export function HowItWorks() {
       <div className="max-w-screen-2xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
-          <span className="text-[#004150] font-bold tracking-widest text-sm uppercase">
+          <span className="text-[#00693E] font-bold tracking-widest text-sm uppercase">
             Comment ça marche
           </span>
           <h2 className="font-headline text-4xl font-extrabold text-editorial text-[#181c1d] mt-2">
