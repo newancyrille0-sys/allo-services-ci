@@ -149,6 +149,8 @@ bun run dev
 | `ORANGE_MONEY_API_KEY` | Clé API Orange Money | Prod |
 | `WAVE_API_KEY` | Clé API Wave | Prod |
 | `MTN_MONEY_API_KEY` | Clé API MTN | Prod |
+| `YELIKA_API_KEY` | Clé API Yelika SMS | Prod |
+| `YELIKA_SENDER_ID` | Nom de l'expéditeur SMS | Prod |
 
 ## 🗄️ Déploiement sur Supabase
 
@@ -198,6 +200,31 @@ Paiements via:
 - 🟡 MTN Mobile Money
 - 🔵 Wave
 - 🟣 Moov Money
+
+## 📩 Notifications SMS
+
+Service SMS via **Yelika** (Côte d'Ivoire):
+
+```typescript
+import { sendOTP, sendTemplateSMS } from "@/lib/services/yelika-sms";
+
+// Envoyer un OTP
+await sendOTP("+22507000000", "123456");
+
+// Envoyer un SMS avec template
+await sendTemplateSMS("+22507000000", "reservationConfirmed", "Jean", "15/04/2024", "Plomberie");
+```
+
+Templates disponibles:
+- `otp` - Code de vérification
+- `reservationConfirmed` - Confirmation de réservation
+- `reservationReminder` - Rappel de rendez-vous
+- `providerNewReservation` - Nouvelle réservation (prestataire)
+- `paymentConfirmed` - Confirmation de paiement
+- `welcome` - Bienvenue
+- `passwordReset` - Réinitialisation mot de passe
+- `kycApproved` - KYC approuvé
+- `referral` - Bonus de parrainage
 
 ## 🎯 KPIs Objectifs
 
