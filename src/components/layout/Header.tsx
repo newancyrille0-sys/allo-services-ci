@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, Search, X, FileText, Phone } from "lucide-react";
+import { Menu, Search, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { APP_CONFIG } from "@/lib/constants/config";
 import {
   Sheet,
   SheetContent,
@@ -26,15 +25,6 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          {/* Contact Phone */}
-          <a 
-            href={`tel:${APP_CONFIG.contact.phoneInternational}`}
-            className="flex items-center gap-2 text-[#004150] font-semibold hover:text-[#fd7613] transition-colors"
-          >
-            <Phone className="h-4 w-4" />
-            <span>{APP_CONFIG.contact.phoneFormatted}</span>
-          </a>
-          
           <Link 
             href="/services" 
             className="text-slate-600 hover:text-teal-800 transition-colors font-semibold"
@@ -79,15 +69,6 @@ export function Header() {
               <SheetTitle className="text-[#004150]">Menu</SheetTitle>
             </SheetHeader>
             <div className="flex flex-col gap-4 mt-6">
-              {/* Contact Phone Mobile */}
-              <a 
-                href={`tel:${APP_CONFIG.contact.phoneInternational}`}
-                className="flex items-center gap-2 text-[#004150] font-semibold py-2"
-              >
-                <Phone className="h-4 w-4" />
-                <span>{APP_CONFIG.contact.phoneFormatted}</span>
-              </a>
-              
               <Link 
                 href="/services" 
                 className="text-[#181c1d] hover:text-[#004150] transition-colors font-semibold py-2"
