@@ -121,18 +121,30 @@ const allNavItems: NavItem[] = [
   { icon: Icons.dashboard, label: "Dashboard", href: "/admin/dashboard" },
   { icon: Icons.requests, label: "Requêtes", href: "/admin/reservations", permission: "reservations.read" },
   { icon: Icons.technicians, label: "Techniciens", href: "/admin/providers", badge: 5, permission: "providers.read" },
-  { 
+  {
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       </svg>
     ),
-    label: "Modération", 
-    href: "/admin/moderation", 
+    label: "Modération",
+    href: "/admin/moderation",
     badge: 3,
-    permission: "content.read" 
+    permission: "content.read"
   },
   { icon: Icons.finance, label: "Finances", href: "/admin/payments", permission: "finance.read" },
+  {
+    icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+        <circle cx="12" cy="15" r="2" />
+      </svg>
+    ),
+    label: "Contrôle Paiements",
+    href: "/admin/payment-control",
+    permission: "finance.read"
+  },
   { icon: Icons.analytics, label: "Analytics", href: "/admin/analytics", permission: "finance.read" },
   { icon: Icons.settings, label: "Paramètres", href: "/admin/settings", permission: "system.settings" },
 ];
