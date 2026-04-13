@@ -538,6 +538,16 @@ export default function ProviderRegisterPage() {
           Se connecter
         </Link>
       </p>
+
+      {/* FAQ Link */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <p className="text-center text-sm text-gray-600">
+          Des questions sur l&apos;inscription prestataire ?{" "}
+          <Link href="/faq" className="text-blue-600 font-medium hover:text-blue-700 hover:underline">
+            Consultez notre FAQ
+          </Link>
+        </p>
+      </div>
     </AuthLayout>
   );
 }

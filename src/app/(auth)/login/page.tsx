@@ -261,6 +261,16 @@ export default function LoginPage() {
           Devenir prestataire
         </Link>
       </p>
+
+      {/* FAQ Link */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <p className="text-center text-sm text-gray-600">
+          Des questions ?{" "}
+          <Link href="/faq" className="text-primary font-medium hover:underline">
+            Consultez notre FAQ
+          </Link>
+        </p>
+      </div>
     </AuthLayout>
   );
 }

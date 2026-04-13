@@ -8,6 +8,7 @@ import { FeaturedProviders } from "@/components/home/FeaturedProviders";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { TrustSection } from "@/components/home/TrustSection";
 import { Testimonials } from "@/components/home/Testimonials";
+import { FAQSection } from "@/components/home/FAQSection";
 import { CTASection } from "@/components/home/CTASection";
 
 export default function Home() {
@@ -22,6 +23,7 @@ export default function Home() {
         <HowItWorks />
         <TrustSection />
         <Testimonials />
+        <FAQSection />
         <CTASection />
       </main>
 
