@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, Search, X, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,15 @@ export function Header() {
     <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
       <div className="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
         {/* Logo */}
-        <Link href="/" className="text-2xl font-black tracking-tight text-primary">
-          Allo Services CI
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.svg"
+            alt="ALLÔ SERVICES"
+            width={180}
+            height={45}
+            priority
+            className="h-10 w-auto"
+          />
         </Link>
 
         {/* Desktop Navigation */}

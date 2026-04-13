@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, MessageCircle, Phone, Mail } from "lucide-react";
 import { APP_CONFIG } from "@/lib/constants/config";
 
@@ -33,8 +34,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="text-2xl font-black tracking-tight text-white">
-              Allo Services CI
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.svg"
+                alt="ALLÔ SERVICES"
+                width={180}
+                height={45}
+                className="h-10 w-auto brightness-0 invert"
+              />
             </Link>
             <p className="text-primary font-semibold mt-2">
               Le bon prestataire, au bon moment, près de chez vous.

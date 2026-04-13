@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#004150"/>
+      <stop offset="100%" style="stop-color:#005a6e"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FD7613"/>
+      <stop offset="100%" style="stop-color:#ff8c3a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="64" height="64" rx="14" fill="#f7fafb"/>
+  
+  <!-- Speech Bubble -->
+  <path d="M10 8 
+           Q10 4 14 4 
+           L50 4 
+           Q54 4 54 8 
+           L54 38 
+           Q54 42 50 42 
+           L26 42 
+           L18 52 
+           L18 42 
+           L14 42 
+           Q10 42 10 38 
+           Z" 
+        fill="url(#primaryGrad)"/>
+  
+  <!-- Phone Icon -->
+  <rect x="26" y="12" width="12" height="20" rx="2" fill="white"/>
+  <rect x="28" y="15" width="8" height="12" rx="1" fill="#004150" opacity="0.2"/>
+  <circle cx="32" cy="29" r="1.5" fill="#004150" opacity="0.3"/>
+  
+  <!-- Notification dot -->
+  <circle cx="50" cy="12" r="6" fill="url(#orangeGrad)"/>
+  
+  <!-- Check mark in notification -->
+  <path d="M47 12 L49 14 L53 10" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
