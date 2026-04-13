@@ -112,6 +112,9 @@ model User {
   referralsAsReferrer Referral[] @relation("ReferrerRelation")
   referralsAsReferred Referral[] @relation("ReferredRelation")
   warnings         UserWarning[]
+
+  // Payment control relations
+  paymentControls   UserPaymentControl[]
 }
 
 // ==================== PROVIDER MODEL ====================
@@ -1248,6 +1251,37 @@ model ProviderPaymentControl {
 
   @@unique([providerId, paymentMethod])
   @@index([providerId])
+  @@index([paymentMethod])
+  @@index([isEnabled])
+}
+
+// ==================== USER PAYMENT CONTROL ====================
+// Contrôle des méthodes de paiement par client
+
+model UserPaymentControl {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Méthode de paiement
+  paymentMethod   String   // orange_money, mtn_money, wave, moov, card, cash
+
+  // Statut
+  isEnabled       Boolean  @default(true)  // true = activé, false = désactivé
+  disabledAt      DateTime?
+  disabledById    String?  // Admin ID
+  disabledReason  String?  // Raison de la désactivation
+
+  // Réactivation
+  reactivatedAt   DateTime?
+  reactivatedById String?
+
+  // Audit
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, paymentMethod])
+  @@index([userId])
   @@index([paymentMethod])
   @@index([isEnabled])
 }

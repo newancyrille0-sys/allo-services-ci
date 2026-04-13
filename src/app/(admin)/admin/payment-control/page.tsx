@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Search,
   CreditCard,
@@ -13,6 +13,7 @@ import {
   XCircle,
   Filter,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -97,156 +98,132 @@ const PAYMENT_METHODS = [
   },
 ];
 
-// Mock users data
-const mockClients = [
-  {
-    id: "client-1",
-    name: "Amadou Koné",
-    email: "amadou.kone@email.com",
-    phone: "+225 07 00 00 01",
-    avatar: "https://i.pravatar.cc/100?img=1",
-    status: "active",
-    totalPayments: 125000,
-    blockedMethods: ["wave"],
-    lastPayment: new Date("2024-05-10"),
-  },
-  {
-    id: "client-2",
-    name: "Aya Diallo",
-    email: "aya.diallo@email.com",
-    phone: "+225 07 00 00 02",
-    avatar: "https://i.pravatar.cc/100?img=2",
-    status: "active",
-    totalPayments: 85000,
-    blockedMethods: [],
-    lastPayment: new Date("2024-05-08"),
-  },
-  {
-    id: "client-3",
-    name: "Kouadio Jean-Baptiste",
-    email: "kouadio.jb@email.com",
-    phone: "+225 07 00 00 03",
-    avatar: "https://i.pravatar.cc/100?img=3",
-    status: "suspended",
-    totalPayments: 250000,
-    blockedMethods: ["orange_money", "mtn_money", "wave", "moov_money", "card"],
-    lastPayment: new Date("2024-04-15"),
-  },
-  {
-    id: "client-4",
-    name: "Fatou Sanogo",
-    email: "fatou.sanogo@email.com",
-    phone: "+225 07 00 00 04",
-    avatar: "https://i.pravatar.cc/100?img=4",
-    status: "active",
-    totalPayments: 45000,
-    blockedMethods: ["card"],
-    lastPayment: new Date("2024-05-12"),
-  },
-];
+interface ClientData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  status: string;
+  totalPayments: number;
+  blockedMethods: string[];
+  lastPayment: string | null;
+  paymentCount: number;
+}
 
-const mockProviders = [
-  {
-    id: "provider-1",
-    name: "Plomberie Express",
-    businessName: "Plomberie Express Abidjan",
-    email: "contact@plomberieexpress.ci",
-    phone: "+225 07 10 00 01",
-    avatar: "https://i.pravatar.cc/100?img=11",
-    status: "active",
-    tier: "premium",
-    totalPayouts: 1500000,
-    blockedMethods: [],
-    lastPayout: new Date("2024-05-10"),
-  },
-  {
-    id: "provider-2",
-    name: "Beauty Home Services",
-    businessName: "Beauty Home Services",
-    email: "contact@beautyhome.ci",
-    phone: "+225 07 10 00 02",
-    avatar: "https://i.pravatar.cc/100?img=12",
-    status: "active",
-    tier: "basic",
-    totalPayouts: 450000,
-    blockedMethods: ["moov_money"],
-    lastPayout: new Date("2024-05-09"),
-  },
-  {
-    id: "provider-3",
-    name: "Élec Pro CI",
-    businessName: "Électricité Professionnelle",
-    email: "contact@elecpro.ci",
-    phone: "+225 07 10 00 03",
-    avatar: "https://i.pravatar.cc/100?img=13",
-    status: "suspended",
-    tier: "gratuit",
-    totalPayouts: 125000,
-    blockedMethods: ["orange_money", "mtn_money", "wave", "moov_money", "card", "cash"],
-    lastPayout: new Date("2024-03-20"),
-  },
-  {
-    id: "provider-4",
-    name: "Ménage Premium",
-    businessName: "Services de Ménage Premium",
-    email: "contact@menagepremium.ci",
-    phone: "+225 07 10 00 04",
-    avatar: "https://i.pravatar.cc/100?img=14",
-    status: "active",
-    tier: "elite",
-    totalPayouts: 2800000,
-    blockedMethods: [],
-    lastPayout: new Date("2024-05-11"),
-  },
-];
+interface ProviderData {
+  id: string;
+  name: string;
+  businessName: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  status: string;
+  tier: string;
+  totalPayouts: number;
+  blockedMethods: string[];
+  lastPayout: string | null;
+  reservationCount: number;
+}
+
+interface Stats {
+  totalClients: number;
+  totalProviders: number;
+  clientsWithRestrictions: number;
+  providersWithRestrictions: number;
+  suspendedClients: number;
+  suspendedProviders: number;
+}
 
 export default function PaymentControlPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [selectedUser, setSelectedUser] = useState<typeof mockClients[0] | typeof mockProviders[0] | null>(null);
+  const [selectedClient, setSelectedClient] = useState<ClientData | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<ProviderData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [userType, setUserType] = useState<"client" | "provider">("client");
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Filter users based on search and status
-  const filteredClients = mockClients.filter((client) => {
-    const matchesSearch =
-      client.name.toLowerCase().includes(search.toLowerCase()) ||
-      client.email.toLowerCase().includes(search.toLowerCase()) ||
-      client.phone.includes(search);
-    const matchesStatus = statusFilter === "all" || client.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  // Data states
+  const [clients, setClients] = useState<ClientData[]>([]);
+  const [providers, setProviders] = useState<ProviderData[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalClients: 0,
+    totalProviders: 0,
+    clientsWithRestrictions: 0,
+    providersWithRestrictions: 0,
+    suspendedClients: 0,
+    suspendedProviders: 0,
   });
 
-  const filteredProviders = mockProviders.filter((provider) => {
-    const matchesSearch =
-      provider.name.toLowerCase().includes(search.toLowerCase()) ||
-      provider.businessName.toLowerCase().includes(search.toLowerCase()) ||
-      provider.email.toLowerCase().includes(search.toLowerCase()) ||
-      provider.phone.includes(search);
-    const matchesStatus = statusFilter === "all" || provider.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // Fetch data
+  const fetchData = useCallback(async (showRefreshLoader = false) => {
+    if (showRefreshLoader) {
+      setRefreshing(true);
+    } else {
+      setInitialLoading(true);
+    }
 
-  // Toggle payment method
-  const togglePaymentMethod = async (methodId: string, isBlocked: boolean) => {
-    if (!selectedUser) return;
+    try {
+      const params = new URLSearchParams();
+      if (search) params.append("search", search);
+      if (statusFilter !== "all") params.append("status", statusFilter);
+
+      const response = await fetch(`/api/admin/payment-control?${params.toString()}`);
+      if (!response.ok) throw new Error("Erreur lors du chargement");
+
+      const data = await response.json();
+      setClients(data.clients || []);
+      setProviders(data.providers || []);
+      setStats(data.stats || {});
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Erreur lors du chargement des données");
+    } finally {
+      setInitialLoading(false);
+      setRefreshing(false);
+    }
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Toggle payment method for client
+  const toggleClientPaymentMethod = async (methodId: string, isBlocked: boolean) => {
+    if (!selectedClient) return;
 
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await fetch(`/api/admin/users/${selectedClient.id}/payment-control`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentMethod: methodId,
+          isEnabled: isBlocked, // If blocked, we want to enable it
+        }),
+      });
+
+      if (!response.ok) throw new Error("Erreur");
+
+      const data = await response.json();
+      toast.success(data.message);
 
       // Update local state
-      if (isBlocked) {
-        // Unblock
-        selectedUser.blockedMethods = selectedUser.blockedMethods.filter((m) => m !== methodId);
-        toast.success(`${PAYMENT_METHODS.find((m) => m.id === methodId)?.name} débloqué pour ${selectedUser.name}`);
-      } else {
-        // Block
-        selectedUser.blockedMethods = [...selectedUser.blockedMethods, methodId];
-        toast.error(`${PAYMENT_METHODS.find((m) => m.id === methodId)?.name} bloqué pour ${selectedUser.name}`);
-      }
+      setSelectedClient((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          blockedMethods: isBlocked
+            ? prev.blockedMethods.filter((m) => m !== methodId)
+            : [...prev.blockedMethods, methodId],
+        };
+      });
+
+      // Refresh data
+      fetchData(true);
     } catch {
       toast.error("Une erreur est survenue");
     } finally {
@@ -254,15 +231,39 @@ export default function PaymentControlPage() {
     }
   };
 
-  // Block all payment methods
-  const blockAllMethods = async () => {
-    if (!selectedUser) return;
+  // Toggle payment method for provider
+  const toggleProviderPaymentMethod = async (methodId: string, isBlocked: boolean) => {
+    if (!selectedProvider) return;
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      selectedUser.blockedMethods = PAYMENT_METHODS.map((m) => m.id);
-      toast.error(`Tous les moyens de paiement bloqués pour ${selectedUser.name}`);
+      const response = await fetch(`/api/admin/providers/${selectedProvider.id}/payment-control`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentMethod: methodId,
+          isEnabled: isBlocked, // If blocked, we want to enable it
+        }),
+      });
+
+      if (!response.ok) throw new Error("Erreur");
+
+      const data = await response.json();
+      toast.success(data.message);
+
+      // Update local state
+      setSelectedProvider((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          blockedMethods: isBlocked
+            ? prev.blockedMethods.filter((m) => m !== methodId)
+            : [...prev.blockedMethods, methodId],
+        };
+      });
+
+      // Refresh data
+      fetchData(true);
     } catch {
       toast.error("Une erreur est survenue");
     } finally {
@@ -270,15 +271,127 @@ export default function PaymentControlPage() {
     }
   };
 
-  // Unblock all payment methods
-  const unblockAllMethods = async () => {
-    if (!selectedUser) return;
+  // Block all payment methods for client
+  const blockAllClientMethods = async () => {
+    if (!selectedClient) return;
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      selectedUser.blockedMethods = [];
-      toast.success(`Tous les moyens de paiement débloqués pour ${selectedUser.name}`);
+      const methods = PAYMENT_METHODS.map((m) => ({
+        paymentMethod: m.id,
+        isEnabled: false,
+      }));
+
+      const response = await fetch(`/api/admin/users/${selectedClient.id}/payment-control`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ methods, reason: "Blocage total par admin" }),
+      });
+
+      if (!response.ok) throw new Error("Erreur");
+
+      toast.error(`Tous les moyens de paiement bloqués pour ${selectedClient.name}`);
+      setSelectedClient((prev) => {
+        if (!prev) return prev;
+        return { ...prev, blockedMethods: PAYMENT_METHODS.map((m) => m.id) };
+      });
+      fetchData(true);
+    } catch {
+      toast.error("Une erreur est survenue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Unblock all payment methods for client
+  const unblockAllClientMethods = async () => {
+    if (!selectedClient) return;
+
+    setLoading(true);
+    try {
+      const methods = PAYMENT_METHODS.map((m) => ({
+        paymentMethod: m.id,
+        isEnabled: true,
+      }));
+
+      const response = await fetch(`/api/admin/users/${selectedClient.id}/payment-control`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ methods }),
+      });
+
+      if (!response.ok) throw new Error("Erreur");
+
+      toast.success(`Tous les moyens de paiement débloqués pour ${selectedClient.name}`);
+      setSelectedClient((prev) => {
+        if (!prev) return prev;
+        return { ...prev, blockedMethods: [] };
+      });
+      fetchData(true);
+    } catch {
+      toast.error("Une erreur est survenue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Block all payment methods for provider
+  const blockAllProviderMethods = async () => {
+    if (!selectedProvider) return;
+
+    setLoading(true);
+    try {
+      const methods = PAYMENT_METHODS.map((m) => ({
+        paymentMethod: m.id,
+        isEnabled: false,
+      }));
+
+      const response = await fetch(`/api/admin/providers/${selectedProvider.id}/payment-control`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ methods, reason: "Blocage total par admin" }),
+      });
+
+      if (!response.ok) throw new Error("Erreur");
+
+      toast.error(`Tous les moyens de paiement bloqués pour ${selectedProvider.businessName}`);
+      setSelectedProvider((prev) => {
+        if (!prev) return prev;
+        return { ...prev, blockedMethods: PAYMENT_METHODS.map((m) => m.id) };
+      });
+      fetchData(true);
+    } catch {
+      toast.error("Une erreur est survenue");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Unblock all payment methods for provider
+  const unblockAllProviderMethods = async () => {
+    if (!selectedProvider) return;
+
+    setLoading(true);
+    try {
+      const methods = PAYMENT_METHODS.map((m) => ({
+        paymentMethod: m.id,
+        isEnabled: true,
+      }));
+
+      const response = await fetch(`/api/admin/providers/${selectedProvider.id}/payment-control`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ methods }),
+      });
+
+      if (!response.ok) throw new Error("Erreur");
+
+      toast.success(`Tous les moyens de paiement débloqués pour ${selectedProvider.businessName}`);
+      setSelectedProvider((prev) => {
+        if (!prev) return prev;
+        return { ...prev, blockedMethods: [] };
+      });
+      fetchData(true);
     } catch {
       toast.error("Une erreur est survenue");
     } finally {
@@ -294,6 +407,66 @@ export default function PaymentControlPage() {
     }).format(value);
   };
 
+  const formatDate = (date: string | null) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString("fr-FR");
+  };
+
+  // Get blocked methods for selected user
+  const getBlockedMethods = () => {
+    if (userType === "client") {
+      return selectedClient?.blockedMethods || [];
+    }
+    return selectedProvider?.blockedMethods || [];
+  };
+
+  // Toggle payment method (generic)
+  const togglePaymentMethod = (methodId: string, isBlocked: boolean) => {
+    if (userType === "client") {
+      toggleClientPaymentMethod(methodId, isBlocked);
+    } else {
+      toggleProviderPaymentMethod(methodId, isBlocked);
+    }
+  };
+
+  // Block all methods (generic)
+  const blockAllMethods = () => {
+    if (userType === "client") {
+      blockAllClientMethods();
+    } else {
+      blockAllProviderMethods();
+    }
+  };
+
+  // Unblock all methods (generic)
+  const unblockAllMethods = () => {
+    if (userType === "client") {
+      unblockAllClientMethods();
+    } else {
+      unblockAllProviderMethods();
+    }
+  };
+
+  // Get selected user info
+  const getSelectedUser = () => {
+    if (userType === "client") {
+      return selectedClient
+        ? { name: selectedClient.name, email: selectedClient.email, avatar: selectedClient.avatar }
+        : null;
+    }
+    return selectedProvider
+      ? { name: selectedProvider.businessName, email: selectedProvider.email, avatar: selectedProvider.avatar }
+      : null;
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#001e40]" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Page Header */}
@@ -302,8 +475,13 @@ export default function PaymentControlPage() {
           <h1 className="text-2xl font-bold text-slate-900">Contrôle des Moyens de Paiement</h1>
           <p className="text-slate-500 mt-1">Bloquez ou débloquez les moyens de paiement des utilisateurs</p>
         </div>
-        <Button variant="outline" className="gap-2">
-          <RefreshCw className="w-4 h-4" />
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={() => fetchData(true)}
+          disabled={refreshing}
+        >
+          <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
           Actualiser
         </Button>
       </div>
@@ -317,7 +495,7 @@ export default function PaymentControlPage() {
                 <User className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{mockClients.length}</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.totalClients}</p>
                 <p className="text-sm text-slate-500">Clients</p>
               </div>
             </div>
@@ -330,7 +508,7 @@ export default function PaymentControlPage() {
                 <Building2 className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{mockProviders.length}</p>
+                <p className="text-2xl font-bold text-slate-900">{stats.totalProviders}</p>
                 <p className="text-sm text-slate-500">Prestataires</p>
               </div>
             </div>
@@ -344,8 +522,7 @@ export default function PaymentControlPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">
-                  {mockClients.filter((c) => c.blockedMethods.length > 0).length +
-                    mockProviders.filter((p) => p.blockedMethods.length > 0).length}
+                  {stats.clientsWithRestrictions + stats.providersWithRestrictions}
                 </p>
                 <p className="text-sm text-slate-500">Avec restrictions</p>
               </div>
@@ -360,8 +537,7 @@ export default function PaymentControlPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-slate-900">
-                  {mockClients.filter((c) => c.status === "suspended").length +
-                    mockProviders.filter((p) => p.status === "suspended").length}
+                  {stats.suspendedClients + stats.suspendedProviders}
                 </p>
                 <p className="text-sm text-slate-500">Comptes suspendus</p>
               </div>
@@ -403,11 +579,11 @@ export default function PaymentControlPage() {
         <TabsList className="bg-slate-100 p-1">
           <TabsTrigger value="clients" className="gap-2">
             <User className="w-4 h-4" />
-            Clients ({filteredClients.length})
+            Clients ({clients.length})
           </TabsTrigger>
           <TabsTrigger value="providers" className="gap-2">
             <Building2 className="w-4 h-4" />
-            Prestataires ({filteredProviders.length})
+            Prestataires ({providers.length})
           </TabsTrigger>
         </TabsList>
 
@@ -440,14 +616,14 @@ export default function PaymentControlPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredClients.map((client) => (
+                    {clients.map((client) => (
                       <tr key={client.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={client.avatar} />
+                              <AvatarImage src={client.avatar || undefined} />
                               <AvatarFallback className="bg-blue-100 text-blue-600">
-                                {client.name.charAt(0)}
+                                {client.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -487,14 +663,14 @@ export default function PaymentControlPage() {
                           </div>
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-500">
-                          {client.lastPayment.toLocaleDateString("fr-FR")}
+                          {formatDate(client.lastPayment)}
                         </td>
                         <td className="px-4 py-4 text-right">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              setSelectedUser(client);
+                              setSelectedClient(client);
                               setUserType("client");
                               setIsDialogOpen(true);
                             }}
@@ -510,7 +686,7 @@ export default function PaymentControlPage() {
                 </table>
               </div>
 
-              {filteredClients.length === 0 && (
+              {clients.length === 0 && (
                 <div className="text-center py-12 text-slate-500">
                   <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>Aucun client trouvé</p>
@@ -549,14 +725,14 @@ export default function PaymentControlPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredProviders.map((provider) => (
+                    {providers.map((provider) => (
                       <tr key={provider.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-4 py-4">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={provider.avatar} />
+                              <AvatarImage src={provider.avatar || undefined} />
                               <AvatarFallback className="bg-purple-100 text-purple-600">
-                                {provider.name.charAt(0)}
+                                {provider.businessName.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -601,14 +777,14 @@ export default function PaymentControlPage() {
                           </div>
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-500">
-                          {provider.lastPayout.toLocaleDateString("fr-FR")}
+                          {formatDate(provider.lastPayout)}
                         </td>
                         <td className="px-4 py-4 text-right">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              setSelectedUser(provider);
+                              setSelectedProvider(provider);
                               setUserType("provider");
                               setIsDialogOpen(true);
                             }}
@@ -624,7 +800,7 @@ export default function PaymentControlPage() {
                 </table>
               </div>
 
-              {filteredProviders.length === 0 && (
+              {providers.length === 0 && (
                 <div className="text-center py-12 text-slate-500">
                   <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>Aucun prestataire trouvé</p>
@@ -644,17 +820,17 @@ export default function PaymentControlPage() {
               Gestion des Moyens de Paiement
             </DialogTitle>
             <DialogDescription>
-              {selectedUser && (
+              {getSelectedUser() && (
                 <div className="flex items-center gap-2 mt-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarImage src={getSelectedUser()?.avatar || undefined} />
                     <AvatarFallback>
-                      {selectedUser.name.charAt(0)}
+                      {getSelectedUser()?.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium text-slate-900">{selectedUser.name}</p>
-                    <p className="text-xs text-slate-500">{selectedUser.email}</p>
+                    <p className="font-medium text-slate-900">{getSelectedUser()?.name}</p>
+                    <p className="text-xs text-slate-500">{getSelectedUser()?.email}</p>
                   </div>
                 </div>
               )}
@@ -689,7 +865,8 @@ export default function PaymentControlPage() {
             {/* Payment Methods List */}
             <div className="space-y-3">
               {PAYMENT_METHODS.map((method) => {
-                const isBlocked = selectedUser?.blockedMethods.includes(method.id);
+                const blockedMethods = getBlockedMethods();
+                const isBlocked = blockedMethods.includes(method.id);
                 return (
                   <div
                     key={method.id}

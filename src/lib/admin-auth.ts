@@ -183,6 +183,11 @@ export async function getCurrentAdmin() {
   return session.admin;
 }
 
+// Get admin session from request (for API routes)
+export async function getAdminSession(_request?: Request) {
+  return getCurrentAdmin();
+}
+
 // Authentifier un admin
 export async function authenticateAdmin(email: string, password: string) {
   const admin = await prisma.admin.findUnique({
