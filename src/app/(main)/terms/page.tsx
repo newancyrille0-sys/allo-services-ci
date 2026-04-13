@@ -14,6 +14,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { APP_CONFIG } from "@/lib/constants/config";
 
 const tableOfContents = [
   { id: "introduction", title: "1. Introduction" },
@@ -318,8 +319,8 @@ export default function TermsPage() {
                     Pour toute question concernant ces CGU, vous pouvez nous contacter :
                   </p>
                   <ul className="list-none text-gray-600 space-y-2">
-                    <li>Email : legal@alloservices.ci</li>
-                    <li>Téléphone : +225 07 00 00 00 00</li>
+                    <li>Email : {APP_CONFIG.contact.email}</li>
+                    <li>Téléphone : {APP_CONFIG.contact.phoneFormatted}</li>
                     <li>Adresse : Abidjan, Plateau, Côte d&apos;Ivoire</li>
                   </ul>
                 </section>
