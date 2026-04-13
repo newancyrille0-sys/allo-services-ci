@@ -14,9 +14,9 @@ export const APP_CONFIG = {
     phone: "0141105707",
     phoneFormatted: "01 41 10 57 07",
     phoneInternational: "+2250141105707",
-    email: "contact@alloservices.ci",
-    emailSupport: "support@alloservices.ci",
-    emailAdmin: "admin@alloservices.ci",
+    email: "admin@alloserviceci.com",
+    emailSupport: "support@alloserviceci.com",
+    emailAdmin: "admin@alloserviceci.com",
   },
   
   // Adresse
