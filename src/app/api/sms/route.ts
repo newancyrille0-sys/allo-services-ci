@@ -1,35 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendYelikaSMS, sendTemplateSMS, sendOTP, checkSMSCredits } from "@/lib/services/yelika-sms";
+import { sendYelikaSMS, sendTemplateSMS, smsTemplates } from "@/lib/services/yelika-sms";
+import { prisma } from "@/lib/prisma";
 
 /**
  * POST /api/sms/send
- * Envoie un SMS via Yelika
+ * Envoie un SMS via Yellika
  * 
  * Body:
  * - phone: string - Numéro de téléphone
- * - message: string - Message à envoyer (optionnel si template utilisé)
- * - template: string - Type de template (otp, welcome, etc.)
- * - templateArgs: string[] - Arguments pour le template
+ * - message?: string - Message personnalisé
+ * - template?: string - Type de template (voir smsTemplates)
+ * - templateArgs?: string[] - Arguments pour le template
+ * - userId?: string - ID utilisateur (optionnel, pour logging)
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { phone, message, template, templateArgs } = body;
+    const { phone, message, template, templateArgs, userId } = body;
 
     // Validation du numéro de téléphone
     if (!phone) {
       return NextResponse.json(
-        { success: false, error: "Phone number is required" },
+        { success: false, error: "Numéro de téléphone requis" },
         { status: 400 }
       );
     }
 
-    // Validation du format du numéro (Côte d'Ivoire)
-    const phoneRegex = /^(\+225|0)?[0-9]{8,10}$/;
-    const cleanPhone = phone.replace(/\s+/g, "");
-    if (!phoneRegex.test(cleanPhone)) {
+    // Normaliser le numéro
+    let normalizedPhone = phone.replace(/\s+/g, "").replace(/^00/, "+");
+    if (normalizedPhone.startsWith("0")) {
+      normalizedPhone = "+225" + normalizedPhone.substring(1);
+    } else if (!normalizedPhone.startsWith("+")) {
+      normalizedPhone = "+225" + normalizedPhone;
+    }
+
+    // Validation format ivoirien
+    const phoneRegex = /^\+225[0-9]{8,10}$/;
+    if (!phoneRegex.test(normalizedPhone)) {
       return NextResponse.json(
-        { success: false, error: "Invalid phone number format" },
+        { success: false, error: "Format de numéro invalide" },
         { status: 400 }
       );
     }
@@ -37,15 +46,33 @@ export async function POST(request: NextRequest) {
     let result;
 
     if (template) {
-      // Envoi avec template
+      // Vérifier que le template existe
+      if (!(template in smsTemplates)) {
+        return NextResponse.json(
+          { success: false, error: `Template "${template}" non reconnu. Templates disponibles: ${Object.keys(smsTemplates).join(", ")}` },
+          { status: 400 }
+        );
+      }
+
+      // Envoyer avec template
       const args = templateArgs || [];
-      result = await sendTemplateSMS(phone, template, ...args);
+      result = await sendTemplateSMS(normalizedPhone, template as keyof typeof smsTemplates, ...args);
+      
     } else if (message) {
-      // Envoi avec message personnalisé
-      result = await sendYelikaSMS(phone, message);
+      // Vérifier la longueur du message
+      if (message.length > 500) {
+        return NextResponse.json(
+          { success: false, error: "Message trop long (max 500 caractères)" },
+          { status: 400 }
+        );
+      }
+
+      // Envoyer message personnalisé
+      result = await sendYelikaSMS(normalizedPhone, message);
+      
     } else {
       return NextResponse.json(
-        { success: false, error: "Message or template is required" },
+        { success: false, error: "Message ou template requis" },
         { status: 400 }
       );
     }
@@ -54,6 +81,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         messageId: result.messageId,
+        phone: normalizedPhone,
         credits: result.credits,
       });
     } else {
@@ -62,49 +90,57 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
   } catch (error) {
-    console.error("SMS API error:", error);
+    console.error("Erreur envoi SMS:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Erreur interne du serveur" },
       { status: 500 }
     );
   }
 }
 
 /**
- * GET /api/sms/balance
- * Vérifie le solde de crédits SMS
+ * GET /api/sms
+ * Informations sur le service SMS
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get("action");
 
-  if (action === "balance") {
-    const credits = await checkSMSCredits();
+  if (action === "templates") {
+    // Lister les templates disponibles
+    const templatesList = Object.keys(smsTemplates).map(key => ({
+      key,
+      example: smsTemplates[key as keyof typeof smsTemplates]("XXX", "Jean", "15/04/2024", "Plomberie"),
+    }));
+
     return NextResponse.json({
       success: true,
-      credits,
+      templates: templatesList,
     });
   }
 
+  if (action === "balance") {
+    // Vérifier le solde (si endpoint disponible)
+    return NextResponse.json({
+      success: true,
+      message: "Utilisez le panel Yellika pour vérifier le solde",
+      panelUrl: "https://panel.yellikasms.com",
+    });
+  }
+
+  // Informations générales
   return NextResponse.json({
     success: true,
-    service: "Yelika SMS",
+    service: "Yellika SMS",
+    provider: "Yellika (Côte d'Ivoire)",
     endpoints: {
-      "POST /api/sms/send": "Send SMS",
-      "GET /api/sms/balance": "Check SMS credits",
+      "POST /api/sms/send": "Envoyer un SMS",
+      "GET /api/sms?action=templates": "Lister les templates",
+      "POST /api/auth/otp/send": "Envoyer un code OTP",
+      "PUT /api/auth/otp/verify": "Vérifier un code OTP",
     },
-    templates: [
-      "otp",
-      "reservationConfirmed",
-      "reservationReminder",
-      "providerNewReservation",
-      "paymentConfirmed",
-      "welcome",
-      "passwordReset",
-      "kycApproved",
-      "kycRejected",
-      "referral",
-    ],
+    templates: Object.keys(smsTemplates),
   });
 }
