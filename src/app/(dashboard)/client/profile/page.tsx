@@ -45,7 +45,7 @@ const MOCK_USER = {
   email: "amadou.kone@email.com",
   phone: "+225 07 00 00 00 00",
   city: "Abidjan",
-  avatarUrl: undefined,
+  avatarUrl: "https://i.pravatar.cc/150?img=33",
   createdAt: new Date("2023-06-15"),
 };
 

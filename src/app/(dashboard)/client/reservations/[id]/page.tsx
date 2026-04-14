@@ -56,7 +56,7 @@ const MOCK_RESERVATION = {
     id: "provider-1",
     businessName: "Plomberie Express Abidjan",
     description: "Expert en plomberie et sanitaires. Intervention rapide 7j/7 sur Abidjan et environs.",
-    user: { fullName: "Koffi Yao", phone: "+225 07 12 34 56 78", avatarUrl: undefined },
+    user: { fullName: "Koffi Yao", phone: "+225 07 12 34 56 78", avatarUrl: "https://i.pravatar.cc/150?img=12" },
     averageRating: 4.9,
     totalReviews: 127,
     trustScore: 95,

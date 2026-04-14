@@ -11,7 +11,7 @@ function getMockReviews(providerId: string) {
       createdAt: "2024-01-15T10:30:00.000Z",
       client: {
         fullName: "Aminata Koné",
-        avatarUrl: undefined,
+        avatarUrl: "https://i.pravatar.cc/150?img=23",
       },
     },
     {
@@ -21,7 +21,7 @@ function getMockReviews(providerId: string) {
       createdAt: "2024-01-10T14:15:00.000Z",
       client: {
         fullName: "Jean-Baptiste Yao",
-        avatarUrl: undefined,
+        avatarUrl: "https://i.pravatar.cc/150?img=51",
       },
     },
     {
@@ -31,7 +31,7 @@ function getMockReviews(providerId: string) {
       createdAt: "2024-01-05T09:00:00.000Z",
       client: {
         fullName: "Fatou Diallo",
-        avatarUrl: undefined,
+        avatarUrl: "https://i.pravatar.cc/150?img=25",
       },
     },
     {
@@ -41,7 +41,7 @@ function getMockReviews(providerId: string) {
       createdAt: "2024-01-01T16:45:00.000Z",
       client: {
         fullName: "Kouamé Laurent",
-        avatarUrl: undefined,
+        avatarUrl: "https://i.pravatar.cc/150?img=57",
       },
     },
     {
@@ -51,7 +51,7 @@ function getMockReviews(providerId: string) {
       createdAt: "2023-12-20T11:30:00.000Z",
       client: {
         fullName: "Marie Adjoua",
-        avatarUrl: undefined,
+        avatarUrl: "https://i.pravatar.cc/150?img=26",
       },
     },
   ];

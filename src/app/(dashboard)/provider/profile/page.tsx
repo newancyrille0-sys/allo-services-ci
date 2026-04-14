@@ -84,7 +84,7 @@ const MOCK_PROVIDER = {
   city: "Abidjan",
   address: "Cocody, Rue des Jardins",
   phone: "+225 07 08 09 10 11",
-  avatarUrl: undefined,
+  avatarUrl: "https://i.pravatar.cc/150?img=12",
   coverUrl: undefined,
   gallery: [] as string[],
   videoUrl: undefined,

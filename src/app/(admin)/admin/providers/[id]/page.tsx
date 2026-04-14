@@ -69,7 +69,7 @@ const mockProvider = {
   city: "Abidjan",
   address: "Cocody, Rue des Jardins",
   description: "Service professionnel d'installation et réparation électrique. Plus de 10 ans d'expérience.",
-  avatarUrl: null,
+  avatarUrl: "https://i.pravatar.cc/150?img=11",
   subscriptionPlan: "PREMIUM" as const,
   kycStatus: "PENDING" as const,
   status: "ACTIVE" as const,
