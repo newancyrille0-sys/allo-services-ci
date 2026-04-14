@@ -15,7 +15,7 @@ import {
   Download,
   PlusCircle,
   RefreshCw,
-  Tune,
+  SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
   Zap,
@@ -319,7 +319,7 @@ export default function AdminReservationsPage() {
               <RefreshCw className="w-5 h-5" />
             </button>
             <button className="p-2 text-slate-400 hover:text-[#001e40] transition-colors">
-              <Tune className="w-5 h-5" />
+              <SlidersHorizontal className="w-5 h-5" />
             </button>
           </div>
         </div>
