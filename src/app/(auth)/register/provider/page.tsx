@@ -211,6 +211,20 @@ export default function ProviderRegisterPage() {
     }
   }, []);
 
+  // Stop recording - declared first to avoid reference error
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    setIsRecording(false);
+  }, []);
+
   // Start recording with countdown
   const startRecording = useCallback(() => {
     if (!streamRef.current || !videoRef.current) return;
@@ -264,21 +278,7 @@ export default function ProviderRegisterPage() {
       console.error("Recording error:", err);
       setCameraError("Erreur lors du démarrage de l'enregistrement. Veuillez réessayer.");
     }
-  }, [stopCamera]);
-
-  // Stop recording
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    
-    setIsRecording(false);
-  }, []);
+  }, [stopCamera, stopRecording]);
 
   // Retake video
   const retakeVideo = useCallback(() => {

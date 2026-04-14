@@ -126,14 +126,27 @@ export function AssistantChat() {
     sendMessage(query);
   };
 
-  // Formater le texte avec markdown basique
-  const formatMessage = (content: string) => {
-    // Convertir les sauts de ligne en <br/>
-    // Convertir **text** en gras
-    // Convertir les listes
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br/>');
+  // Formater le texte avec markdown basique - version sécurisée
+  const formatMessage = (content: string): React.ReactNode[] => {
+    // Séparer le texte par les sauts de ligne
+    const lines = content.split('\n');
+    
+    return lines.map((line, index) => {
+      // Convertir **text** en gras de manière sécurisée
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      
+      return (
+        <span key={index}>
+          {parts.map((part, partIndex) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <strong key={partIndex}>{part.slice(2, -2)}</strong>;
+            }
+            return <span key={partIndex}>{part}</span>;
+          })}
+          {index < lines.length - 1 && <br />}
+        </span>
+      );
+    });
   };
 
   return (
@@ -208,10 +221,9 @@ export function AssistantChat() {
                       : "bg-white text-gray-800 rounded-bl-sm border border-gray-100 shadow-sm"
                   )}
                 >
-                  <p 
-                    className="whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
-                  />
+                  <p className="whitespace-pre-wrap">
+                    {formatMessage(message.content)}
+                  </p>
                 </div>
                 {message.role === 'user' && (
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">

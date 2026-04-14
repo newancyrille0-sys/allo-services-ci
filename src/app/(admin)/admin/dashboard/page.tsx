@@ -129,7 +129,10 @@ export default function AdminDashboardPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Use RAF to avoid synchronous setState in effect
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
   }, []);
 
   // Mock data
