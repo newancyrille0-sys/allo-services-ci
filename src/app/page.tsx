@@ -10,6 +10,7 @@ import { TrustSection } from "@/components/home/TrustSection";
 import { Testimonials } from "@/components/home/Testimonials";
 import { FAQSection } from "@/components/home/FAQSection";
 import { CTASection } from "@/components/home/CTASection";
+import { AssistantChat } from "@/components/assistant/AssistantChat";
 
 export default function Home() {
   return (
@@ -28,6 +29,9 @@ export default function Home() {
       </main>
 
       <Footer />
+      
+      {/* Assistant IA - Disponible sur toutes les pages */}
+      <AssistantChat />
     </div>
   );
 }

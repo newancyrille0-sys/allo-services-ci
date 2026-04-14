@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AssistantChat } from "@/components/assistant/AssistantChat";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -143,6 +144,9 @@ export function AuthLayout({
           <p>© {new Date().getFullYear()} Allo Services CI. Tous droits réservés.</p>
         </div>
       </div>
+      
+      {/* Assistant IA - Disponible sur les pages d'authentification */}
+      <AssistantChat />
     </div>
   );
 }
