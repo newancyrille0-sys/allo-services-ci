@@ -6,28 +6,31 @@ const testimonials = [
   {
     id: 1,
     name: "Kouamé Jean-Baptiste",
+    initials: "KJ",
     role: "Client à Abidjan",
     content: "J'ai trouvé un excellent plombier en moins de 10 minutes. Le service était rapide et professionnel. Je recommande vivement !",
     rating: 5,
-    image: "https://i.pravatar.cc/100?img=33",
+    bgColor: "bg-gradient-to-br from-blue-500 to-blue-700",
     service: "Plomberie",
   },
   {
     id: 2,
     name: "Aya Koné",
+    initials: "AK",
     role: "Cliente à Bouaké",
     content: "Grâce à Allo Services CI, j'ai pu trouver une femme de ménage formidable. Le système de réservation est très simple.",
     rating: 5,
-    image: "https://i.pravatar.cc/100?img=44",
+    bgColor: "bg-gradient-to-br from-purple-500 to-purple-700",
     service: "Ménage",
   },
   {
     id: 3,
     name: "Dr. Mamadou Diallo",
+    initials: "MD",
     role: "Client à San-Pédro",
     content: "En tant que prestataire, cette plateforme m'a permis de développer ma clientèle. Les outils sont excellents.",
     rating: 5,
-    image: "https://i.pravatar.cc/100?img=52",
+    bgColor: "bg-gradient-to-br from-green-500 to-green-700",
     service: "Consultation",
   },
 ];
@@ -70,11 +73,9 @@ export function Testimonials() {
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <div className={`w-12 h-12 rounded-full ${testimonial.bgColor} flex items-center justify-center text-white font-bold`}>
+                  {testimonial.initials}
+                </div>
                 <div>
                   <p className="font-bold text-[#181c1d]">{testimonial.name}</p>
                   <p className="text-sm text-[#70787c]">{testimonial.role}</p>

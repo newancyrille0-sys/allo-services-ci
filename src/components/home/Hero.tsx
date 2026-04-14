@@ -29,14 +29,14 @@ export function Hero() {
 
   return (
     <section className="relative min-h-[870px] flex items-center justify-center overflow-hidden px-4 md:px-10">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=80"
-          alt="Background"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 hero-gradient opacity-85" />
+      {/* Background with Gradient */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#004150] via-[#005a6e] to-[#003366]" />
+      
+      {/* Decorative elements */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -top-1/4 -right-1/4 w-1/2 h-1/2 bg-[#fd7613]/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-1/4 -left-1/4 w-1/2 h-1/2 bg-[#50C878]/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-white/5 rounded-full blur-3xl" />
       </div>
 
       {/* Content */}

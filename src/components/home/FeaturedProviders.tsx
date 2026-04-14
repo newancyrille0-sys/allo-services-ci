@@ -1,40 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { Star, MapPin, Calendar, Shield, Zap } from "lucide-react";
+import { Star, MapPin, Calendar, Shield, Zap, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const providers = [
   {
     id: 1,
     name: "Koffi Kouadio",
+    initials: "KK",
     service: "Plomberie & Installations Sanitaires",
     city: "Cocody",
     rating: 4.9,
     price: "15.000",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    bgColor: "bg-gradient-to-br from-teal-500 to-teal-700",
     verified: true,
     badge: "verified",
   },
   {
     id: 2,
     name: "Awa Bakayoko",
+    initials: "AB",
     service: "Coiffure à Domicile & Esthétique",
     city: "Riviera",
     rating: 5.0,
     price: "10.000",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    bgColor: "bg-gradient-to-br from-rose-500 to-rose-700",
     verified: true,
     badge: "verified",
   },
   {
     id: 3,
     name: "Jean-Marc Yao",
+    initials: "JY",
     service: "Électricité & Domotique",
     city: "Marcory",
     rating: 4.8,
     price: "20.000",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+    bgColor: "bg-gradient-to-br from-amber-500 to-amber-700",
     verified: true,
     badge: "urgent",
   },
@@ -69,13 +72,14 @@ export function FeaturedProviders() {
             key={provider.id}
             className="group relative bg-white rounded-[2.5rem] p-4 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden"
           >
-            {/* Image */}
-            <div className="relative h-64 overflow-hidden rounded-[2rem] mb-6">
-              <img
-                src={provider.image}
-                alt={provider.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+            {/* Avatar */}
+            <div className={`relative h-64 overflow-hidden rounded-[2rem] mb-6 ${provider.bgColor} flex items-center justify-center`}>
+              <div className="flex flex-col items-center justify-center text-white">
+                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                  <span className="text-4xl font-bold">{provider.initials}</span>
+                </div>
+                <User className="w-16 h-16 opacity-30" />
+              </div>
               {/* Badge */}
               <div className={`absolute top-4 left-4 ${provider.badge === 'urgent' ? 'bg-[#9c4400]' : 'bg-[#00460e]'} text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1`}>
                 {provider.badge === 'urgent' ? (
