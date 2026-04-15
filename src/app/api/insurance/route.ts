@@ -3,29 +3,46 @@ import { db } from '@/lib/db';
 import { z } from 'zod';
 
 // ==================== INSURANCE CONFIGURATION ====================
+// Allo Services Assurance: Si le prestataire fait un mauvais travail, 
+// nous envoyons 2 agents qualifiés pour refaire le travail gratuitement
 
 const INSURANCE_CONFIG = {
-  // Montants maximum par type de réclamation
-  maxClaimAmounts: {
-    no_show: 50000,      // Prestataire ne vient pas
-    damage: 100000,      // Dommages causés
-    incomplete: 30000,   // Travail non terminé
-    dispute: 50000,      // Litige divers
+  // Types de réclamations couvertes
+  claimTypes: {
+    no_show: {
+      label: 'Absence du prestataire',
+      description: 'Le prestataire ne s\'est pas présenté à la réservation.',
+      agentsSent: 2,
+    },
+    incomplete: {
+      label: 'Travail inachevé',
+      description: 'La prestation n\'a pas été correctement terminée.',
+      agentsSent: 2,
+    },
+    bad_quality: {
+      label: 'Mauvaise qualité',
+      description: 'Le travail effectué ne correspond pas aux standards.',
+      agentsSent: 2,
+    },
+    damage: {
+      label: 'Dommages causés',
+      description: 'Des dommages ont été causés lors de la prestation.',
+      agentsSent: 2,
+    },
   },
   
-  // Délai maximum pour réclamer (en jours)
-  claimDeadlineDays: 7,
+  // Délai maximum pour réclamer (en heures)
+  claimDeadlineHours: 48,
   
-  // Franchise (part à la charge du client)
-  franchisePercentage: 0.10, // 10%
-  minFranchise: 1000, // Minimum 1000 FCFA
+  // Délai d'intervention des agents (en heures)
+  agentsInterventionDelay: 24,
   
   // Messages
   messages: {
-    no_show: 'Le prestataire ne s\'est pas présenté à la réservation.',
-    damage: 'Des dommages ont été causés lors de la prestation.',
-    incomplete: 'La prestation n\'a pas été correctement terminée.',
-    dispute: 'Un litige est survenu avec le prestataire.',
+    no_show: 'Le prestataire ne s\'est pas présenté. Nous enverrons 2 agents qualifiés gratuitement.',
+    incomplete: 'Le travail est inachevé. Nous enverrons 2 agents pour terminer gratuitement.',
+    bad_quality: 'La qualité est insuffisante. Nos 2 agents referont le travail gratuitement.',
+    damage: 'Des dommages ont été causés. Nos agents répareront gratuitement.',
   },
 };
 
@@ -34,18 +51,17 @@ const INSURANCE_CONFIG = {
 const createClaimSchema = z.object({
   reservationId: z.string(),
   clientId: z.string(),
-  claimType: z.enum(['no_show', 'damage', 'incomplete', 'dispute']),
+  claimType: z.enum(['no_show', 'incomplete', 'bad_quality', 'damage']),
   description: z.string().min(20, 'Description minimum 20 caractères'),
-  amount: z.number().positive(),
-  evidence: z.array(z.string()).optional(), // URLs des preuves
+  evidence: z.array(z.string()).optional(), // URLs des preuves (photos, vidéos)
 });
 
 const updateClaimSchema = z.object({
   claimId: z.string(),
-  status: z.enum(['pending', 'under_review', 'approved', 'rejected', 'resolved']),
-  resolutionType: z.enum(['refund', 'partial_refund', 'mediation', 'rejected']).optional(),
-  resolutionAmount: z.number().optional(),
+  status: z.enum(['pending', 'under_review', 'agents_dispatched', 'resolved', 'rejected']),
   resolutionNotes: z.string().optional(),
+  agentsAssigned: z.array(z.string()).optional(), // IDs des agents assignés
+  scheduledIntervention: z.string().optional(), // Date d'intervention prévue
   reviewerId: z.string(),
 });
 
@@ -118,10 +134,7 @@ export async function GET(request: NextRequest) {
         id: c.id,
         claimType: c.claimType,
         description: c.description,
-        amount: c.amount,
         status: c.status,
-        resolutionType: c.resolutionType,
-        resolutionAmount: c.resolutionAmount,
         reservation: {
           id: c.reservation.id,
           service: c.reservation.service.name,
@@ -181,13 +194,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier le délai de réclamation
+    // Vérifier le délai de réclamation (48 heures)
     const deadline = new Date(reservation.scheduledDate);
-    deadline.setDate(deadline.getDate() + INSURANCE_CONFIG.claimDeadlineDays);
+    deadline.setHours(deadline.getHours() + INSURANCE_CONFIG.claimDeadlineHours);
 
     if (new Date() > deadline) {
       return NextResponse.json(
-        { error: `Le délai de réclamation (${INSURANCE_CONFIG.claimDeadlineDays} jours) est dépassé` },
+        { error: `Le délai de réclamation (${INSURANCE_CONFIG.claimDeadlineHours}h) est dépassé` },
         { status: 400 }
       );
     }
@@ -204,15 +217,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Valider le montant
-    const maxAmount = INSURANCE_CONFIG.maxClaimAmounts[data.claimType as keyof typeof INSURANCE_CONFIG.maxClaimAmounts];
-    if (data.amount > maxAmount) {
-      return NextResponse.json(
-        { error: `Montant maximum pour ce type: ${maxAmount.toLocaleString('fr-FR')} FCFA` },
-        { status: 400 }
-      );
-    }
-
     // Créer la réclamation
     const claim = await db.insuranceClaim.create({
       data: {
@@ -221,9 +225,9 @@ export async function POST(request: NextRequest) {
         providerId: reservation.providerId,
         claimType: data.claimType,
         description: data.description,
-        amount: data.amount,
         evidence: data.evidence ? JSON.stringify(data.evidence) : null,
         status: 'pending',
+        amount: 0, // Plus de montant - on envoie des agents à la place
       },
     });
 
@@ -249,11 +253,10 @@ export async function POST(request: NextRequest) {
       claim: {
         id: claim.id,
         claimType: claim.claimType,
-        amount: claim.amount,
         status: claim.status,
         createdAt: claim.createdAt.toISOString(),
       },
-      message: 'Votre réclamation a été enregistrée. Notre équipe l\'examinera dans les 48h.',
+      message: 'Votre réclamation a été enregistrée. Si elle est validée, nous enverrons 2 agents qualifiés gratuitement pour refaire le travail.',
     });
   } catch (error) {
     console.error('Insurance claim creation error:', error);
@@ -302,14 +305,14 @@ export async function PUT(request: NextRequest) {
       reviewedAt: new Date(),
     };
 
-    if (data.resolutionType) {
-      updateData.resolutionType = data.resolutionType;
-    }
-    if (data.resolutionAmount) {
-      updateData.resolutionAmount = data.resolutionAmount;
-    }
     if (data.resolutionNotes) {
       updateData.resolutionNotes = data.resolutionNotes;
+    }
+    if (data.agentsAssigned) {
+      updateData.resolutionNotes = `Agents assignés: ${data.agentsAssigned.join(', ')}`;
+    }
+    if (data.scheduledIntervention) {
+      updateData.resolutionNotes = (updateData.resolutionNotes || '') + ` | Intervention prévue: ${data.scheduledIntervention}`;
     }
     if (data.status === 'resolved' || data.status === 'rejected') {
       updateData.resolvedAt = new Date();
@@ -320,20 +323,33 @@ export async function PUT(request: NextRequest) {
       data: updateData,
     });
 
-    // Si approuvé, effectuer le remboursement
-    if (data.status === 'approved' && data.resolutionAmount) {
-      // Créer une notification pour le client
+    // Si agents envoyés, notifier le client
+    if (data.status === 'agents_dispatched') {
+      const claimTypeConfig = INSURANCE_CONFIG.claimTypes[claim.claimType as keyof typeof INSURANCE_CONFIG.claimTypes];
+      const agentsCount = claimTypeConfig?.agentsSent || 2;
+      
       await db.notification.create({
         data: {
           userId: claim.clientId,
           type: 'system',
-          title: 'Réclamation approuvée',
-          message: `Votre réclamation a été approuvée. Remboursement de ${data.resolutionAmount.toLocaleString('fr-FR')} FCFA en cours.`,
-          actionUrl: `/dashboard/reservations/${claim.reservationId}`,
+          title: 'Agents en route !',
+          message: `${agentsCount} agents qualifiés ont été dépêchés pour refaire le travail gratuitement. Intervention prévue sous ${INSURANCE_CONFIG.agentsInterventionDelay}h.`,
+          actionUrl: `/client/reservations/${claim.reservationId}`,
         },
       });
+    }
 
-      // TODO: Intégrer avec le système de paiement pour le remboursement
+    // Si résolu, notifier le client
+    if (data.status === 'resolved') {
+      await db.notification.create({
+        data: {
+          userId: claim.clientId,
+          type: 'system',
+          title: 'Réclamation résolue',
+          message: 'Votre réclamation a été résolue. Les agents ont terminé le travail.',
+          actionUrl: `/client/reservations/${claim.reservationId}`,
+        },
+      });
     }
 
     return NextResponse.json({
@@ -341,8 +357,7 @@ export async function PUT(request: NextRequest) {
       claim: {
         id: updatedClaim.id,
         status: updatedClaim.status,
-        resolutionType: updatedClaim.resolutionType,
-        resolutionAmount: updatedClaim.resolutionAmount,
+        resolutionNotes: updatedClaim.resolutionNotes,
         resolvedAt: updatedClaim.resolvedAt?.toISOString(),
       },
     });

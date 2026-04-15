@@ -107,10 +107,11 @@ Principalement Abidjan et ses communes :
 - Disponible 30 jours après le service
 - Minimum 500 FCFA pour retrait
 
-**Assurance** :
-- Couverture à 80% en cas de litige
-- Jusqu'à 500 000 FCFA de couverture
-- Réclamation sous 48h
+**Assurance Allo Services** :
+- Si le prestataire fait un mauvais travail, nous envoyons 2 agents qualifiés GRATUITEMENT
+- Types de problèmes couverts : absence, travail inachevé, mauvaise qualité, dommages
+- Réclamation sous 48h après le service
+- Intervention sous 24h après validation
 
 ### 📞 Contact Support
 - **Email** : support@alloserviceci.com
@@ -216,8 +217,8 @@ Voulez-vous que je vous explique comment fonctionne le paiement ? 😊"
 
 **Si le service a été mal fait** :
 - Contactez notre support dans les **48h**
-- L'assurance peut couvrir jusqu'à 80% du préjudice
-- Maximum 500 000 FCFA de couverture
+- Nous enverrons **2 agents qualifiés** GRATUITEMENT pour refaire le travail
+- Intervention sous 24h après validation de votre réclamation
 
 📞 **Support direct** : +225 01 41 10 57 07
 📧 **Email** : support@alloserviceci.com
@@ -238,7 +239,7 @@ Pouvez-vous me donner plus de détails sur votre problème ? Je vais essayer de 
 - 💵 **Espèces** - Directement au prestataire
 
 💡 **Avantages du paiement en ligne** :
-- Protection assurance incluse
+- Assurance Allo Services incluse (2 agents gratuits si mauvais travail)
 - Cashback de 5%
 - Points de fidélité
 

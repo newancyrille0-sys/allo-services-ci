@@ -268,10 +268,10 @@ function getWarningMessage(type: string): string {
     phone: `⚠️ Pour votre sécurité, nous vous recommandons d'éviter de partager votre numéro de téléphone avant la confirmation de la réservation. 
 
 Les prestations effectuées hors plateforme ne bénéficient pas de :
-• Notre garantie satisfait ou remboursé
-• L'assurance dommages jusqu'à 100 000 FCFA
+• Notre assurance Allo Services (2 agents gratuits si mauvais travail)
 • La médiation gratuite en cas de litige
 • Le programme de fidélité et réductions
+• Le cashback 5% sur chaque service
 
 Vos coordonnées seront automatiquement partagées après confirmation.`,
     
@@ -280,10 +280,10 @@ Vos coordonnées seront automatiquement partagées après confirmation.`,
 Pour votre sécurité, gardez la conversation sur Allo Services jusqu'à la confirmation de la réservation. Vous bénéficierez ainsi de :
 • Protection de vos données personnelles
 • Historique de conversation sécurisé
-• Preuves en cas de litige
+• Assurance Allo Services (2 agents gratuits si problème)
 • Support client disponible 24/7`,
     
-    email: `💡 Conseil : Gardez vos échanges sur la plateforme Allo Services pour bénéficier de notre protection et de nos garanties exclusives.`,
+    email: `💡 Conseil : Gardez vos échanges sur la plateforme Allo Services pour bénéficier de notre protection et assurance exclusive.`,
     
     telegram: `💡 Conseil : Pour une meilleure protection, utilisez la messagerie intégrée d'Allo Services jusqu'à la confirmation de votre réservation.`,
     

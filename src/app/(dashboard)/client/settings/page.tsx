@@ -12,10 +12,15 @@ import {
   ExternalLink,
   Save,
   Loader2,
+  Users,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -188,6 +193,93 @@ export default function SettingsPage() {
               </p>
             </div>
             <Switch checked={showActivity} onCheckedChange={setShowActivity} />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Assurance Allo Services */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            Assurance Allo Services
+            <Badge className="bg-primary text-white ml-2">Incluse</Badge>
+          </CardTitle>
+          <CardDescription>
+            Votre protection en cas de problème avec un prestataire
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Main benefit */}
+          <div className="p-4 bg-white rounded-lg border border-primary/20">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">
+                  2 Agents Gratuits en cas de mauvais travail
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Si le prestataire ne fait pas correctement le travail, nous envoyons 
+                  <strong className="text-primary"> 2 agents qualifiés</strong> pour refaire le service gratuitement.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Coverage types */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Types de problèmes couverts :</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Absence du prestataire</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Travail inachevé</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Mauvaise qualité</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <CheckCircle className="h-4 w-4 text-green-500" />
+                <span>Dommages causés</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div className="flex items-center gap-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <Clock className="h-5 w-5 text-amber-600" />
+            <div className="text-sm">
+              <p className="font-medium text-amber-800">Délais importants</p>
+              <p className="text-amber-700">
+                Réclamation sous <strong>48h</strong> • Intervention sous <strong>24h</strong>
+              </p>
+            </div>
+          </div>
+
+          {/* How to claim */}
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm font-medium mb-2">Comment réclamer ?</p>
+            <ol className="text-sm text-muted-foreground space-y-1">
+              <li>1. Allez dans <strong>Mes Réservations</strong></li>
+              <li>2. Sélectionnez la réservation concernée</li>
+              <li>3. Cliquez sur <strong>"Signaler un problème"</strong></li>
+              <li>4. Décrivez le problème avec des photos si possible</li>
+            </ol>
+          </div>
+
+          {/* Warning */}
+          <div className="flex items-start gap-2 text-sm text-muted-foreground">
+            <AlertTriangle className="h-4 w-4 mt-0.5 text-amber-500" />
+            <p>
+              L'assurance ne s'applique qu'aux services réservés et payés via la plateforme. 
+              Les transactions hors plateforme ne sont pas couvertes.
+            </p>
           </div>
         </CardContent>
       </Card>

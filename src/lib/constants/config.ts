@@ -82,11 +82,12 @@ export const APP_CONFIG = {
     availabilityDays: 30, // Disponible après 30 jours
   },
   
-  // Assurance
+  // Assurance Allo Services
+  // Si le prestataire fait un mauvais travail, nous envoyons 2 agents pour travailler gratuitement
   insurance: {
-    coverageRate: 0.80, // 80% couverture
-    maxCoverage: 500000, // FCFA
-    claimDeadline: 48, // heures
+    agentsCount: 2, // Nombre d'agents envoyés en cas de mauvais travail
+    claimDeadline: 48, // heures pour réclamer
+    coverageTypes: ['no_show', 'incomplete', 'bad_quality', 'damage'], // Types de réclamations
   },
   
   // Horaires de travail
