@@ -58,42 +58,20 @@ const STEPS = [
   { id: 5, title: "Confirmation", icon: CheckCircle },
 ];
 
-// Mock providers
-const MOCK_PROVIDERS = [
-  {
-    id: "provider-1",
-    businessName: "Plomberie Express Abidjan",
-    averageRating: 4.9,
-    totalReviews: 127,
-    trustScore: 95,
-    hourlyRate: 8000,
-    city: "Abidjan",
-    badgeVerified: true,
-    subscriptionStatus: "PREMIUM" as const,
-  },
-  {
-    id: "provider-2",
-    businessName: "Électro Services",
-    averageRating: 4.7,
-    totalReviews: 89,
-    trustScore: 88,
-    hourlyRate: 7000,
-    city: "Abidjan",
-    badgeVerified: true,
-    subscriptionStatus: "MONTHLY" as const,
-  },
-  {
-    id: "provider-3",
-    businessName: "Multi Services CI",
-    averageRating: 4.5,
-    totalReviews: 45,
-    trustScore: 82,
-    hourlyRate: 6000,
-    city: "Abidjan",
-    badgeVerified: false,
-    subscriptionStatus: "FREE" as const,
-  },
-];
+// Provider type
+interface Provider {
+  id: string;
+  businessName: string;
+  averageRating: number;
+  totalReviews: number;
+  trustScore: number;
+  hourlyRate: number;
+  city: string;
+  badgeVerified: boolean;
+  subscriptionStatus: "PREMIUM" | "MONTHLY" | "FREE";
+  description?: string;
+  serviceCategory?: string;
+}
 
 function formatPrice(amount: number): string {
   return new Intl.NumberFormat("fr-CI", {
@@ -235,6 +213,8 @@ export default function NewReservationPage() {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [isLoading, setIsLoading] = React.useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = React.useState(false);
+  const [providers, setProviders] = React.useState<Provider[]>([]);
+  const [providersLoading, setProvidersLoading] = React.useState(false);
 
   // Form state
   const [selectedService, setSelectedService] = React.useState("");
@@ -250,6 +230,29 @@ export default function NewReservationPage() {
 
   const progress = (currentStep / STEPS.length) * 100;
 
+  // Fetch providers when service is selected
+  React.useEffect(() => {
+    const fetchProviders = async () => {
+      if (!selectedService) return;
+      
+      setProvidersLoading(true);
+      try {
+        const response = await fetch(`/api/providers?category=${encodeURIComponent(selectedService)}&limit=10`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          setProviders(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching providers:", error);
+      } finally {
+        setProvidersLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, [selectedService]);
+
   // Get available time slots
   const timeSlots = React.useMemo(() => {
     const slots = [];
@@ -262,10 +265,10 @@ export default function NewReservationPage() {
 
   // Calculate estimated price
   const estimatedPrice = React.useMemo(() => {
-    const provider = MOCK_PROVIDERS.find((p) => p.id === selectedProvider);
-    if (!provider) return 0;
+    const provider = providers.find((p) => p.id === selectedProvider);
+    if (!provider) return 25000; // Default price if no provider selected
     return provider.hourlyRate * estimatedDuration;
-  }, [selectedProvider, estimatedDuration]);
+  }, [selectedProvider, estimatedDuration, providers]);
 
   const canProceed = () => {
     switch (currentStep) {
@@ -302,14 +305,43 @@ export default function NewReservationPage() {
   const handleConfirmReservation = async () => {
     setIsLoading(true);
     
-    // Simuler la création de la réservation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    setIsLoading(false);
-    setShowConfirmationModal(false);
-    
-    // Rediriger vers la liste des réservations
-    router.push("/client/reservations");
+    try {
+      // Combine date and time
+      const scheduledDate = new Date(selectedDate!);
+      const [hours, minutes] = selectedTime.split(':').map(Number);
+      scheduledDate.setHours(hours, minutes, 0, 0);
+
+      const response = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          serviceId: selectedService,
+          providerId: autoAssign ? null : selectedProvider,
+          scheduledDate: scheduledDate.toISOString(),
+          address,
+          city,
+          notes,
+          estimatedDuration,
+          priceTotal: estimatedPrice,
+          autoAssign,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de la création de la réservation');
+      }
+
+      // Rediriger vers la liste des réservations
+      router.push('/client/reservations');
+    } catch (error) {
+      console.error('Reservation error:', error);
+      alert(error instanceof Error ? error.message : 'Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
+      setShowConfirmationModal(false);
+    }
   };
 
   const selectedServiceData = SERVICE_CATEGORIES.find(
@@ -440,8 +472,19 @@ export default function NewReservationPage() {
               {!autoAssign && (
                 <div className="space-y-3">
                   <Label>Choisir un prestataire</Label>
-                  <div className="space-y-3">
-                    {MOCK_PROVIDERS.map((provider) => (
+                  {providersLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      <span className="ml-2 text-muted-foreground">Chargement des prestataires...</span>
+                    </div>
+                  ) : providers.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>Aucun prestataire disponible pour ce service.</p>
+                      <p className="text-sm mt-1">Un prestataire vous sera assigné automatiquement.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {providers.map((provider) => (
                       <button
                         key={provider.id}
                         type="button"

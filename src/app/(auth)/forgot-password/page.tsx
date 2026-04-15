@@ -51,19 +51,30 @@ export default function ForgotPasswordPage() {
     setSubmittedValue(data.emailOrPhone);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const isEmail = data.emailOrPhone.includes("@");
       
-      // In real implementation, call API to send reset link
-      // const response = await fetch("/api/auth/forgot-password", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          isEmail 
+            ? { email: data.emailOrPhone }
+            : { phone: data.emailOrPhone }
+        ),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Une erreur est survenue");
+      }
 
       setIsSuccess(true);
-    } catch {
-      // Handle error
+    } catch (error) {
+      form.setError("emailOrPhone", {
+        type: "manual",
+        message: error instanceof Error ? error.message : "Une erreur est survenue",
+      });
     } finally {
       setIsLoading(false);
     }

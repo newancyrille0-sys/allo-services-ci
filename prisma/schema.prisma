@@ -505,3 +505,194 @@ model AdminImage {
 
   @@index([category])
 }
+
+// ==================== INSURANCE CLAIM MODEL ====================
+
+model InsuranceClaim {
+  id             String   @id @default(cuid())
+  reservationId  String   @unique
+  clientId       String
+  providerId     String
+  reason         String   // no_show, incomplete, poor_quality, damage
+  description    String
+  evidenceUrls   String?  // JSON array of image URLs
+  status         String   @default("PENDING") // PENDING, APPROVED, REJECTED, RESOLVED
+  resolution     String?  // agents_sent, refund, rejected
+  resolvedAt     DateTime?
+  resolvedBy     String?  // Admin ID
+  agentsAssigned String?  // JSON array of assigned agent provider IDs
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([providerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ==================== LOYALTY & CASHBACK MODELS ====================
+
+model LoyaltyPoints {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  totalPoints  Int      @default(0)
+  usedPoints   Int      @default(0)
+  expiredPoints Int     @default(0)
+  level        String   @default("BRONZE") // BRONZE, SILVER, GOLD, PLATINUM
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  transactions LoyaltyTransaction[]
+
+  @@index([userId])
+  @@index([level])
+}
+
+model LoyaltyTransaction {
+  id             String   @id @default(cuid())
+  loyaltyPointsId String
+  loyaltyPoints   LoyaltyPoints @relation(fields: [loyaltyPointsId], references: [id], onDelete: Cascade)
+  points         Int
+  type           String   // EARN, USE, EXPIRE, BONUS
+  source         String   // reservation, referral, bonus, redemption
+  sourceId       String?  // Related reservation/referral ID
+  description    String?
+  expiresAt      DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([loyaltyPointsId])
+  @@index([type])
+  @@index([source])
+}
+
+model Cashback {
+  id             String   @id @default(cuid())
+  userId         String
+  reservationId  String?
+  amount         Float
+  percentage     Float
+  status         String   @default("PENDING") // PENDING, AVAILABLE, USED, EXPIRED
+  expiresAt      DateTime?
+  usedAt         DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ==================== ANTI-LEAKAGE MODELS ====================
+
+model ContactDetectionLog {
+  id             String   @id @default(cuid())
+  senderId       String
+  receiverId     String
+  reservationId  String?
+  detectedType   String   // phone, email, address, external_app
+  detectedValue  String?  // Hashed/masked value
+  messageSnippet String?
+  action         String   // warning_sent, blocked, flagged
+  createdAt      DateTime @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([detectedType])
+  @@index([createdAt])
+}
+
+model UserWarning {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String   // contact_leak, fraud_attempt, policy_violation
+  reason       String
+  reservationId String?
+  metadata     String?  // JSON
+  isResolved   Boolean  @default(false)
+  resolvedBy   String?
+  resolvedAt   DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([isResolved])
+}
+
+// ==================== PHONE MASKING MODEL ====================
+
+model PhoneMasking {
+  id            String   @id @default(cuid())
+  reservationId String   @unique
+  realPhone     String   // Encrypted
+  maskedPhone   String   @unique
+  providerId    String
+  clientId      String
+  expiresAt     DateTime
+  callCount     Int      @default(0)
+  smsCount      Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@index([reservationId])
+  @@index([maskedPhone])
+  @@index([isActive])
+}
+
+// ==================== PASSWORD RESET TOKEN ====================
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// ==================== RATE LIMIT ====================
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(1)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([key])
+  @@index([resetAt])
+}
+
+// ==================== SYSTEM SETTINGS ====================
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  category    String?
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+}
+
+// ==================== REFERRAL MODEL ====================
+
+model Referral {
+  id           String   @id @default(cuid())
+  referrerId   String
+  referredId   String
+  code         String
+  status       String   @default("PENDING") // PENDING, COMPLETED, REWARDED
+  rewardPoints Int      @default(0)
+  createdAt    DateTime @default(now())
+  completedAt  DateTime?
+
+  @@unique([referrerId, referredId])
+  @@index([referrerId])
+  @@index([referredId])
+  @@index([code])
+}

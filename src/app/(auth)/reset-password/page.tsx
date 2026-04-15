@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Loader2, Check, CheckCircle2, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, Check, CheckCircle2, Lock, AlertCircle } from "lucide-react";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,10 +45,41 @@ const passwordRequirements = [
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [tokenError, setTokenError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Verify token on mount
+  useEffect(() => {
+    const verifyToken = async () => {
+      if (!token) {
+        setTokenError("Lien de réinitialisation invalide");
+        setIsVerifying(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/auth/reset-password?token=${token}`);
+        const result = await response.json();
+
+        if (!result.valid) {
+          setTokenError(result.error || "Lien invalide ou expiré");
+        }
+      } catch {
+        setTokenError("Erreur de vérification");
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+
+    verifyToken();
+  }, [token]);
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -61,26 +92,80 @@ export default function ResetPasswordPage() {
   const password = form.watch("password");
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
+    if (!token) {
+      setTokenError("Token manquant");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          token, 
+          password: data.password,
+          confirmPassword: data.confirmPassword 
+        }),
+      });
 
-      // In real implementation, call API to reset password
-      // const response = await fetch("/api/auth/reset-password", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ token, password: data.password }),
-      // });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Une erreur est survenue");
+      }
 
       setIsSuccess(true);
-    } catch {
-      // Handle error
+    } catch (error) {
+      form.setError("password", {
+        type: "manual",
+        message: error instanceof Error ? error.message : "Une erreur est survenue",
+      });
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Loading state while verifying token
+  if (isVerifying) {
+    return (
+      <AuthLayout title="Vérification" description="Vérification du lien..." showBackButton={false}>
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  // Invalid token state
+  if (tokenError) {
+    return (
+      <AuthLayout title="Lien invalide" description="Ce lien n'est plus valide" showBackButton={false}>
+        <div className="text-center py-4">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+
+          <p className="text-gray-600 mb-6">{tokenError}</p>
+
+          <div className="space-y-3">
+            <Link href="/forgot-password">
+              <Button className="w-full bg-primary hover:bg-primary/90">
+                Demander un nouveau lien
+              </Button>
+            </Link>
+
+            <Link href="/login">
+              <Button variant="ghost" className="w-full">
+                Retour à la connexion
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (isSuccess) {
     return (
