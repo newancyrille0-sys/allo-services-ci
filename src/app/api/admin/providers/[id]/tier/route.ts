@@ -1,7 +1,103 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { ProviderTier } from "@prisma/client";
 import { getAdminSession } from "@/lib/admin-auth";
+
+// Provider tier values as strings (matching the schema)
+const PROVIDER_TIERS = ["GRATUIT", "BASIC", "PREMIUM", "ELITE"] as const;
+type ProviderTierType = typeof PROVIDER_TIERS[number];
+
+// Default tier configurations
+const DEFAULT_TIER_CONFIGS: Record<ProviderTierType, {
+  tier: ProviderTierType;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  commissionRate: number;
+  maxPublications: number;
+  maxLives: number;
+  maxServices: number;
+  canViewPhone: boolean;
+  canPriority: boolean;
+  canAnalytics: boolean;
+  canPromo: boolean;
+  canInvoice: boolean;
+  canInsurance: boolean;
+  visibilityBoost: number;
+  badgeColor: string;
+  badgeIcon: string;
+}> = {
+  GRATUIT: {
+    tier: "GRATUIT",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    commissionRate: 0.20,
+    maxPublications: 3,
+    maxLives: 1,
+    maxServices: 2,
+    canViewPhone: false,
+    canPriority: false,
+    canAnalytics: false,
+    canPromo: false,
+    canInvoice: false,
+    canInsurance: false,
+    visibilityBoost: 1.0,
+    badgeColor: "#6B7280",
+    badgeIcon: "free",
+  },
+  BASIC: {
+    tier: "BASIC",
+    monthlyPrice: 10000,
+    yearlyPrice: 100000,
+    commissionRate: 0.15,
+    maxPublications: 10,
+    maxLives: 3,
+    maxServices: 5,
+    canViewPhone: false,
+    canPriority: false,
+    canAnalytics: true,
+    canPromo: false,
+    canInvoice: true,
+    canInsurance: false,
+    visibilityBoost: 1.5,
+    badgeColor: "#3B82F6",
+    badgeIcon: "basic",
+  },
+  PREMIUM: {
+    tier: "PREMIUM",
+    monthlyPrice: 25000,
+    yearlyPrice: 250000,
+    commissionRate: 0.12,
+    maxPublications: 25,
+    maxLives: 10,
+    maxServices: 10,
+    canViewPhone: true,
+    canPriority: true,
+    canAnalytics: true,
+    canPromo: true,
+    canInvoice: true,
+    canInsurance: true,
+    visibilityBoost: 2.0,
+    badgeColor: "#F59E0B",
+    badgeIcon: "premium",
+  },
+  ELITE: {
+    tier: "ELITE",
+    monthlyPrice: 50000,
+    yearlyPrice: 500000,
+    commissionRate: 0.10,
+    maxPublications: -1,
+    maxLives: -1,
+    maxServices: -1,
+    canViewPhone: true,
+    canPriority: true,
+    canAnalytics: true,
+    canPromo: true,
+    canInvoice: true,
+    canInsurance: true,
+    visibilityBoost: 3.0,
+    badgeColor: "#8B5CF6",
+    badgeIcon: "elite",
+  },
+};
 
 // GET /api/admin/providers/[id]/tier - Get provider tier info
 export async function GET(
@@ -24,7 +120,6 @@ export async function GET(
         businessName: true,
         providerTier: true,
         tierExpiresAt: true,
-        tierSetAt: true,
         user: {
           select: {
             id: true,
@@ -39,22 +134,13 @@ export async function GET(
       return NextResponse.json({ error: "Prestataire non trouvé" }, { status: 404 });
     }
 
-    // Get tier history
-    const tierHistory = await db.providerTierHistory.findMany({
-      where: { providerId },
-      orderBy: { changedAt: "desc" },
-      take: 10,
-    });
-
-    // Get tier configuration
-    const tierConfig = await db.providerTierConfig.findUnique({
-      where: { tier: provider.providerTier },
-    });
+    // Get tier configuration from defaults
+    const tierConfig = DEFAULT_TIER_CONFIGS[provider.providerTier as ProviderTierType] || DEFAULT_TIER_CONFIGS.GRATUIT;
 
     return NextResponse.json({
       provider: {
         ...provider,
-        tierHistory,
+        tierHistory: [], // No history table for now
         tierConfig,
       },
     });
@@ -84,7 +170,7 @@ export async function PUT(
     const body = await request.json();
     const { tier, expiresAt, reason } = body;
 
-    if (!tier || !Object.values(ProviderTier).includes(tier)) {
+    if (!tier || !PROVIDER_TIERS.includes(tier)) {
       return NextResponse.json(
         { error: "Tier invalide. Valeurs acceptées: GRATUIT, BASIC, PREMIUM, ELITE" },
         { status: 400 }
@@ -103,44 +189,14 @@ export async function PUT(
 
     const previousTier = currentProvider.providerTier;
 
-    // Update provider tier and create history entry
-    const [updatedProvider] = await db.$transaction([
-      // Update provider
-      db.provider.update({
-        where: { id: providerId },
-        data: {
-          providerTier: tier as ProviderTier,
-          tierExpiresAt: expiresAt ? new Date(expiresAt) : null,
-          tierSetById: admin.id,
-          tierSetAt: new Date(),
-        },
-      }),
-      // Create history entry
-      db.providerTierHistory.create({
-        data: {
-          providerId,
-          previousTier,
-          newTier: tier as ProviderTier,
-          reason: reason || "admin_change",
-          changedById: admin.id,
-        },
-      }),
-      // Log admin action
-      db.adminLog.create({
-        data: {
-          adminId: admin.id,
-          action: "PROVIDER_TIER_CHANGED",
-          targetType: "PROVIDER",
-          targetId: providerId,
-          details: JSON.stringify({
-            previousTier,
-            newTier: tier,
-            expiresAt,
-            reason,
-          }),
-        },
-      }),
-    ]);
+    // Update provider tier
+    const updatedProvider = await db.provider.update({
+      where: { id: providerId },
+      data: {
+        providerTier: tier,
+        tierExpiresAt: expiresAt ? new Date(expiresAt) : null,
+      },
+    });
 
     return NextResponse.json({
       success: true,

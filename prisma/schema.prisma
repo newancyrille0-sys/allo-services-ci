@@ -6,187 +6,92 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-
-// ==================== ENUMS ====================
-
-enum UserRole {
-  CLIENT
-  PROVIDER
-  ADMIN
-}
-
-enum UserStatus {
-  ACTIVE
-  SUSPENDED
-  BANNED
-  PENDING_VERIFICATION
-}
-
-enum KycStatus {
-  PENDING
-  VERIFIED
-  REJECTED
-}
-
-enum SubscriptionPlan {
-  STARTER    // 5 000 FCFA/mois - Bleu
-  STANDARD   // 15 000 FCFA/mois - Vert
-  PREMIUM    // 25 000 FCFA/mois - Or
-}
-
-// Niveaux de prestataire (gratuit, basic, premium, elite)
-enum ProviderTier {
-  GRATUIT    // Tier gratuit - Accès limité
-  BASIC      // Tier Basic - 10 000 FCFA/mois
-  PREMIUM    // Tier Premium - 25 000 FCFA/mois
-  ELITE      // Tier Elite - 50 000 FCFA/mois - Accès complet
-}
-
-enum ReservationStatus {
-  PENDING
-  CONFIRMED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  DISPUTED
-}
-
-// ==================== ADMIN ENUMS ====================
-
-enum AdminRole {
-  SUPER_ADMIN      // Accès total - 1-2 personnes
-  ADMIN_SENIOR     // Gestion complète - 3-5 personnes
-  ADMIN_MODERATOR  // Modération seulement - 5-10 personnes
-  SUPPORT          // Support client uniquement - Nombre illimité
-}
-
-enum AdminStatus {
-  ACTIVE
-  SUSPENDED
-  DEACTIVATED
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // ==================== USER MODEL ====================
 
 model User {
-  id        String   @id @default(cuid())
-  email     String?  @unique
-  phone     String?  @unique
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  phone        String?  @unique
   passwordHash String?
-  role      UserRole  @default(CLIENT)
-  status    UserStatus @default(PENDING_VERIFICATION)
-  fullName  String?
-  avatarUrl String?
-  city      String?
-  country   String   @default("Côte d'Ivoire")
-  otpVerified Boolean @default(false)
-  trustScore Int     @default(0)
+  role         String   @default("CLIENT") // CLIENT, PROVIDER, ADMIN
+  status       String   @default("PENDING_VERIFICATION") // ACTIVE, SUSPENDED, BANNED, PENDING_VERIFICATION
+  fullName     String?
+  avatarUrl    String?
+  city         String?
+  country      String   @default("Côte d'Ivoire")
+  otpVerified  Boolean  @default(false)
+  trustScore   Int      @default(0)
   emailVerified DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  provider    Provider?
+  provider             Provider?
   reservationsAsClient Reservation[] @relation("ClientReservations")
-  reviews      Review[] @relation("ClientReviews")
-  messagesSent Message[] @relation("SentMessages")
-  messagesReceived Message[] @relation("ReceivedMessages")
-  payments     Payment[]
-  notifications Notification[]
-  fraudLogs    FraudLog[]
-  accounts     Account[]
-  sessions     Session[]
-  otpCodes     OTPCode[]
-
-  // Anti-leakage relations
-  loyaltyPoints    LoyaltyPoints?
-  cashbacks        Cashback[]
-  insuranceClaims  InsuranceClaim[] @relation("ClientInsuranceClaims")
-  contactDetections ContactDetectionLog[] @relation("ContactDetectionSender")
-  receivedDetections ContactDetectionLog[] @relation("ContactDetectionReceiver")
-  providerAddressBook ProviderAddressBook[]
-  referralsAsReferrer Referral[] @relation("ReferrerRelation")
-  referralsAsReferred Referral[] @relation("ReferredRelation")
-  warnings         UserWarning[]
-
-  // Payment control relations
-  paymentControls   UserPaymentControl[]
+  reviews              Review[]      @relation("ClientReviews")
+  messagesSent         Message[]     @relation("SentMessages")
+  messagesReceived     Message[]     @relation("ReceivedMessages")
+  payments             Payment[]
+  notifications        Notification[]
+  fraudLogs            FraudLog[]
+  accounts             Account[]
+  sessions             Session[]
+  otpCodes             OTPCode[]
 }
 
 // ==================== PROVIDER MODEL ====================
 
 model Provider {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  businessName String?
-  description String?
-  categories String // JSON array of category IDs
-  hourlyRate Float?
-  isVerified Boolean @default(false)
-  kycStatus  KycStatus @default(PENDING)
-  kycDocuments String? // JSON array of document URLs
-  badgeVerified Boolean @default(false)
-  totalReservations Int @default(0)
-  totalReviews Int @default(0)
-  averageRating Float @default(0)
-  subscriptionStatus SubscriptionPlan @default(STARTER)
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName          String?
+  description           String?
+  categories            String   // JSON array of category IDs
+  hourlyRate            Float?
+  isVerified            Boolean  @default(false)
+  kycStatus             String   @default("PENDING") // PENDING, VERIFIED, REJECTED
+  kycDocuments          String?  // JSON array of document URLs
+  badgeVerified         Boolean  @default(false)
+  totalReservations     Int      @default(0)
+  totalReviews          Int      @default(0)
+  averageRating         Float    @default(0)
+  subscriptionStatus    String   @default("STARTER") // STARTER, STANDARD, PREMIUM
   subscriptionExpiresAt DateTime?
-  
-  // Niveau de prestataire (gratuit, basic, premium, elite)
-  providerTier   ProviderTier @default(GRATUIT)
-  tierExpiresAt  DateTime?    // Date d'expiration du tier
-  tierSetById    String?      // Admin qui a défini le tier
-  tierSetAt      DateTime?    // Date de définition du tier
-  
-  isActive  Boolean @default(false)
-  latitude  Float?
-  longitude Float?
-  videosPublishedThisMonth Int @default(0)
-  livesStreamedThisMonth Int @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  providerTier          String   @default("GRATUIT") // GRATUIT, BASIC, PREMIUM, ELITE
+  tierExpiresAt         DateTime?
+  isActive              Boolean  @default(false)
+  latitude              Float?
+  longitude             Float?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   // Relations
   reservations Reservation[] @relation("ProviderReservations")
-  reviews      Review[] @relation("ProviderReviews")
+  reviews      Review[]      @relation("ProviderReviews")
   subscriptions Subscription[]
-  publications ProviderPublication[]
-  lives        ProviderLive[]
-
-  // Anti-leakage relations
-  inClientAddressBooks ProviderAddressBook[]
-  commissionTiers   CommissionTier[]
-  groupMemberships  ProviderGroupMember[]
-
-  // Provider tools relations
-  invoices          ProviderInvoice[]
-  availabilities    ProviderAvailability[]
-  availabilityExceptions ProviderAvailabilityException[]
-  stats             ProviderStats?
-  
-  // Payment control relations
-  paymentControls   ProviderPaymentControl[]
+  publications  ProviderPublication[]
+  lives         ProviderLive[]
 }
 
 // ==================== SERVICE MODEL ====================
 
 model Service {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  description String?
-  iconUrl   String?
-  parentId  String?
-  parent    Service? @relation("SubServices", fields: [parentId], references: [id])
-  subServices Service[] @relation("SubServices")
-  isActive  Boolean  @default(true)
-  displayOrder Int   @default(0)
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String?
+  iconUrl      String?
+  parentId     String?
+  parent       Service?  @relation("SubServices", fields: [parentId], references: [id])
+  subServices  Service[] @relation("SubServices")
+  isActive     Boolean   @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime  @default(now())
 
   // Relations
   reservations Reservation[]
@@ -195,103 +100,94 @@ model Service {
 // ==================== RESERVATION MODEL ====================
 
 model Reservation {
-  id        String   @id @default(cuid())
-  clientId  String
-  client    User     @relation("ClientReservations", fields: [clientId], references: [id])
-  providerId String
-  provider  Provider @relation("ProviderReservations", fields: [providerId], references: [id])
-  serviceId String
-  service   Service  @relation(fields: [serviceId], references: [id])
-  status    ReservationStatus @default(PENDING)
+  id            String   @id @default(cuid())
+  clientId      String
+  client        User     @relation("ClientReservations", fields: [clientId], references: [id])
+  providerId    String
+  provider      Provider @relation("ProviderReservations", fields: [providerId], references: [id])
+  serviceId     String
+  service       Service  @relation(fields: [serviceId], references: [id])
+  status        String   @default("PENDING") // PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, DISPUTED
   scheduledDate DateTime
-  address   String
-  city      String
-  phoneContact String?
-  notes     String?
-  priceTotal Float
-  paymentStatus String @default("pending")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  address       String
+  city          String
+  phoneContact  String?
+  notes         String?
+  priceTotal    Float
+  paymentStatus String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relations
-  review    Review?
-  messages  Message[]
-  payments  Payment[] @relation("ReservationPayments")
-
-  // Anti-leakage relations
-  cashback         Cashback?
-  insuranceClaim   InsuranceClaim?
-  phoneMasking     PhoneMasking?
-  loyaltyTransactions LoyaltyTransaction[]
-
-  // Provider tools relations
-  providerInvoice  ProviderInvoice?
+  review   Review?
+  messages Message[]
+  payments Payment[] @relation("ReservationPayments")
 }
 
 // ==================== REVIEW MODEL ====================
 
 model Review {
-  id        String   @id @default(cuid())
-  reservationId String @unique
-  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  clientId  String
-  client    User     @relation("ClientReviews", fields: [clientId], references: [id])
-  providerId String
-  provider  Provider @relation("ProviderReviews", fields: [providerId], references: [id])
-  rating    Int // 1-5
-  comment   String?
-  isVisible Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  reservationId String   @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  clientId      String
+  client        User     @relation("ClientReviews", fields: [clientId], references: [id])
+  providerId    String
+  provider      Provider @relation("ProviderReviews", fields: [providerId], references: [id])
+  rating        Int      // 1-5
+  comment       String?
+  isVisible     Boolean  @default(true)
+  createdAt     DateTime @default(now())
 }
 
 // ==================== MESSAGE MODEL ====================
 
 model Message {
-  id        String   @id @default(cuid())
-  senderId  String
-  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
-  receiverId String
-  receiver  User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  id            String   @id @default(cuid())
+  senderId      String
+  sender        User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId    String
+  receiver      User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   reservationId String?
-  reservation Reservation? @relation(fields: [reservationId], references: [id])
-  content   String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  content       String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
 }
 
 // ==================== SUBSCRIPTION MODEL ====================
 
 model Subscription {
-  id        String   @id @default(cuid())
+  id         String   @id @default(cuid())
   providerId String
-  provider  Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  planName  SubscriptionPlan
-  amount    Float
-  currency  String   @default("XOF")
-  startDate DateTime
-  endDate   DateTime
-  status    String   @default("active")
-  paymentId String?
-  autoRenew Boolean  @default(false)
-  createdAt DateTime @default(now())
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  planName   String   // STARTER, STANDARD, PREMIUM
+  amount     Float
+  currency   String   @default("XOF")
+  startDate  DateTime
+  endDate    DateTime
+  status     String   @default("active")
+  paymentId  String?
+  autoRenew  Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 // ==================== PAYMENT MODEL ====================
 
 model Payment {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  reservationId String?
-  reservation Reservation? @relation("ReservationPayments", fields: [reservationId], references: [id])
-  amount    Float
-  currency  String   @default("XOF")
-  paymentMethod String // orange_money, mtn_money, wave, moov, card
-  providerName String?
-  transactionId String @unique
-  status    String   @default("pending")
-  metadata  String? // JSON
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  reservationId  String?
+  reservation    Reservation? @relation("ReservationPayments", fields: [reservationId], references: [id])
+  amount         Float
+  currency       String   @default("XOF")
+  paymentMethod  String   // orange_money, mtn_money, wave, moov, card
+  providerName   String?
+  transactionId  String   @unique
+  status         String   @default("pending")
+  metadata       String?  // JSON
+  createdAt      DateTime @default(now())
 }
 
 // ==================== NOTIFICATION MODEL ====================
@@ -300,7 +196,7 @@ model Notification {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String // reservation, payment, system, promo
+  type      String   // reservation, payment, system, promo
   title     String
   message   String
   isRead    Boolean  @default(false)
@@ -311,16 +207,16 @@ model Notification {
 // ==================== FRAUD LOG MODEL ====================
 
 model FraudLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  eventType String
-  severity  String   @default("low") // low, medium, high, critical
-  ipAddress String?
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  eventType  String
+  severity   String   @default("low") // low, medium, high, critical
+  ipAddress  String?
   description String?
-  metadata  String? // JSON
-  isResolved Boolean @default(false)
-  createdAt DateTime @default(now())
+  metadata   String?  // JSON
+  isResolved Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
 
 // ==================== NEXTAUTH MODELS ====================
@@ -377,29 +273,29 @@ model OTPCode {
 // ==================== PROVIDER PUBLICATION MODEL ====================
 
 model ProviderPublication {
-  id          String   @id @default(cuid())
-  providerId  String
-  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  type        String   // photo, video
-  mediaUrl    String
-  thumbnailUrl String?
-  caption     String?
-  servicePrice Float?  // Prix du service défini par le prestataire
-  serviceDescription String? // Description du service proposé
-  expiresAt   DateTime? // Pour les stories (24h)
-  viewCount   Int      @default(0)
-  likeCount   Int      @default(0)
-  commentCount Int     @default(0)
-  shareCount  Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  providerId        String
+  provider          Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  type              String   // photo, video
+  mediaUrl          String
+  thumbnailUrl      String?
+  caption           String?
+  servicePrice      Float?
+  serviceDescription String?
+  expiresAt         DateTime?
+  viewCount         Int      @default(0)
+  likeCount         Int      @default(0)
+  commentCount      Int      @default(0)
+  shareCount        Int      @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relations
-  likes       PublicationLike[]
-  comments    PublicationComment[]
-  bookmarks   PublicationBookmark[]
-  views       PublicationView[]
+  likes     PublicationLike[]
+  comments  PublicationComment[]
+  bookmarks PublicationBookmark[]
+  views     PublicationView[]
 
   @@index([providerId])
   @@index([type])
@@ -410,25 +306,25 @@ model ProviderPublication {
 // ==================== PROVIDER LIVE MODEL ====================
 
 model ProviderLive {
-  id          String   @id @default(cuid())
-  providerId  String
-  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  title       String
-  description String?
+  id           String   @id @default(cuid())
+  providerId   String
+  provider     Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
   thumbnailUrl String?
-  streamUrl   String?
-  status      String   @default("scheduled") // scheduled, live, ended
-  viewerCount Int      @default(0)
-  likeCount   Int      @default(0)
-  commentCount Int     @default(0)
-  startedAt   DateTime?
-  endedAt     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  streamUrl    String?
+  status       String   @default("scheduled") // scheduled, live, ended
+  viewerCount  Int      @default(0)
+  likeCount    Int      @default(0)
+  commentCount Int      @default(0)
+  startedAt    DateTime?
+  endedAt      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
-  likes       LiveLike[]
-  comments    LiveComment[]
+  likes    LiveLike[]
+  comments LiveComment[]
 
   @@index([providerId])
   @@index([status])
@@ -455,7 +351,7 @@ model PublicationComment {
   userId       String
   content      String
   likeCount    Int      @default(0)
-  parentId     String?  // For replies
+  parentId     String?
   parent       PublicationComment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies      PublicationComment[] @relation("CommentReplies")
   createdAt    DateTime @default(now())
@@ -516,8 +412,8 @@ model LiveComment {
 
 model UserFollow {
   id          String   @id @default(cuid())
-  followerId  String   // User who follows
-  followingId String   // Provider being followed
+  followerId  String
+  followingId String
   createdAt   DateTime @default(now())
 
   @@unique([followerId, followingId])
@@ -528,41 +424,31 @@ model UserFollow {
 // ==================== ADMIN MODELS ====================
 
 model Admin {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  passwordHash  String
-  fullName      String
-  phone         String?
-  role          AdminRole   @default(SUPPORT)
-  status        AdminStatus @default(ACTIVE)
-  avatarUrl     String?
-
-  // Permissions personnalisées (optionnel - pour affiner)
-  permissions   String?     // JSON string: ["users.read", "users.write", ...]
-
-  // Sécurité
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String
+  fullName         String
+  phone            String?
+  role             String   @default("SUPPORT") // SUPER_ADMIN, ADMIN_SENIOR, ADMIN_MODERATOR, SUPPORT
+  status           String   @default("ACTIVE") // ACTIVE, SUSPENDED, DEACTIVATED
+  avatarUrl        String?
+  permissions      String?
   twoFactorEnabled Boolean  @default(false)
   twoFactorSecret  String?
   lastLoginAt      DateTime?
   lastLoginIp      String?
-
-  // Audit
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  createdById   String?     // Admin qui a créé ce compte (pour traçabilité)
-
-  // Relations
-  createdBy     Admin?      @relation("AdminCreator", fields: [createdById], references: [id])
-  createdAdmins Admin[]     @relation("AdminCreator")
-  auditLogs     AdminLog[]
-  sessions      AdminSession[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  createdById      String?
+  createdBy        Admin?   @relation("AdminCreator", fields: [createdById], references: [id])
+  createdAdmins    Admin[]  @relation("AdminCreator")
+  sessions         AdminSession[]
 
   @@index([email])
   @@index([role])
   @@index([status])
 }
 
-// Session admin (pour l'authentification)
 model AdminSession {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -577,839 +463,45 @@ model AdminSession {
   @@index([sessionToken])
 }
 
-// Log de toutes les actions admin (AUDIT OBLIGATOIRE)
-model AdminLog {
-  id          String   @id @default(cuid())
-  adminId     String
-  action      String   // "USER_SUSPENDED", "KYC_APPROVED", "REFUND_PROCESSED", etc.
-  targetType  String   // "USER", "PROVIDER", "RESERVATION", etc.
-  targetId    String?  // ID de l'élément ciblé
-  details     String?  // JSON string: détails de l'action (avant/après, raisons, etc.)
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-
-  // Relations
-  admin       Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
-
-  @@index([adminId])
-  @@index([action])
-  @@index([targetType, targetId])
-  @@index([createdAt])
-}
-
-// Permissions détaillées (pour granularité fine)
-model AdminPermission {
-  id          String   @id @default(cuid())
-  name        String   @unique  // "users.read", "users.write", "finance.export", etc.
-  description String?
-  category    String   // "USERS", "PROVIDERS", "FINANCE", "CONTENT", "SYSTEM"
-  createdAt   DateTime @default(now())
-
-  // Relations
-  roles       AdminRolePermission[]
-
-  @@index([category])
-}
-
-// Liaison rôles <-> permissions
-model AdminRolePermission {
-  id           String   @id @default(cuid())
-  role         AdminRole
-  permissionId String
-  createdAt    DateTime @default(now())
-
-  // Relations
-  permission   AdminPermission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@unique([role, permissionId])
-  @@index([role])
-}
-
-// Signalements utilisateurs (pour modération)
-model UserReport {
-  id          String   @id @default(cuid())
-  reporterId  String   // User who reported
-  reportedId  String   // User being reported
-  reason      String   // spam, harassment, fake_profile, inappropriate_content, other
-  description String?
-  status      String   @default("pending") // pending, reviewed, resolved, dismissed
-  reviewedById String?
-  reviewedAt  DateTime?
-  createdAt   DateTime @default(now())
-
-  @@index([reporterId])
-  @@index([reportedId])
-  @@index([status])
-}
-
-// Signalements de contenus (publications, commentaires)
-model ContentReport {
-  id              String   @id @default(cuid())
-  reporterId      String
-  contentType     String   // publication, comment, live
-  contentId       String
-  reason          String
-  description     String?
-  status          String   @default("pending")
-  reviewedById    String?
-  reviewedAt      DateTime?
-  action          String?  // removed, warning_given, no_action
-  createdAt       DateTime @default(now())
-
-  @@index([contentType, contentId])
-  @@index([status])
-}
-
-// Tickets support
-model SupportTicket {
-  id          String   @id @default(cuid())
-  userId      String
-  subject     String
-  message     String
-  status      String   @default("open") // open, in_progress, resolved, closed
-  priority    String   @default("normal") // low, normal, high, urgent
-  assignedTo  String?  // Admin ID
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  responses   SupportTicketResponse[]
-
-  @@index([userId])
-  @@index([status])
-  @@index([assignedTo])
-}
-
-model SupportTicketResponse {
-  id        String   @id @default(cuid())
-  ticketId  String
-  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  adminId   String?  // null si réponse de l'utilisateur
-  userId    String?  // null si réponse de l'admin
-  message   String
-  createdAt DateTime @default(now())
-
-  @@index([ticketId])
-}
-
-// ==================== ANTI-LEAKAGE MODELS ====================
-// Stratégie pour réduire la fuite de clients/prestataires hors plateforme
-
-// Programme de fidélité - Points clients
-model LoyaltyPoints {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Points accumulés
-  totalPoints     Int      @default(0)
-  availablePoints Int      @default(0) // Points utilisables
-  pendingPoints   Int      @default(0) // Points en attente (30 jours)
-  
-  // Statistiques
-  totalEarned     Int      @default(0) // Total historique gagné
-  totalSpent      Int      @default(0) // Total historique dépensé
-  
-  // Niveau de fidélité
-  tier            String   @default("bronze") // bronze, silver, gold, platinum
-  tierUpdatedAt   DateTime @default(now())
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  transactions    LoyaltyTransaction[]
-
-  @@index([userId])
-  @@index([tier])
-}
-
-// Transactions de points de fidélité
-model LoyaltyTransaction {
-  id              String   @id @default(cuid())
-  loyaltyPointsId String
-  loyaltyPoints   LoyaltyPoints @relation(fields: [loyaltyPointsId], references: [id], onDelete: Cascade)
-  
-  // Type de transaction
-  type            String   // earn, spend, expire, bonus
-  points          Int      // Positif pour earn, négatif pour spend
-  reason          String   // reservation, referral, bonus, redemption, expiry
-  
-  // Référence
-  reservationId   String?
-  reservation     Reservation? @relation(fields: [reservationId], references: [id])
-  referralId      String?
-  
-  // Métadonnées
-  description     String?
-  metadata        String?  // JSON
-  
-  // Expiration (pour les points en attente)
-  expiresAt       DateTime?
-  
-  createdAt       DateTime @default(now())
-
-  @@index([loyaltyPointsId])
-  @@index([type])
-  @@index([reservationId])
-  @@index([createdAt])
-}
-
-// Cashback différé (anti-fuite puissant)
-model Cashback {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reservationId   String   @unique
-  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  
-  // Montant
-  amount          Float    // Montant du cashback (5% de la réservation)
-  currency        String   @default("XOF")
-  
-  // Statut
-  status          String   @default("pending") // pending, available, used, forfeited
-  
-  // Conditions anti-fuite
-  hasContactShare Boolean  @default(false) // Contact partagé détecté ?
-  hasDispute      Boolean  @default(false) // Litige en cours ?
-  hasCancellation Boolean  @default(false) // Annulation ?
-  
-  // Dates
-  eligibleAt      DateTime // Date à laquelle le cashback devient disponible (30 jours)
-  usedAt          DateTime?
-  forfeitedAt     DateTime?
-  forfeitReason   String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([userId])
-  @@index([status])
-  @@index([eligibleAt])
-}
-
-// Assurance prestation (Killer Feature)
-model InsuranceClaim {
-  id              String   @id @default(cuid())
-  reservationId   String   @unique
-  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  clientId        String
-  client          User     @relation("ClientInsuranceClaims", fields: [clientId], references: [id])
-  providerId      String
-  
-  // Type de réclamation
-  claimType       String   // no_show, damage, incomplete, dispute
-  description     String
-  amount          Float    // Montant réclamé
-  currency        String   @default("XOF")
-  
-  // Preuves
-  evidence        String?  // JSON array of file URLs
-  
-  // Statut
-  status          String   @default("pending") // pending, under_review, approved, rejected, resolved
-  reviewedById    String?
-  reviewedAt      DateTime?
-  
-  // Résolution
-  resolutionType  String?  // refund, partial_refund, mediation, rejected
-  resolutionAmount Float?
-  resolutionNotes String?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  resolvedAt      DateTime?
-
-  @@index([reservationId])
-  @@index([clientId])
-  @@index([status])
-  @@index([claimType])
-}
-
-// Détection de contacts (messagerie)
-model ContactDetectionLog {
-  id              String   @id @default(cuid())
-  messageId       String?
-  senderId        String
-  sender          User     @relation("ContactDetectionSender", fields: [senderId], references: [id])
-  receiverId      String
-  receiver        User     @relation("ContactDetectionReceiver", fields: [receiverId], references: [id])
-  reservationId   String?
-  
-  // Type de contact détecté
-  detectedType    String   // phone, whatsapp, email, telegram, other
-  detectedPattern String   // Pattern regex détecté
-  
-  // Contexte
-  rawContent      String   // Contenu original (pour analyse)
-  maskedContent   String?  // Contenu masqué (si applicable)
-  
-  // Gravité et action
-  severity        String   @default("low") // low, medium, high
-  action          String   @default("alert") // alert, warn, block
-  actionTaken     String?  // Description de l'action prise
-  
-  // Statut
-  isResolved      Boolean  @default(false)
-  resolvedAt      DateTime?
-  resolvedBy      String?  // Admin ID
-  
-  // Récidive
-  occurrenceCount Int      @default(1) // Nombre d'occurrences pour cet utilisateur
-  
-  createdAt       DateTime @default(now())
-
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([detectedType])
-  @@index([severity])
-  @@index([createdAt])
-}
-
-// Carnet d'adresses sécurisé (clients)
-model ProviderAddressBook {
-  id              String   @id @default(cuid())
-  clientId        String
-  client          User     @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Dernière prestation
-  lastReservationId String?
-  lastServiceDate   DateTime?
-  
-  // Notes privées du client
-  privateNotes    String?
-  
-  // Statistiques
-  totalReservations Int  @default(0)
-  totalSpent      Float    @default(0)
-  
-  // Rappels automatiques
-  reminderEnabled Boolean  @default(true)
-  nextReminderDate DateTime?
-  
-  // Tags
-  tags            String?  // JSON array: ["plombier", "urgent", "favori"]
-  
-  // Favori
-  isFavorite      Boolean  @default(false)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([clientId, providerId])
-  @@index([clientId])
-  @@index([providerId])
-  @@index([isFavorite])
-}
-
-// Programme de parrainage
-model Referral {
-  id              String   @id @default(cuid())
-  referrerId      String   // Parrain (User)
-  referrer        User     @relation("ReferrerRelation", fields: [referrerId], references: [id], onDelete: Cascade)
-  referredId      String   // Filleul (User)
-  referred        User     @relation("ReferredRelation", fields: [referredId], references: [id], onDelete: Cascade)
-  
-  // Code de parrainage
-  referralCode    String   @unique
-  
-  // Statut
-  status          String   @default("pending") // pending, completed, rewarded
-  
-  // Récompenses
-  referrerReward  Float    @default(5000) // 5000 FCFA pour le parrain
-  referredReward  Float    @default(5000) // 5000 FCFA pour le filleul
-  rewardCurrency  String   @default("XOF")
-  
-  // Condition de déblocage
-  firstReservationCompleted Boolean @default(false)
-  
-  // Dates
-  completedAt     DateTime?
-  rewardedAt      DateTime?
-  
-  createdAt       DateTime @default(now())
-
-  @@index([referrerId])
-  @@index([referredId])
-  @@index([referralCode])
-  @@index([status])
-}
-
-// Commission dégressive
-model CommissionTier {
-  id              String   @id @default(cuid())
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Période
-  periodStart     DateTime
-  periodEnd       DateTime
-  
-  // Volume de réservations
-  reservationCount Int     @default(0)
-  totalRevenue    Float    @default(0)
-  
-  // Taux de commission
-  baseRate        Float    @default(0.15)  // 15% de base
-  appliedRate     Float    @default(0.15)  // Taux appliqué après réduction
-  discountSaved   Float    @default(0)     // Économies réalisées
-  
-  // Statut
-  isPaid          Boolean  @default(false)
-  paidAt          DateTime?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([providerId, periodStart])
-  @@index([providerId])
-  @@index([periodStart])
-}
-
-// Avertissements anti-fuite
-model UserWarning {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Type d'avertissement
-  warningType     String   // contact_share, platform_leak, terms_violation
-  severity        String   // soft, formal, suspension
-  
-  // Détails
-  title           String
-  message         String
-  relatedDetectionId String? // Lien vers ContactDetectionLog
-  
-  // Actions
-  acknowledged    Boolean  @default(false)
-  acknowledgedAt  DateTime?
-  
-  // Conséquences
-  pointsDeducted  Int      @default(0)
-  cashbackForfeited Float  @default(0)
-  
-  // Expiration
-  expiresAt       DateTime? // Les avertissements expirent après un certain temps
-  
-  createdAt       DateTime @default(now())
-
-  @@index([userId])
-  @@index([warningType])
-  @@index([severity])
-  @@index([createdAt])
-}
-
-// Masquage de téléphone temporaire
-model PhoneMasking {
-  id              String   @id @default(cuid())
-  reservationId   String   @unique
-  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  
-  // Téléphones masqués
-  clientPhone     String   // Téléphone réel du client
-  providerPhone   String   // Téléphone réel du prestataire
-  
-  // Numéro relais (si VoIP disponible)
-  relayNumber     String?  // Numéro temporaire affiché
-  
-  // Statut du masquage
-  isActive        Boolean  @default(true)
-  revealedAt      DateTime? // Quand les vrais numéros ont été révélés
-  revealReason    String?  // confirmation, completion, emergency
-  
-  // Expiration
-  expiresAt       DateTime // Le masquage expire après la prestation
-  
-  createdAt       DateTime @default(now())
-
-  @@index([reservationId])
-  @@index([isActive])
-  @@index([expiresAt])
-}
-
-// Tontine digitale (groupes de prestataires)
-model ProviderGroup {
-  id              String   @id @default(cuid())
-  name            String
-  description     String?
-  
-  // Paramètres
-  category        String   // Catégorie de services
-  city            String   // Ville
-  maxMembers      Int      @default(10)
-  
-  // Visibilité
-  visibilityBoost Float    @default(1.0) // Multiplicateur de visibilité
-  
-  // Statistiques
-  totalEarnings   Float    @default(0)
-  totalReservations Int    @default(0)
-  
-  // Fondateur
-  founderId       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  // Relations
-  members         ProviderGroupMember[]
-
-  @@index([category])
-  @@index([city])
-}
-
-model ProviderGroupMember {
-  id              String   @id @default(cuid())
-  groupId         String
-  group           ProviderGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Rôle
-  role            String   @default("member") // founder, admin, member
-  
-  // Contribution à la tontine
-  contribution    Float    @default(0)
-  sharedEarnings  Float    @default(0)
-  
-  // Statut
-  status          String   @default("active") // active, suspended, left
-  
-  joinedAt        DateTime @default(now())
-
-  @@unique([groupId, providerId])
-  @@index([groupId])
-  @@index([providerId])
-}
-
-// ==================== PROVIDER MANAGEMENT TOOLS ====================
-
-// Factures prestataire
-model ProviderInvoice {
-  id              String   @id @default(cuid())
-  invoiceNumber   String   @unique
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  reservationId   String   @unique
-  reservation     Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  clientId        String
-  
-  // Détails service
-  serviceName     String
-  serviceDate     DateTime
-  serviceAddress  String
-  serviceCity     String
-  
-  // Montants
-  amount          Float    // Montant total
-  commission      Float    // Commission prélevée
-  commissionRate  Float    // Taux appliqué
-  netAmount       Float    // Montant net à percevoir
-  currency        String   @default("XOF")
-  
-  // Statut
-  status          String   @default("draft") // draft, sent, paid, cancelled
-  
-  // Dates
-  dueDate         DateTime
-  paidAt          DateTime?
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([providerId])
-  @@index([clientId])
-  @@index([status])
-  @@index([serviceDate])
-  @@index([createdAt])
-}
-
-// Disponibilités prestataire
-model ProviderAvailability {
-  id              String   @id @default(cuid())
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Jour de la semaine (0 = Dimanche, 6 = Samedi)
-  dayOfWeek       Int
-  
-  // Horaires
-  startTime       String   // "08:00"
-  endTime         String   // "18:00"
-  
-  // Pause déjeuner
-  breakStart      String?  // "12:00"
-  breakEnd        String?  // "14:00"
-  
-  // Statut
-  isActive        Boolean  @default(true)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([providerId, dayOfWeek])
-  @@index([providerId])
-}
-
-// Exceptions de disponibilité (vacances, absences)
-model ProviderAvailabilityException {
-  id              String   @id @default(cuid())
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Période
-  startDate       DateTime
-  endDate         DateTime
-  
-  // Type
-  type            String   // vacation, sick_leave, personal, other
-  reason          String?
-  
-  // Statut
-  isApproved      Boolean  @default(true)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([providerId])
-  @@index([startDate])
-  @@index([endDate])
-}
-
-// Statistiques prestataire (cache)
-model ProviderStats {
-  id              String   @id @default(cuid())
-  providerId      String   @unique
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Période actuelle (mois en cours)
-  currentMonthRevenue      Float    @default(0)
-  currentMonthReservations Int      @default(0)
-  currentMonthReviews      Int      @default(0)
-  
-  // Période précédente (mois dernier)
-  lastMonthRevenue         Float    @default(0)
-  lastMonthReservations    Int      @default(0)
-  
-  // Totaux
-  totalRevenue             Float    @default(0)
-  totalCompletedReservations Int    @default(0)
-  totalCancelledReservations Int    @default(0)
-  
-  // Moyennes
-  averageResponseTime      Int      @default(0) // en minutes
-  averageRating            Float    @default(0)
-  
-  // Tendances
-  revenueGrowth            Float    @default(0) // pourcentage
-  reservationGrowth        Float    @default(0) // pourcentage
-  
-  // Meilleurs créneaux
-  peakHours                String?  // JSON: [{"hour": 9, "count": 15}, ...]
-  peakDays                 String?  // JSON: [{"day": "saturday", "count": 45}, ...]
-  
-  // Clients
-  repeatClientRate         Float    @default(0) // pourcentage
-  topClients               String?  // JSON: [{"id": "...", "count": 5, "spent": 50000}, ...]
-  
-  lastCalculated           DateTime @default(now())
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-
-  @@index([providerId])
-}
-
-// ==================== PROVIDER PAYMENT CONTROL ====================
-// Contrôle des méthodes de paiement par prestataire
-
-model ProviderPaymentControl {
-  id              String   @id @default(cuid())
-  providerId      String
-  provider        Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  
-  // Méthode de paiement
-  paymentMethod   String   // orange_money, mtn_money, wave, moov, card, cash
-  
-  // Statut
-  isEnabled       Boolean  @default(true)  // true = activé, false = désactivé
-  disabledAt      DateTime?
-  disabledById    String?  // Admin ID
-  disabledReason  String?  // Raison de la désactivation
-  
-  // Réactivation
-  reactivatedAt   DateTime?
-  reactivatedById String?
-  
-  // Audit
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([providerId, paymentMethod])
-  @@index([providerId])
-  @@index([paymentMethod])
-  @@index([isEnabled])
-}
-
-// ==================== USER PAYMENT CONTROL ====================
-// Contrôle des méthodes de paiement par client
-
-model UserPaymentControl {
-  id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Méthode de paiement
-  paymentMethod   String   // orange_money, mtn_money, wave, moov, card, cash
-
-  // Statut
-  isEnabled       Boolean  @default(true)  // true = activé, false = désactivé
-  disabledAt      DateTime?
-  disabledById    String?  // Admin ID
-  disabledReason  String?  // Raison de la désactivation
-
-  // Réactivation
-  reactivatedAt   DateTime?
-  reactivatedById String?
-
-  // Audit
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([userId, paymentMethod])
-  @@index([userId])
-  @@index([paymentMethod])
-  @@index([isEnabled])
-}
-
-// ==================== PARTENAIRES ====================
-// Partenaires affichés dans la bande déroulante
+// ==================== PARTNER MODEL ====================
 
 model Partner {
-  id              String   @id @default(cuid())
-  
-  // Informations du partenaire
-  name            String   // Nom du partenaire
-  logoUrl         String   // URL du logo
-  websiteUrl      String?  // Site web (optionnel)
-  description     String?  // Description courte
-  
-  // Affichage
-  displayOrder    Int      @default(0)  // Ordre d'affichage
-  isActive        Boolean  @default(true)  // Actif ou non
-  
-  // Notification (affichage après 3h)
-  showInNotification Boolean @default(false)
-  notificationMessage String?  // Message personnalisé pour la notification
-  notificationStartAt DateTime?  // Date de début d'affichage en notification
-  
-  // localisations d'affichage
-  showOnHome      Boolean  @default(true)  // Afficher sur la page d'accueil
-  showOnPublicite Boolean  @default(true)  // Afficher sur la page publicité
-  showOnDashboard Boolean  @default(true)  // Afficher dans les dashboards
-  
-  // Dates
-  startDate       DateTime?  // Date de début du partenariat
-  endDate         DateTime?  // Date de fin du partenariat
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  createdById     String?  // Admin qui a créé
+  id                  String   @id @default(cuid())
+  name                String
+  logoUrl             String
+  websiteUrl          String?
+  description         String?
+  displayOrder        Int      @default(0)
+  isActive            Boolean  @default(true)
+  showInNotification  Boolean  @default(false)
+  notificationMessage String?
+  notificationStartAt DateTime?
+  showOnHome          Boolean  @default(true)
+  showOnPublicite     Boolean  @default(true)
+  showOnDashboard     Boolean  @default(true)
+  startDate           DateTime?
+  endDate             DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([isActive])
-  @@index([displayOrder])
-  @@index([showInNotification])
   @@index([showOnHome])
   @@index([showOnPublicite])
   @@index([showOnDashboard])
 }
 
-// ==================== IMAGES ADMIN ====================
-// Images uploadées par l'administrateur
+// ==================== ADMIN IMAGE MODEL ====================
 
 model AdminImage {
-  id              String   @id @default(cuid())
-  
-  // Fichier
-  url             String   // URL de l'image
-  filename        String   // Nom du fichier original
-  mimeType        String   // Type MIME
-  size            Int      // Taille en bytes
-  
-  // Métadonnées
-  title           String?  // Titre de l'image
-  altText         String?  // Texte alternatif
-  category        String?  // Catégorie (logo, banner, partner, etc.)
-  
-  // Upload info
-  uploadedById    String?  // Admin ID
-  uploadedAt      DateTime @default(now())
-  
+  id        String   @id @default(cuid())
+  url       String
+  filename  String
+  mimeType  String
+  size      Int
+  title     String?
+  altText   String?
+  category  String?
+  createdAt DateTime @default(now())
+
   @@index([category])
-  @@index([uploadedById])
-}
-
-// ==================== PROVIDER TIER CONFIGURATION ====================
-// Configuration des avantages par tier
-
-model ProviderTierConfig {
-  id              String   @id @default(cuid())
-  tier            ProviderTier @unique
-  
-  // Tarification
-  monthlyPrice    Float    @default(0)     // Prix mensuel en FCFA
-  yearlyPrice     Float    @default(0)     // Prix annuel en FCFA
-  commissionRate  Float    @default(0.15)  // Taux de commission
-  
-  // Limites
-  maxPublications Int      @default(5)     // Max publications/mois
-  maxLives        Int      @default(2)     // Max lives/mois
-  maxServices     Int      @default(3)     // Max services actifs
-  
-  // Fonctionnalités
-  canViewPhone    Boolean  @default(false) // Voir téléphone client
-  canPriority     Boolean  @default(false) // Affichage prioritaire
-  canAnalytics    Boolean  @default(false) // Statistiques avancées
-  canPromo        Boolean  @default(false) // Créer des promotions
-  canInvoice      Boolean  @default(false) // Générer factures
-  canInsurance    Boolean  @default(false) // Assurance prestation
-  
-  // Visibilité
-  visibilityBoost Float    @default(1.0)   // Multiplicateur de visibilité
-  
-  // Badge
-  badgeColor      String?  // Couleur du badge (hex)
-  badgeIcon       String?  // Icône du badge
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-}
-
-// ==================== PROVIDER TIER HISTORY ====================
-// Historique des changements de tier
-
-model ProviderTierHistory {
-  id              String   @id @default(cuid())
-  providerId      String
-  
-  // Changement
-  previousTier    ProviderTier
-  newTier         ProviderTier
-  
-  // Raison
-  reason          String   // upgrade, downgrade, admin_change, payment, expiry
-  
-  // Dates
-  changedAt       DateTime @default(now())
-  changedById     String?  // Admin ID (si changement manuel)
-  
-  // Métadonnées
-  metadata        String?  // JSON
-
-  @@index([providerId])
-  @@index([changedAt])
 }
