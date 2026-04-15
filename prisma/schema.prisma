@@ -1286,6 +1286,73 @@ model UserPaymentControl {
   @@index([isEnabled])
 }
 
+// ==================== PARTENAIRES ====================
+// Partenaires affichés dans la bande déroulante
+
+model Partner {
+  id              String   @id @default(cuid())
+  
+  // Informations du partenaire
+  name            String   // Nom du partenaire
+  logoUrl         String   // URL du logo
+  websiteUrl      String?  // Site web (optionnel)
+  description     String?  // Description courte
+  
+  // Affichage
+  displayOrder    Int      @default(0)  // Ordre d'affichage
+  isActive        Boolean  @default(true)  // Actif ou non
+  
+  // Notification (affichage après 3h)
+  showInNotification Boolean @default(false)
+  notificationMessage String?  // Message personnalisé pour la notification
+  notificationStartAt DateTime?  // Date de début d'affichage en notification
+  
+  // localisations d'affichage
+  showOnHome      Boolean  @default(true)  // Afficher sur la page d'accueil
+  showOnPublicite Boolean  @default(true)  // Afficher sur la page publicité
+  showOnDashboard Boolean  @default(true)  // Afficher dans les dashboards
+  
+  // Dates
+  startDate       DateTime?  // Date de début du partenariat
+  endDate         DateTime?  // Date de fin du partenariat
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdById     String?  // Admin qui a créé
+
+  @@index([isActive])
+  @@index([displayOrder])
+  @@index([showInNotification])
+  @@index([showOnHome])
+  @@index([showOnPublicite])
+  @@index([showOnDashboard])
+}
+
+// ==================== IMAGES ADMIN ====================
+// Images uploadées par l'administrateur
+
+model AdminImage {
+  id              String   @id @default(cuid())
+  
+  // Fichier
+  url             String   // URL de l'image
+  filename        String   // Nom du fichier original
+  mimeType        String   // Type MIME
+  size            Int      // Taille en bytes
+  
+  // Métadonnées
+  title           String?  // Titre de l'image
+  altText         String?  // Texte alternatif
+  category        String?  // Catégorie (logo, banner, partner, etc.)
+  
+  // Upload info
+  uploadedById    String?  // Admin ID
+  uploadedAt      DateTime @default(now())
+  
+  @@index([category])
+  @@index([uploadedById])
+}
+
 // ==================== PROVIDER TIER CONFIGURATION ====================
 // Configuration des avantages par tier
 

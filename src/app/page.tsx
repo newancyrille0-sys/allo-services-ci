@@ -11,6 +11,7 @@ import { Testimonials } from "@/components/home/Testimonials";
 import { FAQSection } from "@/components/home/FAQSection";
 import { CTASection } from "@/components/home/CTASection";
 import { AssistantChat } from "@/components/assistant/AssistantChat";
+import { PartnerMarquee } from "@/components/partners/PartnerMarquee";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
 
       <main className="flex-grow">
         <Hero />
+        <PartnerMarquee location="home" />
         <CategoriesGrid />
         <FeaturedProviders />
         <HowItWorks />

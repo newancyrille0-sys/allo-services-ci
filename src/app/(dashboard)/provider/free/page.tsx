@@ -31,6 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { PartnerNotification } from "@/components/partners/PartnerMarquee";
 
 // Mock data
 const STATS = {
@@ -137,6 +138,9 @@ export default function ProviderFreeDashboardPage() {
       {/* Main Content */}
       <main className="pt-20 pb-24 px-4">
         <div className="max-w-6xl mx-auto space-y-6">
+          {/* Partner Notifications - Shows after 3h of session */}
+          <PartnerNotification />
+          
           {/* Welcome Banner */}
           <div className="glass-panel rounded-2xl p-6 shadow-ambient">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

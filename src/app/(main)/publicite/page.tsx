@@ -62,6 +62,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { SUBSCRIPTION_PLANS, formatXOF, type SubscriptionPlanKey } from "@/lib/constants/subscription";
+import { PartnerMarquee } from "@/components/partners/PartnerMarquee";
 
 // Types
 interface Comment {
@@ -848,6 +849,9 @@ export default function PublicitePage() {
       {/* Main Content */}
       {!isLoading && (
         <main className="pt-28 pb-20">
+          {/* Partners Marquee */}
+          <PartnerMarquee location="publicite" className="mb-4" />
+          
           {activeTab === "saved" ? (
             <div className="max-w-lg mx-auto px-4">
               <h2 className="text-white font-semibold mb-4">Vidéos enregistrées</h2>

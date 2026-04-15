@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { PartnerNotification } from "@/components/partners/PartnerMarquee";
 
 // Mock data
 const MOCK_BALANCE = 45000;
@@ -305,6 +306,9 @@ export default function ClientDashboardPage() {
       {/* Main Content */}
       <main className="pt-20 pb-24 lg:pb-8">
         <div className="max-w-7xl mx-auto px-4">
+          {/* Partner Notifications - Shows after 3h of session */}
+          <PartnerNotification />
+          
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Main Content */}
             <div className="lg:col-span-2 space-y-6">
