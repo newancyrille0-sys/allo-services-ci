@@ -1,37 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { UserStatus } from "@prisma/client";
+import { sendNotification } from "@/lib/notifications";
 
-export async function PUT(
+// PATCH /api/admin/users/[id]/status - Update user status
+export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id: userId } = await params;
     const body = await request.json();
     const { status, reason } = body;
 
-    if (!status || !Object.values(UserStatus).includes(status)) {
+    if (!status || !["ACTIVE", "SUSPENDED", "BANNED"].includes(status)) {
       return NextResponse.json(
         { error: "Statut invalide" },
         { status: 400 }
       );
     }
 
-    // Update user status
-    const user = await db.user.update({
-      where: { id },
-      data: { status: status as UserStatus },
+    // Get current user
+    const user = await db.user.findUnique({
+      where: { id: userId },
     });
 
-    // Log the action (in a real app, you'd have an audit log)
-    console.log(`[ADMIN] User ${id} status changed to ${status}. Reason: ${reason || "N/A"}`);
+    if (!user) {
+      return NextResponse.json({ error: "Utilisateur non trouvé" }, { status: 404 });
+    }
+
+    // Update user status
+    const updatedUser = await db.user.update({
+      where: { id: userId },
+      data: { status },
+    });
+
+    // Log the action (could create an admin log entry)
+    console.log(`Admin action: User ${userId} status changed to ${status}. Reason: ${reason || "No reason provided"}`);
+
+    // Notify the user
+    const statusMessages = {
+      ACTIVE: "Votre compte a été réactivé. Vous pouvez maintenant vous connecter.",
+      SUSPENDED: `Votre compte a été suspendu. ${reason || "Veuillez contacter le support pour plus d'informations."}`,
+      BANNED: `Votre compte a été banni. ${reason || "Cette décision est définitive."}`,
+    };
+
+    if (user.email) {
+      await sendNotification({
+        userId,
+        email: user.email || undefined,
+        phone: user.phone || undefined,
+        title: "Statut de votre compte",
+        message: statusMessages[status as keyof typeof statusMessages],
+        type: "account_status",
+        channels: ["email", "in_app"],
+      });
+    }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        status: user.status,
+        id: updatedUser.id,
+        status: updatedUser.status,
       },
     });
   } catch (error) {

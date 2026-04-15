@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { KycStatus, SubscriptionPlan } from "@prisma/client";
 
+// GET /api/admin/providers - Get all providers with filters
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search") || "";
-    const status = searchParams.get("status");
-    const subscription = searchParams.get("subscription");
-    const kycStatus = searchParams.get("kycStatus");
-    const city = searchParams.get("city");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
+    const search = searchParams.get("search") || "";
+    const status = searchParams.get("status") || "";
+    const kycStatus = searchParams.get("kycStatus") || "";
+    const tier = searchParams.get("tier") || "";
+
     const skip = (page - 1) * limit;
 
     // Build where clause
@@ -22,33 +22,22 @@ export async function GET(request: NextRequest) {
         { businessName: { contains: search, mode: "insensitive" } },
         { user: { fullName: { contains: search, mode: "insensitive" } } },
         { user: { email: { contains: search, mode: "insensitive" } } },
-        { user: { phone: { contains: search, mode: "insensitive" } } },
+        { user: { phone: { contains: search } } },
       ];
     }
 
-    if (status && status !== "all") {
-      if (status === "ACTIVE") {
-        where.isActive = true;
-        where.user = { ...where.user, status: "ACTIVE" };
-      } else if (status === "PENDING") {
-        where.kycStatus = KycStatus.PENDING;
-      } else if (status === "SUSPENDED") {
-        where.user = { ...where.user, status: "SUSPENDED" };
-      } else if (status === "BANNED") {
-        where.user = { ...where.user, status: "BANNED" };
-      }
-    }
-
-    if (subscription && subscription !== "all") {
-      where.subscriptionStatus = subscription as SubscriptionPlan;
+    if (status === "active") {
+      where.isActive = true;
+    } else if (status === "inactive") {
+      where.isActive = false;
     }
 
     if (kycStatus && kycStatus !== "all") {
-      where.kycStatus = kycStatus as KycStatus;
+      where.kycStatus = kycStatus;
     }
 
-    if (city && city !== "all") {
-      where.user = { ...where.user, city };
+    if (tier && tier !== "all") {
+      where.providerTier = tier;
     }
 
     // Get providers with pagination
@@ -68,6 +57,13 @@ export async function GET(request: NextRequest) {
               city: true,
               avatarUrl: true,
               status: true,
+              createdAt: true,
+            },
+          },
+          _count: {
+            select: {
+              reservations: true,
+              reviews: true,
             },
           },
         },
@@ -75,28 +71,45 @@ export async function GET(request: NextRequest) {
       db.provider.count({ where }),
     ]);
 
+    // Calculate revenue for each provider
+    const providersWithRevenue = await Promise.all(
+      providers.map(async (provider) => {
+        const revenue = await db.payment.aggregate({
+          where: {
+            reservation: { providerId: provider.id },
+            status: "success",
+          },
+          _sum: { amount: true },
+        });
+
+        return {
+          id: provider.id,
+          userId: provider.userId,
+          businessName: provider.businessName,
+          isVerified: provider.isVerified,
+          kycStatus: provider.kycStatus,
+          providerTier: provider.providerTier,
+          tierExpiresAt: provider.tierExpiresAt,
+          isActive: provider.isActive,
+          averageRating: provider.averageRating,
+          totalReviews: provider.totalReviews,
+          totalReservations: provider.totalReservations,
+          createdAt: provider.createdAt,
+          user: provider.user,
+          reservationCount: provider._count.reservations,
+          reviewCount: provider._count.reviews,
+          totalRevenue: revenue._sum.amount || 0,
+        };
+      })
+    );
+
     return NextResponse.json({
-      providers: providers.map((provider) => ({
-        id: provider.id,
-        userId: provider.user.id,
-        businessName: provider.businessName,
-        ownerName: provider.user.fullName,
-        email: provider.user.email,
-        phone: provider.user.phone,
-        city: provider.user.city,
-        avatarUrl: provider.user.avatarUrl,
-        subscriptionPlan: provider.subscriptionStatus,
-        kycStatus: provider.kycStatus,
-        status: provider.user.status,
-        rating: provider.averageRating,
-        totalReservations: provider.totalReservations,
-        createdAt: provider.createdAt,
-      })),
+      providers: providersWithRevenue,
       pagination: {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit),
+        pages: Math.ceil(total / limit),
       },
     });
   } catch (error) {
