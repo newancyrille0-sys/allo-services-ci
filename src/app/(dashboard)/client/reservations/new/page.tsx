@@ -485,44 +485,45 @@ export default function NewReservationPage() {
                   ) : (
                     <div className="space-y-3">
                       {providers.map((provider) => (
-                      <button
-                        key={provider.id}
-                        type="button"
-                        onClick={() => setSelectedProvider(provider.id)}
-                        className={`w-full p-4 rounded-lg border text-left transition-all ${
-                          selectedProvider === provider.id
-                            ? "border-primary bg-primary/5"
-                            : "border-gray-200 hover:border-primary/50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-primary/10 text-primary">
-                              {provider.businessName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium truncate">
-                                {provider.businessName}
-                              </p>
-                              {provider.badgeVerified && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Vérifié
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                              <span>{provider.averageRating}</span>
-                              <span>•</span>
-                              <span>{formatPrice(provider.hourlyRate)}/h</span>
+                        <button
+                          key={provider.id}
+                          type="button"
+                          onClick={() => setSelectedProvider(provider.id)}
+                          className={`w-full p-4 rounded-lg border text-left transition-all ${
+                            selectedProvider === provider.id
+                              ? "border-primary bg-primary/5"
+                              : "border-gray-200 hover:border-primary/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback className="bg-primary/10 text-primary">
+                                {provider.businessName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium truncate">
+                                  {provider.businessName}
+                                </p>
+                                {provider.badgeVerified && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Vérifié
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                <span>{provider.averageRating}</span>
+                                <span>•</span>
+                                <span>{formatPrice(provider.hourlyRate)}/h</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

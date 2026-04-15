@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { randomBytes } from "crypto";
-import { sendEmail } from "@/lib/notifications/email";
+import { sendEmail } from "@/lib/notifications";
 
 // Generate a secure reset token
 function generateResetToken(): string {
