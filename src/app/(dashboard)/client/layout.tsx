@@ -58,7 +58,7 @@ export default function ClientDashboardLayout({
       redirect("/login");
     }
     if (!isLoading && isAuthenticated && !isClient && !isDevelopment) {
-      redirect("/dashboard/provider");
+      redirect("/provider");
     }
   }, [isLoading, isAuthenticated, isClient]);
 

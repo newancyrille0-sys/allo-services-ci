@@ -65,32 +65,32 @@ interface NavItem {
 }
 
 const clientNavItems: NavItem[] = [
-  { name: "Tableau de bord", href: "/client/dashboard", icon: LayoutDashboard },
+  { name: "Tableau de bord", href: "/client", icon: LayoutDashboard },
   { name: "Mes réservations", href: "/client/reservations", icon: CalendarDays },
   { name: "Messages", href: "/client/messages", icon: MessageSquare, badge: 3 },
-  { name: "Favoris", href: "/client/favoris", icon: Heart },
-  { name: "Mon profil", href: "/client/profil", icon: User },
+  { name: "Favoris", href: "/client/favorites", icon: Heart },
+  { name: "Mon profil", href: "/client/profile", icon: User },
 ];
 
 const providerNavItems: NavItem[] = [
-  { name: "Tableau de bord", href: "/provider/dashboard", icon: LayoutDashboard },
-  { name: "Mon profil", href: "/provider/profil", icon: User },
+  { name: "Tableau de bord", href: "/provider", icon: LayoutDashboard },
+  { name: "Mon profil", href: "/provider/profile", icon: User },
   { name: "Mes services", href: "/provider/services", icon: Wrench },
   { name: "Réservations", href: "/provider/reservations", icon: CalendarDays, badge: 5 },
   { name: "Messages", href: "/provider/messages", icon: MessageSquare, badge: 2 },
-  { name: "Avis", href: "/provider/avis", icon: Star },
-  { name: "Abonnement", href: "/provider/abonnement", icon: CreditCard },
+  { name: "Avis", href: "/provider/reviews", icon: Star },
+  { name: "Abonnement", href: "/provider/subscription", icon: CreditCard },
   { name: "Analytics", href: "/provider/analytics", icon: BarChart3 },
 ];
 
 const adminNavItems: NavItem[] = [
   { name: "Tableau de bord", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Prestataires", href: "/admin/prestataires", icon: Users },
-  { name: "Clients", href: "/admin/clients", icon: Users },
-  { name: "Abonnements", href: "/admin/abonnements", icon: CreditCard },
-  { name: "Paiements", href: "/admin/paiements", icon: DollarSign },
-  { name: "Fraude", href: "/admin/fraude", icon: AlertTriangle, badge: 12 },
-  { name: "Paramètres", href: "/admin/parametres", icon: Settings },
+  { name: "Prestataires", href: "/admin/providers", icon: Users },
+  { name: "Clients", href: "/admin/users", icon: Users },
+  { name: "Abonnements", href: "/admin/subscriptions", icon: CreditCard },
+  { name: "Paiements", href: "/admin/payments", icon: DollarSign },
+  { name: "Fraude", href: "/admin/fraud", icon: AlertTriangle, badge: 12 },
+  { name: "Paramètres", href: "/admin/settings", icon: Settings },
 ];
 
 const subscriptionStyles: Record<SubscriptionPlan, { color: string; icon: React.ElementType }> = {
@@ -262,7 +262,7 @@ export function Sidebar({ user, collapsed = false, onToggle }: SidebarProps) {
                   className="w-full bg-accent hover:bg-accent-600 text-accent-foreground"
                   asChild
                 >
-                  <Link href="/provider/abonnement">
+                  <Link href="/provider/subscription">
                     <Crown className="h-4 w-4 mr-1" />
                     Passer à Premium
                   </Link>

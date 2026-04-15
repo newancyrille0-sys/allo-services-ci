@@ -845,7 +845,7 @@ export function FeedPage({
                 variant={filter === "all" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setFilter("all")}
-                className={cn("text-xs", filter === "all" && "bg-white text-primary")}}
+                className={cn("text-xs", filter === "all" && "bg-white text-primary")}
               >
                 Pour vous
               </Button>
@@ -853,7 +853,7 @@ export function FeedPage({
                 variant={filter === "following" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setFilter("following")}
-                className={cn("text-xs", filter === "following" && "bg-white text-primary")}}
+                className={cn("text-xs", filter === "following" && "bg-white text-primary")}
               >
                 Abonnements
               </Button>

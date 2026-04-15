@@ -191,7 +191,7 @@ export default function ProviderBasicDashboardPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Link href="/provider/publications/new">
+                <Link href="/provider/publications">
                   <Button variant="outline" className="border-emerald-500 text-emerald-600 hover:bg-emerald-50">
                     <ImageIcon className="h-4 w-4 mr-2" />
                     Publier
@@ -359,13 +359,13 @@ export default function ProviderBasicDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-3 mb-4">
-                    <Link href="/provider/publications/new">
+                    <Link href="/provider/publications">
                       <div className="flex flex-col items-center p-3 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer">
                         <ImageIcon className="h-6 w-6 text-emerald-600 mb-1" />
                         <span className="text-xs font-medium text-emerald-700">Photo</span>
                       </div>
                     </Link>
-                    <Link href="/provider/publications/new">
+                    <Link href="/provider/publications">
                       <div className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors cursor-pointer">
                         <Video className="h-6 w-6 text-blue-600 mb-1" />
                         <span className="text-xs font-medium text-blue-700">Vidéo</span>

@@ -206,7 +206,7 @@ export function DashboardLayout({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profil" className="cursor-pointer">
+                  <Link href={user.role === "CLIENT" ? "/client/profile" : user.role === "PROVIDER" ? "/provider/profile" : "/admin/settings"} className="cursor-pointer">
                     Mon profil
                   </Link>
                 </DropdownMenuItem>

@@ -346,7 +346,7 @@ export default function HelpCenterPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Pour les situations urgentes ou les litiges avec un prestataire, contactez-nous directement.
                 </p>
-                <Link href="/help/contact">
+                <Link href="/contact">
                   <Button className="bg-primary hover:bg-primary/90">
                     Contacter le support
                   </Button>

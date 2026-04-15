@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   Bell,
   Mail,
@@ -297,29 +298,29 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <Button variant="outline" className="w-full justify-between" asChild>
-            <a href="/cgu" target="_blank">
+            <Link href="/terms">
               Conditions générales d'utilisation
               <ExternalLink className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
           <Button variant="outline" className="w-full justify-between" asChild>
-            <a href="/confidentialite" target="_blank">
+            <Link href="/privacy">
               Politique de confidentialité
               <ExternalLink className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
           <Button variant="outline" className="w-full justify-between" asChild>
-            <a href="/mentions-legales" target="_blank">
+            <Link href="/about">
               Mentions légales
               <ExternalLink className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
           <Button variant="outline" className="w-full justify-between" asChild>
-            <a href="/aide" target="_blank">
+            <Link href="/help">
               <HelpCircle className="h-4 w-4 mr-2" />
               Centre d'aide
               <ExternalLink className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         </CardContent>
       </Card>
