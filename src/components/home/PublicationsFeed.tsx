@@ -149,7 +149,7 @@ function PublicationCard({ publication }: { publication: Publication }) {
           <div className="absolute bottom-2 left-2">
             <Badge variant="secondary" className="bg-black/50 text-white border-0 text-[10px]">
               <Eye className="h-3 w-3 mr-1" />
-              {publication.viewCount.toLocaleString()}
+              {publication.viewCount.toLocaleString('fr-FR')}
             </Badge>
           </div>
         </div>

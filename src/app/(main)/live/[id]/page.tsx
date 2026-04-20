@@ -278,7 +278,7 @@ export default function LivePage() {
                 </div>
                 <p className="text-sm text-gray-400">
                   <Users className="h-3 w-3 inline mr-1" />
-                  {live.provider.subscribers?.toLocaleString() || 0} abonnés
+                  {live.provider.subscribers?.toLocaleString('fr-FR') || 0} abonnés
                 </p>
               </div>
             </div>

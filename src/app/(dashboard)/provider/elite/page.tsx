@@ -255,7 +255,7 @@ export default function ProviderEliteDashboardPage() {
                     <Globe className="h-5 w-5 text-blue-400" />
                     <span className="text-white/70 text-sm">Impressions</span>
                   </div>
-                  <p className="text-3xl font-bold text-white">{STATS.impressions.toLocaleString()}</p>
+                  <p className="text-3xl font-bold text-white">{STATS.impressions.toLocaleString('fr-FR')}</p>
                   <p className="text-xs text-green-400 flex items-center gap-1">
                     <ArrowUpRight className="h-3 w-3" /> +18% vs last month
                   </p>

@@ -540,7 +540,7 @@ export default function ModerationDashboardPage() {
                         )}
                         {warning.cashbackForfeited > 0 && (
                           <span className="text-red-400">
-                            -{warning.cashbackForfeited.toLocaleString()} FCFA cashback
+                            -{warning.cashbackForfeited.toLocaleString('fr-FR')} FCFA cashback
                           </span>
                         )}
                       </div>

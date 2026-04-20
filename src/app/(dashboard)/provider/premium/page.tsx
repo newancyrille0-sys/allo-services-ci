@@ -312,7 +312,7 @@ export default function ProviderPremiumDashboardPage() {
                 <div className="flex items-center justify-between mb-2">
                   <Eye className="h-5 w-5 text-purple-500" />
                 </div>
-                <p className="text-2xl font-bold text-gray-900">{STATS.liveViews.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">{STATS.liveViews.toLocaleString('fr-FR')}</p>
                 <p className="text-xs text-gray-500">Vues Live</p>
               </CardContent>
             </Card>

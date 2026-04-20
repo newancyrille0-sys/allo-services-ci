@@ -431,7 +431,7 @@ function FeedPostCard({
         {post.servicePrice && (
           <div className="absolute top-4 left-4">
             <Badge className={cn("text-white font-semibold", tierStyle.badge)}>
-              {post.servicePrice.toLocaleString()} FCFA
+              {post.servicePrice.toLocaleString('fr-FR')} FCFA
             </Badge>
           </div>
         )}

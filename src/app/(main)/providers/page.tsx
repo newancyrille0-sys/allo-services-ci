@@ -228,8 +228,8 @@ function FilterContent({
           className="w-full"
         />
         <div className="flex justify-between text-sm text-gray-600">
-          <span>{priceRange[0].toLocaleString()} FCFA</span>
-          <span>{priceRange[1].toLocaleString()} FCFA</span>
+          <span>{priceRange[0].toLocaleString('fr-FR')} FCFA</span>
+          <span>{priceRange[1].toLocaleString('fr-FR')} FCFA</span>
         </div>
       </div>
 

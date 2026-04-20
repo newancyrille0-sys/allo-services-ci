@@ -201,13 +201,13 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             <div className="text-center text-white">
               <p className="text-4xl font-bold mb-2">
-                {PLATFORM_STATS.totalProviders.toLocaleString()}+
+                {PLATFORM_STATS.totalProviders.toLocaleString('fr-FR')}+
               </p>
               <p className="text-blue-100">Prestataires</p>
             </div>
             <div className="text-center text-white">
               <p className="text-4xl font-bold mb-2">
-                {PLATFORM_STATS.satisfiedClients.toLocaleString()}+
+                {PLATFORM_STATS.satisfiedClients.toLocaleString('fr-FR')}+
               </p>
               <p className="text-blue-100">Clients satisfaits</p>
             </div>
@@ -217,7 +217,7 @@ export default function AboutPage() {
             </div>
             <div className="text-center text-white">
               <p className="text-4xl font-bold mb-2">
-                {PLATFORM_STATS.reservationsCompleted.toLocaleString()}+
+                {PLATFORM_STATS.reservationsCompleted.toLocaleString('fr-FR')}+
               </p>
               <p className="text-blue-100">Réservations</p>
             </div>
