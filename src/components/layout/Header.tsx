@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { AnimatedLogo } from "@/components/ui/AnimatedLogo";
+import { LogoAnimation } from "@/components/ui/LogoAnimation";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +21,7 @@ export function Header() {
       <div className="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
         {/* Logo */}
         <Link href="/" className="logo-container">
-          <AnimatedLogo size="md" />
+          <LogoAnimation size="md" />
         </Link>
 
         {/* Desktop Navigation */}

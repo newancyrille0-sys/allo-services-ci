@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Facebook, Instagram, MessageCircle, Phone, Mail } from "lucide-react";
 import { APP_CONFIG } from "@/lib/constants/config";
-import { AnimatedLogo } from "@/components/ui/AnimatedLogo";
+import { LogoAnimation } from "@/components/ui/LogoAnimation";
 
 const footerLinks = {
   services: [
@@ -35,9 +35,9 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className="logo-container inline-block">
-              <AnimatedLogo variant="light" size="md" showSubtitle />
+              <LogoAnimation variant="light" size="lg" />
             </Link>
-            <p className="text-primary font-semibold mt-2">
+            <p className="text-primary font-semibold mt-4">
               Le bon prestataire, au bon moment, près de chez vous.
             </p>
             <p className="text-white/60 mt-3 max-w-sm">
