@@ -745,3 +745,100 @@ html {
     padding: 2rem 3rem;
   }
 }
+
+/* ============================================
+   ANIMATED LOGO STYLES
+   ============================================ */
+
+/* Logo Icon Animation - Subtle floating */
+@keyframes logo-icon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.animate-logo-icon {
+  animation: logo-icon-float 3s ease-in-out infinite;
+}
+
+/* Logo Ring Animation - Rotating gradient */
+@keyframes logo-ring-spin {
+  0% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.5; }
+}
+
+.animate-logo-ring {
+  animation: logo-ring-spin 2s ease-in-out infinite;
+}
+
+/* Logo Pulse Animation - Subtle pulse on icon */
+@keyframes logo-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-logo-pulse {
+  animation: logo-pulse 2s ease-in-out infinite;
+}
+
+/* Signal Wave Animation - Expanding circles */
+@keyframes signal-wave {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.animate-signal-wave {
+  animation: signal-wave 2s ease-out infinite;
+}
+
+.animate-signal-wave-delayed {
+  animation: signal-wave 2s ease-out infinite;
+  animation-delay: 1s;
+}
+
+/* Gradient X Animation - Moving gradient */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Text Slide Animation - Slide in from right */
+@keyframes text-slide {
+  0% { opacity: 0; transform: translateX(10px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.animate-text-slide {
+  animation: text-slide 0.5s ease-out forwards;
+}
+
+/* Fade In Animation */
+@keyframes fade-in {
+  0% { opacity: 0; transform: translateY(5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
+/* Logo Hover Effects */
+.logo-container:hover .animate-logo-icon {
+  animation: logo-icon-float 1s ease-in-out infinite;
+}
+
+.logo-container:hover .animate-logo-pulse {
+  animation: logo-pulse 0.5s ease-in-out infinite;
+}
+
+.logo-container:hover .animate-signal-wave,
+.logo-container:hover .animate-signal-wave-delayed {
+  animation-duration: 1s;
+}

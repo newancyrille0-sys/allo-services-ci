@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
-import { Menu, Search, X, FileText } from "lucide-react";
+import { Menu, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { AnimatedLogo } from "@/components/ui/AnimatedLogo";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,15 +20,8 @@ export function Header() {
     <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
       <div className="flex justify-between items-center px-6 py-4 max-w-screen-2xl mx-auto">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/logo.svg"
-            alt="ALLÔ SERVICES"
-            width={180}
-            height={45}
-            priority
-            className="h-10 w-auto"
-          />
+        <Link href="/" className="logo-container">
+          <AnimatedLogo size="md" />
         </Link>
 
         {/* Desktop Navigation */}
