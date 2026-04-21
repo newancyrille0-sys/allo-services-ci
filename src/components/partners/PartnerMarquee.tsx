@@ -36,9 +36,15 @@ export function PartnerMarquee({
         }
         
         const response = await fetch(`/api/partners?${params.toString()}`);
+        
+        if (!response.ok) {
+          console.error("Error fetching partners: HTTP", response.status);
+          return;
+        }
+        
         const data = await response.json();
         
-        if (data.success) {
+        if (data.success && Array.isArray(data.data)) {
           setPartners(data.data);
         }
       } catch (error) {
