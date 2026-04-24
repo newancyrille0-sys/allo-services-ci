@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface LogoAnimationProps {
   className?: string;
@@ -13,13 +14,14 @@ interface LogoAnimationProps {
  * Allôservice.ci - Clean Animated Logo
  * 
  * Minimal, modern, elegant 2D animation
- * Duration: 3-4 seconds, smooth loop
+ * Duration: 3-4 seconds, smooth loop every 3 seconds
  * 
  * Animation Phases:
  * 0s-1s: Fade-in + line drawing
  * 1s-2s: Phone + location icon formation  
  * 2s-3s: Text fade + upward motion
  * 3s-4s: Light sweep glow
+ * Repeats every 3 seconds
  */
 export function LogoAnimation({ 
   className, 
@@ -27,6 +29,18 @@ export function LogoAnimation({
   loop = true,
   variant = "default"
 }: LogoAnimationProps) {
+  // Key to re-trigger animation every 3 seconds
+  const [animationKey, setAnimationKey] = useState(0);
+  
+  useEffect(() => {
+    if (loop) {
+      const interval = setInterval(() => {
+        setAnimationKey(prev => prev + 1);
+      }, 3000); // Repeat every 3 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [loop]);
   const dimensions = {
     sm: { icon: 28, text: "text-sm", gap: "gap-1.5" },
     md: { icon: 36, text: "text-base", gap: "gap-2" },
@@ -42,6 +56,7 @@ export function LogoAnimation({
 
   return (
     <div 
+      key={animationKey}
       className={cn(
         "relative flex items-center",
         gap,
